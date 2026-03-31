@@ -146,8 +146,9 @@ async function convertAndOptimize(file) {
 async function readRoot(file) {
   let buffer = await file.arrayBuffer();
   buffer = await maybeDecompress(buffer);
-  const data = await readNbt(buffer);
-  return unwrapTag(data);
+  const parsed = await readNbt(buffer);
+  const root = parsed && typeof parsed === "object" && "data" in parsed ? parsed.data : parsed;
+  return unwrapTag(root);
 }
 
 async function maybeDecompress(buffer) {
@@ -535,7 +536,16 @@ function readVarInt(data, offset) {
   return { value: result, offset };
 }
 
-function asNumber(value) { if (typeof value === "bigint") return Number(value); if (typeof value === "number") return value; return Number(value || 0); }
+function asNumber(value) {
+  if (typeof value === "bigint") return Number(value);
+  if (typeof value === "number") return value;
+  if (value == null) return 0;
+  const primitive = typeof value.valueOf === "function" ? value.valueOf() : value;
+  if (typeof primitive === "bigint") return Number(primitive);
+  if (typeof primitive === "number") return primitive;
+  const parsed = Number(String(primitive).trim().replace(/[bsilfd]$/i, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
 function asByteArray(value) { if (ArrayBuffer.isView(value)) return Uint8Array.from(value); if (Array.isArray(value)) return Uint8Array.from(value.map((v) => asNumber(v))); return Uint8Array.from([]); }
 function isObject(value) { return value && typeof value === "object" && !Array.isArray(value); }
 function key3(x, y, z) { return `${x},${y},${z}`; }
