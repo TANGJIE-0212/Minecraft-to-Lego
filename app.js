@@ -163,9 +163,11 @@ async function maybeDecompress(buffer) {
 function unwrapTag(value) {
   if (value == null) return value;
   if (typeof value === "bigint" || typeof value === "number" || typeof value === "string" || typeof value === "boolean") return value;
+  if (value instanceof Number || value instanceof String || value instanceof Boolean) return value.valueOf();
   if (ArrayBuffer.isView(value)) return Array.from(value);
   if (Array.isArray(value)) return value.map(unwrapTag);
   if (typeof value === "object") {
+    if (typeof value.valueOf === "function") { const prim = value.valueOf(); if (typeof prim === "number" || typeof prim === "bigint" || typeof prim === "string") return prim; }
     const keys = Object.keys(value);
     if ("value" in value && ("type" in value || keys.length <= 2)) return unwrapTag(value.value);
     const out = {};
