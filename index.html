@@ -137,6 +137,25 @@
       text-align: center;
     }
 
+    .hero-banner-wrap {
+      width: min(1100px, 100%);
+      margin: 0 auto 28px;
+      padding: 14px;
+      background: linear-gradient(180deg, rgba(18,22,34,0.92), rgba(10,10,16,0.78));
+      border: 1px solid rgba(116, 255, 167, 0.14);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(255,255,255,0.03) inset;
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+    }
+
+    .hero-banner {
+      display: block;
+      width: 100%;
+      height: auto;
+      clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+      border: 1px solid rgba(255,255,255,0.06);
+      background: #0c0d14;
+    }
+
     .hero-eyebrow {
       font-family: 'DM Mono', monospace;
       font-size: 11px;
@@ -690,6 +709,7 @@
       nav { padding: 16px 24px; }
       .nav-links { display: none; }
       .hero { padding: 100px 24px 60px; }
+      .hero-banner-wrap { padding: 8px; margin-bottom: 24px; }
       .demo-section, .steps-section, .features-section { padding: 60px 24px; }
       .converter-ui { grid-template-columns: 1fr; }
       .steps-grid, .features-grid { grid-template-columns: 1fr; }
@@ -863,19 +883,8 @@
   </nav>
 
   <section class="hero">
-    <p class="hero-eyebrow">Minecraft → Real Life</p>
-    <h1 class="hero-title">
-      <span class="line1">Your Virtual World,</span>
-      <span class="line2">Now In Your Hands</span>
-      <span class="line3">One Brick At A Time.</span>
-    </h1>
-    <p class="hero-sub">
-      Upload your Minecraft <strong>schematic file</strong>, and we'll generate a complete
-      <strong>LEGO brick shopping list</strong> + 3D preview — ready to order from BrickLink.
-    </p>
-    <div class="bricklink-badge">
-      <span class="badge-dot"></span>
-      Connected to BrickLink · 6,000+ Brick Parts · 200+ Block Types Mapped
+    <div class="hero-banner-wrap reveal">
+      <img class="hero-banner" src="./cover-hero.svg" alt="Minecraft to LEGO conversion banner">
     </div>
     <div class="hero-actions">
       <a href="#demo" class="btn-primary">Start Converting</a>
