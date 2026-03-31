@@ -1,0 +1,1466 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrickCraft — Build Your Minecraft World in Real Life</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #0f0f1a;
+      --bg3: #141428;
+      --surface: #1a1a2e;
+      --surface2: #20203a;
+      --border: rgba(100,100,200,0.15);
+      --border-bright: rgba(120,120,255,0.35);
+      --grass: #4ade80;
+      --grass-dark: #22c55e;
+      --dirt: #a16207;
+      --stone: #6b7280;
+      --gold: #fbbf24;
+      --diamond: #67e8f9;
+      --lego-red: #ef4444;
+      --lego-yellow: #fbbf24;
+      --lego-blue: #3b82f6;
+      --accent: #a78bfa;
+      --accent2: #67e8f9;
+      --accent3: #4ade80;
+      --text: #f0f0ff;
+      --text-muted: rgba(240,240,255,0.45);
+      --text-dim: rgba(240,240,255,0.25);
+      --pixel: 4px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.6;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(100,100,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,100,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(10,10,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 12px; }
+
+    .pixel-icon {
+      width: 32px; height: 32px;
+      display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(4,1fr);
+      gap: 1px; image-rendering: pixelated;
+    }
+
+    .pixel-icon span { display: block; border-radius: 1px; }
+
+    .logo-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text em { color: var(--grass); font-style: normal; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent3); }
+
+    .nav-cta {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 10px 20px;
+      background: var(--grass);
+      color: #000;
+      border: none;
+      cursor: crosshair;
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .nav-cta:hover { background: #86efac; transform: translateY(-1px); }
+
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 120px 48px 80px;
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grass);
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .hero-eyebrow::before, .hero-eyebrow::after {
+      content: '';
+      display: block; width: 32px; height: 1px;
+      background: var(--grass);
+      opacity: 0.5;
+    }
+
+    .hero-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(22px, 4vw, 42px);
+      line-height: 1.5;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      max-width: 800px;
+    }
+
+    .hero-title .line1 { color: var(--text); }
+    .hero-title .line2 { color: transparent; -webkit-text-stroke: 1.5px var(--grass); display: block; margin-top: 8px; }
+    .hero-title .line3 { color: var(--lego-yellow); display: block; margin-top: 8px; }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 32px auto 48px;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .hero-sub strong { color: var(--text); font-weight: 500; }
+
+    .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+    .btn-primary {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      padding: 18px 32px;
+      background: var(--grass);
+      color: #000;
+      border: none;
+      cursor: crosshair;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: all 0.2s;
+      position: relative;
+      display: inline-block;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.15s;
+      clip-path: inherit;
+    }
+
+    .btn-primary:hover::after { opacity: 0.15; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,222,128,0.3); }
+
+    .btn-secondary {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 16px 28px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-bright);
+      cursor: crosshair;
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { color: var(--text); border-color: var(--accent); background: rgba(167,139,250,0.05); }
+
+    .floating-blocks { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+    .block {
+      position: absolute;
+      image-rendering: pixelated;
+      animation: float linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      5% { opacity: 0.6; }
+      95% { opacity: 0.4; }
+      100% { transform: translateY(-200px) rotate(360deg); opacity: 0; }
+    }
+
+    .block-grass { width: 28px; height: 28px; background: linear-gradient(180deg, var(--grass) 30%, var(--dirt) 30%); }
+    .block-stone { width: 24px; height: 24px; background: var(--stone); box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.1); }
+    .block-diamond { width: 20px; height: 20px; background: var(--diamond); box-shadow: 0 0 12px var(--diamond); }
+    .block-gold { width: 22px; height: 22px; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+    .block-lego { width: 26px; height: 20px; background: var(--lego-red); position: relative; }
+    .block-lego::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 12px; height: 6px; background: inherit; border-radius: 50% 50% 0 0; }
+
+    .demo-section {
+      padding: 80px 48px;
+      position: relative; z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .converter-ui {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .converter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .converter-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .panel-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .panel-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-left: 4px;
+    }
+
+    .panel-body { padding: 28px; }
+
+    .mc-preview {
+      aspect-ratio: 4/3;
+      background: linear-gradient(180deg, #1a1a4e 0%, #1a3a6e 60%, #2d5a1e 60%, #1a3a0e 100%);
+      position: relative;
+      display: flex; align-items: flex-end; justify-content: center;
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+
+    .mc-building {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      width: 80%; height: 60%;
+      gap: 1px;
+    }
+
+    .mc-block { display: block; border: 1px solid rgba(0,0,0,0.3); }
+
+    .mc-stars { position: absolute; top: 0; left: 0; right: 0; height: 55%; overflow: hidden; }
+
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: white;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .convert-arrow { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    .arrow-track {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, var(--grass), var(--lego-yellow));
+      position: relative;
+    }
+
+    .arrow-track::after {
+      content: '▶';
+      position: absolute; right: -8px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--lego-yellow);
+      font-size: 12px;
+    }
+
+    .arrow-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .converting-dots { display: flex; gap: 4px; }
+
+    .converting-dots span {
+      width: 4px; height: 4px;
+      background: var(--grass);
+      border-radius: 50%;
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+
+    .converting-dots span:nth-child(2) { animation-delay: 0.2s; background: var(--accent); }
+    .converting-dots span:nth-child(3) { animation-delay: 0.4s; background: var(--lego-yellow); }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    .lego-preview {
+      aspect-ratio: 4/3;
+      background: #f0f0f0;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 2px;
+      padding: 16px;
+      background: linear-gradient(135deg, #e8e8e8, #f5f5f5);
+    }
+
+    .lego-brick {
+      position: relative;
+      border-radius: 2px;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 4px;
+    }
+
+    .lego-brick::before {
+      content: '';
+      width: 60%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: inherit;
+      filter: brightness(1.15);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border-bright);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: crosshair;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone:hover { border-color: var(--grass); background: rgba(74,222,128,0.03); }
+
+    .upload-icon { font-size: 32px; margin-bottom: 12px; display: block; filter: grayscale(0.3); }
+
+    .upload-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .upload-text strong { color: var(--grass); display: block; margin-bottom: 4px; font-size: 12px; }
+
+    .file-types { display: flex; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+    .file-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 3px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .steps-section {
+      padding: 80px 48px;
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-heading {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(14px, 2.5vw, 22px);
+      margin-bottom: 60px;
+      line-height: 1.6;
+    }
+
+    .section-heading .accent { color: var(--grass); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .step-card:hover { border-color: var(--border-bright); transform: translateY(-4px); }
+
+    .step-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--grass), var(--diamond));
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .step-card:hover::after { opacity: 1; }
+
+    .step-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .step-number::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .step-icon { font-size: 36px; margin-bottom: 20px; display: block; image-rendering: pixelated; }
+
+    .step-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 300; }
+
+    .step-desc code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--grass);
+      background: rgba(74,222,128,0.08);
+      padding: 1px 6px;
+    }
+
+    .features-section {
+      padding: 80px 48px;
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2px;
+      margin-top: 60px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 32px;
+      display: flex; gap: 24px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover { border-color: var(--border-bright); }
+
+    .feature-icon-wrap {
+      width: 48px; height: 48px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+    }
+
+    .feature-content h3 {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+
+    .feature-content p { font-size: 14px; color: var(--text-muted); line-height: 1.65; font-weight: 300; }
+
+    .stats-bar {
+      padding: 60px 48px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+
+    .stats-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 0 32px;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(18px, 2.5vw, 28px);
+      color: var(--grass);
+      display: block;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .stat-number span { color: var(--lego-yellow); }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.15em; text-transform: uppercase; }
+
+    .cta-section {
+      padding: 120px 48px;
+      text-align: center;
+      position: relative; z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .cta-section h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(16px, 2.5vw, 26px);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 .highlight { color: var(--lego-yellow); display: block; margin-top: 8px; }
+    .cta-section p { font-size: 16px; color: var(--text-muted); margin-bottom: 48px; font-weight: 300; }
+    .cta-buttons { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; z-index: 1;
+    }
+
+    .footer-logo { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--text-dim); }
+    .footer-logo em { color: var(--grass); font-style: normal; }
+
+    .footer-links { display: flex; gap: 28px; list-style: none; }
+
+    .footer-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--text-muted); }
+    .footer-copy { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .scanline {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--grass), var(--diamond), var(--lego-yellow), transparent);
+      z-index: 200; opacity: 0;
+      animation: scan 8s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0% { top: 0; opacity: 0; }
+      5% { opacity: 0.6; }
+      95% { opacity: 0.3; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    .bricklink-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      letter-spacing: 0.1em;
+      margin-bottom: 48px;
+    }
+
+    .badge-dot {
+      width: 6px; height: 6px;
+      background: var(--grass);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .demo-section, .steps-section, .features-section { padding: 60px 24px; }
+      .converter-ui { grid-template-columns: 1fr; }
+      .steps-grid, .features-grid { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 32px; }
+      footer { flex-direction: column; gap: 20px; text-align: center; }
+      .results-overlay .results-inner { padding: 24px; }
+      .results-stats { grid-template-columns: repeat(2,1fr); }
+      .results-main { grid-template-columns: 1fr; }
+    }
+
+    /* ── Upload interaction states ── */
+    .upload-zone.drag-over { border-color: var(--grass); background: rgba(74,222,128,0.08); }
+    .upload-zone input[type=file] { display: none; }
+    .upload-zone.uploading { pointer-events: none; opacity: 0.6; }
+
+    /* ── Results Overlay ── */
+    .results-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: var(--bg);
+      overflow-y: auto;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .results-overlay.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .results-topbar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px;
+      background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .results-topbar h2 { font-family:'Press Start 2P',monospace; font-size:13px; color:var(--text); }
+    .results-topbar h2 em { color:var(--grass); font-style:normal; }
+    .btn-back {
+      font-family:'DM Mono',monospace; font-size:11px;
+      padding:8px 18px; background:transparent; color:var(--text-muted);
+      border:1px solid var(--border-bright); cursor:pointer;
+      letter-spacing:0.05em; text-transform:uppercase; transition:all 0.2s;
+    }
+    .btn-back:hover { color:var(--text); border-color:var(--accent); }
+
+    .results-inner { max-width:1200px; margin:0 auto; padding:40px 48px 80px; }
+
+    .results-stats {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+      margin-bottom:40px;
+    }
+    .rstat {
+      background:var(--surface); border:1px solid var(--border); padding:20px 24px;
+      text-align:center;
+    }
+    .rstat-val {
+      font-family:'Press Start 2P',monospace; font-size:clamp(16px,2vw,24px);
+      color:var(--grass); display:block; margin-bottom:8px;
+    }
+    .rstat-val.cost { color:var(--lego-yellow); }
+    .rstat-val.parts { color:var(--diamond); }
+    .rstat-val.dim { color:var(--accent); }
+    .rstat-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; }
+
+    .results-main { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+    .results-panel {
+      background:var(--surface); border:1px solid var(--border); overflow:hidden;
+    }
+    .results-panel .rpanel-head {
+      background:var(--surface2); border-bottom:1px solid var(--border);
+      padding:12px 20px; font-family:'DM Mono',monospace; font-size:11px;
+      color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px;
+    }
+    .rpanel-head span.dot { width:8px; height:8px; border-radius:50%; }
+
+    /* 3D Viewer */
+    #viewer3d { width:100%; aspect-ratio:4/3; background:#0a0a12; cursor:grab; display:block; }
+    #viewer3d:active { cursor:grabbing; }
+
+    /* Parts table */
+    .parts-scroll { max-height:500px; overflow-y:auto; }
+    .parts-table { width:100%; border-collapse:collapse; }
+    .parts-table th {
+      position:sticky; top:0; background:var(--surface2);
+      font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim);
+      text-align:left; padding:10px 14px; letter-spacing:0.1em; text-transform:uppercase;
+      border-bottom:1px solid var(--border);
+    }
+    .parts-table td {
+      padding:10px 14px; font-family:'DM Mono',monospace; font-size:12px;
+      color:var(--text-muted); border-bottom:1px solid var(--border);
+    }
+    .parts-table tr:hover td { background:rgba(255,255,255,0.02); }
+    .color-chip {
+      display:inline-block; width:14px; height:14px; border-radius:2px;
+      vertical-align:middle; margin-right:8px; border:1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Color bar */
+    .color-bar { display:flex; height:28px; margin-bottom:24px; overflow:hidden; border:1px solid var(--border); }
+    .color-bar-seg { height:100%; transition:flex 0.3s; position:relative; cursor:pointer; }
+    .color-bar-seg:hover::after {
+      content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+      background:var(--surface2); color:var(--text); padding:4px 10px;
+      font-family:'DM Mono',monospace; font-size:10px; white-space:nowrap;
+      border:1px solid var(--border); pointer-events:none; z-index:5;
+    }
+
+    /* Download buttons row */
+    .dl-row { display:flex; gap:12px; margin-top:32px; flex-wrap:wrap; }
+    .btn-dl {
+      flex:1; min-width:180px; text-align:center; padding:16px;
+      font-family:'Press Start 2P',monospace; font-size:10px;
+      text-decoration:none; cursor:pointer; border:none;
+      clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+      transition:opacity 0.2s, transform 0.1s;
+    }
+    .btn-dl:hover { opacity:0.85; transform:translateY(-1px); }
+    .btn-dl-ldr  { background:var(--grass); color:#000; }
+    .btn-dl-xml  { background:var(--lego-yellow); color:#000; }
+    .btn-dl-json { background:var(--accent); color:#000; }
+    .btn-dl-order { background:linear-gradient(135deg,#ef4444,#f97316); color:#fff; font-size:11px; }
+    .btn-dl-order:hover { opacity:0.9; }
+
+    /* Toast notification */
+    .toast {
+      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:var(--surface2); border:1px solid var(--grass); color:var(--text);
+      padding:14px 28px; font-family:'DM Mono',monospace; font-size:12px;
+      letter-spacing:0.05em; z-index:700; opacity:0;
+      transition:transform 0.4s ease, opacity 0.4s ease;
+      display:flex; align-items:center; gap:12px;
+      clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+    .toast-icon { font-size:18px; }
+
+    /* Loading spinner */
+    .loading-overlay {
+      position:fixed; inset:0; z-index:600;
+      display:none; align-items:center; justify-content:center;
+      background:rgba(10,10,15,0.92); flex-direction:column; gap:24px;
+    }
+    .loading-overlay.active { display:flex; }
+    .spinner {
+      width:48px; height:48px;
+      border:3px solid var(--border); border-top-color:var(--grass);
+      border-radius:50%; animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); letter-spacing:0.1em; }
+  </style>
+</head>
+<body>
+  <div class="scanline"></div>
+  <div class="grid-bg"></div>
+  <div class="floating-blocks" id="floatingBlocks"></div>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="pixel-icon" id="pixelIcon"></div>
+      <span class="logo-text">Brick<em>Craft</em></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#demo">Try It</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#features">Features</a></li>
+    </ul>
+    <a href="#demo" class="nav-cta">Try Free</a>
+  </nav>
+
+  <section class="hero">
+    <p class="hero-eyebrow">Minecraft → Real Life</p>
+    <h1 class="hero-title">
+      <span class="line1">Your Virtual World,</span>
+      <span class="line2">Now In Your Hands</span>
+      <span class="line3">One Brick At A Time.</span>
+    </h1>
+    <p class="hero-sub">
+      Upload your Minecraft <strong>schematic file</strong>, and we'll generate a complete
+      <strong>LEGO brick shopping list</strong> + 3D preview — ready to order from BrickLink.
+    </p>
+    <div class="bricklink-badge">
+      <span class="badge-dot"></span>
+      Connected to BrickLink · 6,000+ Brick Parts · 200+ Block Types Mapped
+    </div>
+    <div class="hero-actions">
+      <a href="#demo" class="btn-primary">Start Converting</a>
+      <a href="#how" class="btn-secondary">▶ See How It Works</a>
+    </div>
+  </section>
+
+  <section class="demo-section" id="demo">
+    <p class="section-label">Live Converter Preview</p>
+    <div class="converter-ui reveal">
+
+      <div class="converter-panel">
+        <div class="panel-header">
+          <span class="panel-dot" style="background:#ef4444"></span>
+          <span class="panel-dot" style="background:#fbbf24"></span>
+          <span class="panel-dot" style="background:#4ade80"></span>
+          <span class="panel-title">minecraft_castle.schem</span>
+        </div>
+        <div class="panel-body">
+          <div class="mc-preview" id="mcPreview">
+            <div class="mc-stars" id="mcStars"></div>
+            <div class="mc-building" id="mcBuilding"></div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept=".schem,.schematic,.litematic">
+              <span class="upload-icon">📦</span>
+              <div class="upload-text">
+                <strong>Drop your schematic here</strong>
+                or click to browse
+              </div>
+              <div class="file-types">
+                <span class="file-tag">.schematic</span>
+                <span class="file-tag">.schem</span>
+                <span class="file-tag">.litematic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="convert-arrow">
+        <div class="arrow-track"></div>
+        <div class="converting-dots"><span></span><span></span><span></span></div>
+        <div class="arrow-label">AI<br/>Magic</div>
+      </div>
+
+      <div class="converter-panel">
+        <div class="panel-header">
+          <span class="panel-dot" style="background:#ef4444"></span>
+          <span class="panel-dot" style="background:#fbbf24"></span>
+          <span class="panel-dot" style="background:#4ade80"></span>
+          <span class="panel-title">lego_output.ldr — 2,847 bricks</span>
+        </div>
+        <div class="panel-body">
+          <div class="lego-preview" id="legoPreview"></div>
+          <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+            <div style="background:var(--surface2); border:1px solid var(--border); padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">Estimated Cost</span>
+              <span style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--lego-yellow);">~$127</span>
+            </div>
+            <div style="background:var(--surface2); border:1px solid var(--border); padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);">Unique Part Types</span>
+              <span style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--diamond);">43</span>
+            </div>
+            <a href="#" style="display:block; text-align:center; padding:14px; background:var(--lego-yellow); color:#000; font-family:'Press Start 2P',monospace; font-size:10px; text-decoration:none; clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px)); transition:opacity 0.2s;" onmouseover="this.style.opacity=0.85" onmouseout="this.style.opacity=1">
+              Order on BrickLink →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps-section" id="how">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-heading">
+      <span class="accent">Three steps</span><br/>from pixels to bricks.
+    </h2>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">STEP 01</div>
+        <span class="step-icon">📁</span>
+        <h3 class="step-title">Export Your Build</h3>
+        <p class="step-desc">Use WorldEdit or Amulet to export your Minecraft structure as a <code>.schematic</code> or <code>.schem</code> file. Or just upload a screenshot — we handle both.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.1s">
+        <div class="step-number">STEP 02</div>
+        <span class="step-icon">⚡</span>
+        <h3 class="step-title">AI Maps Every Block</h3>
+        <p class="step-desc">Our engine reads your 3D block data and maps 200+ Minecraft block types to the nearest LEGO color and shape — accounting for stairs, slabs, glass, and more.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.2s">
+        <div class="step-number">STEP 03</div>
+        <span class="step-icon">🧱</span>
+        <h3 class="step-title">Order & Build</h3>
+        <p class="step-desc">Get a complete BrickLink shopping cart with every part you need, a 3D preview in your browser, and step-by-step build instructions.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <span class="stat-number">200<span>+</span></span>
+        <span class="stat-label">Block Types Mapped</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">6K<span>+</span></span>
+        <span class="stat-label">LEGO Parts Available</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">1:1</span>
+        <span class="stat-label">Pixel-Perfect Scale</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">3D</span>
+        <span class="stat-label">Browser Preview</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="features-section" id="features">
+    <p class="section-label">Features</p>
+    <h2 class="section-heading">Built for <span class="accent">hardcore</span><br/>builders.</h2>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <div class="feature-icon-wrap">🗺️</div>
+        <div class="feature-content">
+          <h3>Schematic File Support</h3>
+          <p>Full support for .schematic (pre-1.13), .schem (WorldEdit), and .litematic (Litematica). No data loss, full 3D fidelity.</p>
+        </div>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <div class="feature-icon-wrap">🎨</div>
+        <div class="feature-content">
+          <h3>Color-Accurate Mapping</h3>
+          <p>All 16 wool, concrete, and terracotta colors. All 16 stained glass variants. Mapped to the closest real LEGO color in Delta-E space.</p>
+        </div>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <div class="feature-icon-wrap">📐</div>
+        <div class="feature-content">
+          <h3>Brick Optimization</h3>
+          <p>Adjacent same-color 1×1 bricks automatically merged into 1×2, 1×4, 2×4 plates — fewer parts, lower cost, easier build.</p>
+        </div>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.2s">
+        <div class="feature-icon-wrap">🛒</div>
+        <div class="feature-content">
+          <h3>One-Click BrickLink Cart</h3>
+          <p>Export a BrickLink XML wanted list. Instantly find the cheapest sellers for every part in your build, globally.</p>
+        </div>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.2s">
+        <div class="feature-icon-wrap">👁️</div>
+        <div class="feature-content">
+          <h3>Interactive 3D Preview</h3>
+          <p>Rotate, zoom, and inspect your LEGO model in the browser before you order a single brick. Powered by Three.js.</p>
+        </div>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.3s">
+        <div class="feature-icon-wrap">📋</div>
+        <div class="feature-content">
+          <h3>Build Instructions</h3>
+          <p>Layer-by-layer build guide generated automatically. Export as PDF or view in-browser. Build exactly like an official LEGO set.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <h2>Your build deserves<span class="highlight">to exist in real life.</span></h2>
+    <p>Start free — convert up to 3 builds per month. No credit card required.</p>
+    <div class="cta-buttons">
+      <a href="#demo" class="btn-primary">Convert My First Build</a>
+      <a href="#" class="btn-secondary">View Pricing</a>
+    </div>
+  </section>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Converting blocks to bricks…</div>
+  </div>
+
+  <!-- Results overlay -->
+  <div class="results-overlay" id="resultsOverlay">
+    <div class="results-topbar">
+      <h2>Brick<em>Craft</em> — Results</h2>
+      <button class="btn-back" id="btnBack">← New Conversion</button>
+    </div>
+    <div class="results-inner">
+      <div class="results-stats" id="resultsStats"></div>
+      <div class="color-bar" id="colorBar"></div>
+      <div class="results-main">
+        <div class="results-panel">
+          <div class="rpanel-head">
+            <span class="dot" style="background:#4ade80"></span>
+            3D Preview
+          </div>
+          <canvas id="viewer3d"></canvas>
+        </div>
+        <div class="results-panel">
+          <div class="rpanel-head">
+            <span class="dot" style="background:#fbbf24"></span>
+            Parts List
+          </div>
+          <div class="parts-scroll">
+            <table class="parts-table">
+              <thead><tr><th>Part</th><th>Color</th><th>Qty</th></tr></thead>
+              <tbody id="partsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="dl-row" id="dlRow"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
+
+  <footer>
+    <div class="footer-logo">Brick<em>Craft</em></div>
+    <ul class="footer-links">
+      <li><a href="#">Docs</a></li>
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Discord</a></li>
+      <li><a href="#">Privacy</a></li>
+    </ul>
+    <span class="footer-copy">© 2026 BrickCraft — Not affiliated with LEGO® or Mojang®</span>
+  </footer>
+  <script>
+    const icon = document.getElementById('pixelIcon');
+    const palette = ['#4ade80','#22c55e','#a16207','#6b7280','#4ade80','#4ade80','#a16207','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280'];
+    palette.forEach(c => { const s = document.createElement('span'); s.style.background = c; icon.appendChild(s); });
+
+    const container = document.getElementById('floatingBlocks');
+    const blockTypes = ['block-grass','block-stone','block-diamond','block-gold','block-lego'];
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('div');
+      el.className = 'block ' + blockTypes[Math.floor(Math.random()*blockTypes.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.animationDuration = (12 + Math.random()*18) + 's';
+      el.style.animationDelay = (Math.random()*20) + 's';
+      container.appendChild(el);
+    }
+
+    const starsEl = document.getElementById('mcStars');
+    for (let i = 0; i < 20; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random()*100+'%';
+      s.style.top = Math.random()*100+'%';
+      s.style.animationDelay = Math.random()*3+'s';
+      s.style.animationDuration = (1.5+Math.random()*2)+'s';
+      starsEl.appendChild(s);
+    }
+
+    const mcBuilding = document.getElementById('mcBuilding');
+    const blockColors = [
+      '#6b7280','#9ca3af','#6b7280','#78716c','#6b7280','#9ca3af','#6b7280','#6b7280',
+      '#6b7280','#6b7280','#57534e','#6b7280','#6b7280','#57534e','#6b7280','#6b7280',
+      '#6b7280','#e5e7eb','#1d4ed8','#6b7280','#6b7280','#1d4ed8','#e5e7eb','#6b7280',
+      '#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280',
+      '#78716c','#a8a29e','#6b7280','#92400e','#92400e','#6b7280','#a8a29e','#78716c',
+      '#4ade80','#4ade80','#4ade80','#16a34a','#16a34a','#4ade80','#4ade80','#4ade80',
+    ];
+    blockColors.forEach(c => {
+      const b = document.createElement('span');
+      b.className = 'mc-block';
+      b.style.background = c;
+      b.style.boxShadow = 'inset -2px -2px 0 rgba(0,0,0,0.25), inset 2px 2px 0 rgba(255,255,255,0.08)';
+      mcBuilding.appendChild(b);
+    });
+
+    const legoPreview = document.getElementById('legoPreview');
+    const legoColors = [
+      '#ef4444','#ef4444','#6b7280','#6b7280','#6b7280','#6b7280','#ef4444','#ef4444',
+      '#ef4444','#ffffff','#6b7280','#3b82f6','#3b82f6','#6b7280','#ffffff','#ef4444',
+      '#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280',
+      '#6b7280','#fbbf24','#ffffff','#6b7280','#6b7280','#ffffff','#fbbf24','#6b7280',
+      '#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280',
+      '#4ade80','#4ade80','#4ade80','#4ade80','#4ade80','#4ade80','#4ade80','#4ade80',
+    ];
+    legoColors.forEach(c => {
+      const b = document.createElement('div');
+      b.className = 'lego-brick';
+      b.style.background = c;
+      b.style.boxShadow = 'inset -2px -2px 0 rgba(0,0,0,0.15), inset 2px 2px 0 rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.1)';
+      legoPreview.appendChild(b);
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    let lastX = 0, lastY = 0, moved = 0;
+    document.addEventListener('mousemove', (e) => {
+      moved++;
+      if (moved % 8 !== 0) return;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      lastX = e.clientX; lastY = e.clientY;
+      const crumb = document.createElement('div');
+      const size = 6 + Math.random()*6;
+      crumb.style.cssText = `position:fixed;pointer-events:none;z-index:9998;left:${e.clientX-size/2}px;top:${e.clientY-size/2}px;width:${size}px;height:${size}px;background:${['#4ade80','#67e8f9','#fbbf24','#a78bfa'][Math.floor(Math.random()*4)]};opacity:0.7;transition:all 0.8s ease;image-rendering:pixelated;`;
+      document.body.appendChild(crumb);
+      requestAnimationFrame(() => { crumb.style.opacity='0'; crumb.style.transform=`translateY(${20+Math.random()*30}px) scale(0)`; });
+      setTimeout(() => crumb.remove(), 900);
+    });
+  </script>
+
+  <!-- Three.js for 3D preview -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+  (() => {
+    /* ── DOM refs ── */
+    const uploadZone    = document.getElementById('uploadZone');
+    const fileInput     = document.getElementById('fileInput');
+    const loadingOvl    = document.getElementById('loadingOverlay');
+    const resultsOvl    = document.getElementById('resultsOverlay');
+    const btnBack       = document.getElementById('btnBack');
+    const statsEl       = document.getElementById('resultsStats');
+    const colorBarEl    = document.getElementById('colorBar');
+    const partsBody     = document.getElementById('partsBody');
+    const dlRow         = document.getElementById('dlRow');
+    const canvas        = document.getElementById('viewer3d');
+
+    const API = '/api';      // relative to same origin
+
+    let currentSession = null;
+    let currentXml = null;
+
+    /* ── Toast helper ── */
+    function showToast(icon, msg, duration = 4000) {
+      const t = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      t.querySelector('.toast-icon').textContent = icon;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), duration);
+    }
+
+    /* ── Upload handling ── */
+    uploadZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => { if (fileInput.files[0]) upload(fileInput.files[0]); });
+    uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) upload(f);
+    });
+
+    async function upload(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['schem','schematic','litematic'].includes(ext)) {
+        alert('Unsupported file type. Please upload .schem, .schematic, or .litematic');
+        return;
+      }
+      loadingOvl.classList.add('active');
+      const form = new FormData();
+      form.append('file', file);
+
+      try {
+        const res = await fetch(`${API}/convert`, { method: 'POST', body: form });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: res.statusText }));
+          throw new Error(err.detail || 'Conversion failed');
+        }
+        const data = await res.json();
+        currentSession = data.session_id;
+        currentXml = data.bricklink_xml || null;
+        showResults(data);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      } finally {
+        loadingOvl.classList.remove('active');
+        fileInput.value = '';
+      }
+    }
+
+    /* ── Back button ── */
+    btnBack.addEventListener('click', () => {
+      resultsOvl.classList.remove('active');
+      disposeViewer();
+    });
+
+    /* ── Order on BrickLink ── */
+    async function orderOnBrickLink() {
+      if (!currentXml) {
+        showToast('⚠️', 'No XML data available. Please convert a file first.');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(currentXml);
+        showToast('✅', 'XML copied! Paste it on BrickLink\'s Upload page → opening now…');
+      } catch {
+        // Fallback: select textarea
+        const ta = document.createElement('textarea');
+        ta.value = currentXml;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        ta.remove();
+        showToast('✅', 'XML copied! Paste it on BrickLink\'s Upload page → opening now…');
+      }
+      // Open BrickLink wanted list upload page after a short delay
+      setTimeout(() => {
+        window.open('https://www.bricklink.com/v2/wanted/upload.page', '_blank');
+      }, 1200);
+    }
+
+    /* ── Render results ── */
+    function showResults(d) {
+      // Stats cards
+      const dim = `${d.dimensions.width}×${d.dimensions.height}×${d.dimensions.length}`;
+      statsEl.innerHTML = `
+        <div class="rstat"><span class="rstat-val">${d.total_bricks.toLocaleString()}</span><span class="rstat-label">Total Bricks</span></div>
+        <div class="rstat"><span class="rstat-val cost">$${d.estimated_cost.toFixed(2)}</span><span class="rstat-label">Est. Cost</span></div>
+        <div class="rstat"><span class="rstat-val parts">${d.unique_parts}</span><span class="rstat-label">Unique Parts</span></div>
+        <div class="rstat"><span class="rstat-val dim">${dim}</span><span class="rstat-label">Dimensions</span></div>`;
+
+      // Color bar
+      const total = d.color_summary.reduce((s, c) => s + c.count, 0) || 1;
+      colorBarEl.innerHTML = d.color_summary.map(c => {
+        const pct = (c.count / total * 100).toFixed(1);
+        return `<div class="color-bar-seg" style="flex:${c.count};background:rgb(${c.rgb.join(',')})" data-tip="${c.name} – ${c.count} (${pct}%)"></div>`;
+      }).join('');
+
+      // Parts table
+      partsBody.innerHTML = d.brick_summary.map(p =>
+        `<tr>
+          <td>${p.part_name}<br><span style="color:var(--text-dim);font-size:10px">#${p.part_id}</span></td>
+          <td><span class="color-chip" style="background:rgb(${p.rgb.join(',')})"></span>${p.color_name}</td>
+          <td style="color:var(--text)">${p.count}</td>
+        </tr>`
+      ).join('');
+
+      // Download & order buttons
+      dlRow.innerHTML = `
+        <a class="btn-dl btn-dl-ldr" href="${API}/download/${d.session_id}/ldr">⬇ Download LDR</a>
+        <a class="btn-dl btn-dl-xml" href="${API}/download/${d.session_id}/xml">🛒 BrickLink XML</a>
+        <button class="btn-dl btn-dl-order" id="btnOrder">🛒 Order on BrickLink →</button>`;
+
+      document.getElementById('btnOrder').addEventListener('click', orderOnBrickLink);
+
+      resultsOvl.classList.add('active');
+
+      // 3D viewer
+      if (d.voxels && d.voxels.length && typeof THREE !== 'undefined') {
+        initViewer(d.voxels, d.palette);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════
+       Three.js 3D Viewer
+       ══════════════════════════════════════════════════ */
+    let _scene, _camera, _renderer, _raf;
+
+    function disposeViewer() {
+      if (_raf) cancelAnimationFrame(_raf);
+      if (_renderer) _renderer.dispose();
+      _scene = _camera = _renderer = _raf = null;
+    }
+
+    function initViewer(voxels, palette) {
+      disposeViewer();
+      const W = canvas.clientWidth || 600;
+      const H = canvas.clientHeight || 450;
+
+      _scene = new THREE.Scene();
+      _scene.background = new THREE.Color(0x0a0a12);
+
+      _camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 10000);
+      _renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      _renderer.setSize(W, H);
+      _renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      // Lighting
+      _scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+      const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+      dir.position.set(1, 2, 1.5);
+      _scene.add(dir);
+
+      // Compute bounding box
+      let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+      for (const v of voxels) {
+        minX=Math.min(minX,v[0]); maxX=Math.max(maxX,v[0]+v[3]);
+        minY=Math.min(minY,v[1]); maxY=Math.max(maxY,v[1]+v[4]);
+        minZ=Math.min(minZ,v[2]); maxZ=Math.max(maxZ,v[2]+v[5]);
+      }
+      const cx=(minX+maxX)/2, cy=(minY+maxY)/2, cz=(minZ+maxZ)/2;
+      const size=Math.max(maxX-minX,maxY-minY,maxZ-minZ)||10;
+
+      // Group voxels by palette index for instancing
+      const groups = {};
+      for (const v of voxels) {
+        const pi = v[6];
+        if (!groups[pi]) groups[pi] = [];
+        groups[pi].push(v);
+      }
+
+      const dummy = new THREE.Object3D();
+      for (const [pi, list] of Object.entries(groups)) {
+        const rgb = palette[pi] || [128,128,128];
+        const color = new THREE.Color(rgb[0]/255, rgb[1]/255, rgb[2]/255);
+        const mat = new THREE.MeshLambertMaterial({ color });
+        const geo = new THREE.BoxGeometry(1, 1, 1);
+        const mesh = new THREE.InstancedMesh(geo, mat, list.length);
+        const s = 0.97; // tiny gap between bricks
+        list.forEach((v, i) => {
+          const w=v[3], h=v[4], l=v[5];
+          dummy.position.set(v[0]+w/2-cx, v[1]+h/2-cy, v[2]+l/2-cz);
+          dummy.scale.set(w*s, h*s, l*s);
+          dummy.updateMatrix();
+          mesh.setMatrixAt(i, dummy.matrix);
+        });
+        _scene.add(mesh);
+      }
+
+      // Grid
+      const grid = new THREE.GridHelper(size*1.5, 20, 0x222244, 0x111133);
+      grid.position.y = -cy;
+      _scene.add(grid);
+
+      // Camera position
+      const dist = size * 1.5;
+      _camera.position.set(dist*0.8, dist*0.6, dist*0.8);
+      _camera.lookAt(0, 0, 0);
+
+      // Simple orbit controls (mouse drag + scroll zoom)
+      let isDragging=false, prevX=0, prevY=0;
+      let theta=Math.PI/4, phi=Math.PI/6, radius=dist;
+
+      function updateCam() {
+        _camera.position.set(
+          radius*Math.cos(phi)*Math.sin(theta),
+          radius*Math.sin(phi),
+          radius*Math.cos(phi)*Math.cos(theta)
+        );
+        _camera.lookAt(0, 0, 0);
+      }
+      updateCam();
+
+      canvas.addEventListener('pointerdown', e => { isDragging=true; prevX=e.clientX; prevY=e.clientY; });
+      window.addEventListener('pointerup', () => isDragging=false);
+      window.addEventListener('pointermove', e => {
+        if (!isDragging) return;
+        theta -= (e.clientX-prevX)*0.008;
+        phi   += (e.clientY-prevY)*0.008;
+        phi = Math.max(-Math.PI/2.2, Math.min(Math.PI/2.2, phi));
+        prevX=e.clientX; prevY=e.clientY;
+        updateCam();
+      });
+      canvas.addEventListener('wheel', e => {
+        e.preventDefault();
+        radius *= e.deltaY>0 ? 1.08 : 0.93;
+        radius = Math.max(size*0.3, Math.min(size*5, radius));
+        updateCam();
+      }, { passive: false });
+
+      // Resize
+      const ro = new ResizeObserver(() => {
+        const w2=canvas.clientWidth, h2=canvas.clientHeight;
+        _renderer.setSize(w2, h2);
+        _camera.aspect = w2/h2;
+        _camera.updateProjectionMatrix();
+      });
+      ro.observe(canvas);
+
+      // Render loop
+      function animate() {
+        _raf = requestAnimationFrame(animate);
+        _renderer.render(_scene, _camera);
+      }
+      animate();
+    }
+  })();
+  </script>
+</body>
+</html>
