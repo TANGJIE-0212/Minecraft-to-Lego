@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(100,100,255,0.04)" stroke-width="0.5"/>
+    </pattern>
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.04"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="overlay"/>
+    </filter>
+    <filter id="glow-gold">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-diamond">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0a0a0f"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <rect width="1280" height="640" filter="url(#noise)" opacity="0.5"/>
+
+  <!-- ===== Floating blocks ===== -->
+  <!-- Grass block (top-left) -->
+  <g transform="translate(160, 100) rotate(-18, 14, 14)" opacity="0.6">
+    <rect width="28" height="14" fill="#4ade80"/>
+    <rect y="14" width="28" height="14" fill="#a16207"/>
+  </g>
+
+  <!-- Diamond (top-center) -->
+  <g filter="url(#glow-diamond)">
+    <rect x="520" y="70" width="16" height="16" fill="#67e8f9" opacity="0.5" transform="rotate(20, 528, 78)"/>
+  </g>
+
+  <!-- Gold block (top-right) -->
+  <g filter="url(#glow-gold)">
+    <rect x="1020" y="130" width="20" height="20" fill="#fbbf24" opacity="0.45" transform="rotate(30, 1030, 140)"/>
+  </g>
+
+  <!-- Stone (left middle) -->
+  <rect x="70" y="310" width="20" height="20" fill="#6b7280" opacity="0.3" transform="rotate(12, 80, 320)"/>
+
+  <!-- Diamond (right side) -->
+  <g filter="url(#glow-diamond)">
+    <rect x="1140" y="280" width="18" height="18" fill="#67e8f9" opacity="0.5" transform="rotate(-22, 1149, 289)"/>
+  </g>
+
+  <!-- Grass block (bottom-left) -->
+  <g transform="translate(200, 510) rotate(10, 13, 13)" opacity="0.5">
+    <rect width="24" height="12" fill="#22c55e"/>
+    <rect y="12" width="24" height="12" fill="#92400e"/>
+  </g>
+
+  <!-- Gold (bottom-right) -->
+  <g filter="url(#glow-gold)">
+    <rect x="1060" y="480" width="18" height="18" fill="#fbbf24" opacity="0.4" transform="rotate(-15, 1069, 489)"/>
+  </g>
+
+  <!-- Small diamond (center-right floating) -->
+  <g filter="url(#glow-diamond)">
+    <rect x="1100" y="160" width="14" height="14" fill="#67e8f9" opacity="0.35" transform="rotate(35, 1107, 167)"/>
+  </g>
+
+  <!-- Grass block (bottom center-right) -->
+  <g transform="translate(900, 530) rotate(-12, 12, 12)" opacity="0.4">
+    <rect width="22" height="11" fill="#4ade80"/>
+    <rect y="11" width="22" height="11" fill="#a16207"/>
+  </g>
+
+  <!-- Stone (top center-left) -->
+  <rect x="340" y="120" width="16" height="16" fill="#6b7280" opacity="0.25" transform="rotate(-28, 348, 128)"/>
+
+  <!-- ===== Title — only big text, centered with generous whitespace ===== -->
+  <!-- Line 1: "Your Virtual World," — white -->
+  <text x="640" y="250" text-anchor="middle" font-family="'Press Start 2P', 'Courier New', monospace" font-size="42" fill="#f0f0ff" letter-spacing="1">
+    Your Virtual World,
+  </text>
+
+  <!-- Line 2: "Now In Your Hands" — green outline -->
+  <text x="640" y="330" text-anchor="middle" font-family="'Press Start 2P', 'Courier New', monospace" font-size="42" letter-spacing="1"
+        fill="none" stroke="#4ade80" stroke-width="1.3">
+    Now In Your Hands
+  </text>
+
+  <!-- Line 3: "One Brick At A Time." — gold -->
+  <text x="640" y="410" text-anchor="middle" font-family="'Press Start 2P', 'Courier New', monospace" font-size="42" fill="#fbbf24" letter-spacing="1">
+    One Brick At A Time.
+  </text>
+</svg>

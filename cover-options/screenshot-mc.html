@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1280, height=640">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 1280px;
+      height: 640px;
+      overflow: hidden;
+      background: #0a0a0f;
+      position: relative;
+      font-family: 'Press Start 2P', monospace;
+    }
+    /* Grid */
+    body::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(100,100,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,100,255,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+    }
+    /* Noise grain */
+    body::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .floating-blocks { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .block {
+      position: absolute;
+      image-rendering: pixelated;
+    }
+    .block-grass { width: 28px; height: 28px; background: linear-gradient(180deg, #4ade80 50%, #a16207 50%); }
+    .block-stone { width: 22px; height: 22px; background: #6b7280; box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.08); }
+    .block-diamond { width: 18px; height: 18px; background: #67e8f9; box-shadow: 0 0 12px rgba(103,232,249,0.5); }
+    .block-gold { width: 20px; height: 20px; background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+    .block-lego-red { width: 28px; height: 20px; background: #ef4444; border-radius: 2px; position: relative; }
+    .block-lego-red::before, .block-lego-red::after {
+      content: ''; position: absolute; top: -5px; width: 10px; height: 5px; background: #ef4444; border-radius: 50% 50% 0 0;
+    }
+    .block-lego-red::before { left: 3px; }
+    .block-lego-red::after { right: 3px; }
+    .block-lego-blue { width: 24px; height: 16px; background: #3b82f6; border-radius: 2px; position: relative; }
+    .block-lego-blue::before, .block-lego-blue::after {
+      content: ''; position: absolute; top: -4px; width: 8px; height: 4px; background: #3b82f6; border-radius: 50% 50% 0 0;
+    }
+    .block-lego-blue::before { left: 2px; }
+    .block-lego-blue::after { right: 2px; }
+
+    .title-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+    .line1 {
+      font-size: 42px;
+      color: #f0f0ff;
+      line-height: 1.5;
+      letter-spacing: 1px;
+    }
+    .line2 {
+      font-size: 42px;
+      color: transparent;
+      -webkit-text-stroke: 1.5px #4ade80;
+      line-height: 1.5;
+      letter-spacing: 1px;
+    }
+    .line3 {
+      font-size: 42px;
+      color: #fbbf24;
+      line-height: 1.5;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-blocks">
+    <div class="block block-grass" style="top:90px; left:150px; transform:rotate(-18deg); opacity:0.65;"></div>
+    <div class="block block-diamond" style="top:60px; left:520px; transform:rotate(20deg); opacity:0.5;"></div>
+    <div class="block block-gold" style="top:120px; right:240px; transform:rotate(30deg); opacity:0.5;"></div>
+    <div class="block block-stone" style="top:300px; left:65px; transform:rotate(12deg); opacity:0.35;"></div>
+    <div class="block block-diamond" style="top:270px; right:120px; transform:rotate(-22deg); opacity:0.5;"></div>
+    <div class="block block-grass" style="bottom:110px; left:190px; transform:rotate(10deg); opacity:0.5;"></div>
+    <div class="block block-gold" style="bottom:140px; right:200px; transform:rotate(-15deg); opacity:0.45;"></div>
+    <div class="block block-diamond" style="top:150px; right:160px; transform:rotate(35deg); opacity:0.35;"></div>
+    <div class="block block-grass" style="bottom:90px; right:360px; transform:rotate(-12deg); opacity:0.4;"></div>
+    <div class="block block-stone" style="top:110px; left:330px; transform:rotate(-28deg); opacity:0.25;"></div>
+    <div class="block block-lego-red" style="bottom:180px; left:340px; transform:rotate(8deg); opacity:0.35;"></div>
+    <div class="block block-lego-blue" style="top:80px; right:350px; transform:rotate(-12deg); opacity:0.3;"></div>
+  </div>
+
+  <div class="title-container">
+    <div class="line1">Your Virtual World,</div>
+    <div class="line2">Now In Your Hands</div>
+    <div class="line3">One Brick At A Time.</div>
+  </div>
+</body>
+</html>

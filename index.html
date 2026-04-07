@@ -1,0 +1,2110 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DayToy | Minecraft to LEGO</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #0f0f1a;
+      --bg3: #141428;
+      --surface: #1a1a2e;
+      --surface2: #20203a;
+      --border: rgba(100,100,200,0.15);
+      --border-bright: rgba(120,120,255,0.35);
+      --grass: #4ade80;
+      --grass-dark: #22c55e;
+      --dirt: #a16207;
+      --stone: #6b7280;
+      --gold: #fbbf24;
+      --diamond: #67e8f9;
+      --lego-red: #ef4444;
+      --lego-yellow: #fbbf24;
+      --lego-blue: #3b82f6;
+      --accent: #a78bfa;
+      --accent2: #67e8f9;
+      --accent3: #4ade80;
+      --text: #f0f0ff;
+      --text-muted: rgba(240,240,255,0.45);
+      --text-dim: rgba(240,240,255,0.25);
+      --pixel: 4px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.6;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(100,100,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(100,100,255,0.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      background: rgba(10,10,15,0.7);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 12px; }
+
+    .pixel-icon {
+      width: 32px; height: 32px;
+      display: grid; grid-template-columns: repeat(4,1fr); grid-template-rows: repeat(4,1fr);
+      gap: 1px; image-rendering: pixelated;
+    }
+
+    .pixel-icon span { display: block; border-radius: 1px; }
+
+    .logo-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text em { color: var(--grass); font-style: normal; }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent3); }
+
+    .nav-cta {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 10px 20px;
+      background: var(--grass);
+      color: #000;
+      border: none;
+      cursor: crosshair;
+      text-decoration: none;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .nav-cta:hover { background: #86efac; transform: translateY(-1px); }
+
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 120px 48px 80px;
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grass);
+      margin-bottom: 24px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .hero-eyebrow::before, .hero-eyebrow::after {
+      content: '';
+      display: block; width: 32px; height: 1px;
+      background: var(--grass);
+      opacity: 0.5;
+    }
+
+    .hero-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(22px, 4vw, 42px);
+      line-height: 1.5;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+      max-width: 800px;
+    }
+
+    .hero-title .line1 { color: var(--text); }
+    .hero-title .line2 { color: transparent; -webkit-text-stroke: 1.5px var(--grass); display: block; margin-top: 8px; }
+    .hero-title .line3 { color: var(--lego-yellow); display: block; margin-top: 8px; }
+
+    .hero-sub {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 32px auto 48px;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .hero-sub strong { color: var(--text); font-weight: 500; }
+
+    .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center; }
+
+    .btn-primary {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      padding: 18px 32px;
+      background: var(--grass);
+      color: #000;
+      border: none;
+      cursor: crosshair;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: all 0.2s;
+      position: relative;
+      display: inline-block;
+    }
+
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: white;
+      opacity: 0;
+      transition: opacity 0.15s;
+      clip-path: inherit;
+    }
+
+    .btn-primary:hover::after { opacity: 0.15; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,222,128,0.3); }
+
+    .btn-secondary {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      padding: 16px 28px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-bright);
+      cursor: crosshair;
+      text-decoration: none;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover { color: var(--text); border-color: var(--accent); background: rgba(167,139,250,0.05); }
+
+    .btn-see-how {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      padding: 20px 36px;
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+      cursor: crosshair;
+      text-decoration: none;
+      letter-spacing: 0.06em;
+      border-radius: 4px;
+      transition: all 0.2s;
+      position: relative;
+      display: inline-block;
+    }
+
+    .btn-see-how:hover { background: rgba(167,139,250,0.1); border-color: #818cf8; color: #818cf8; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(167,139,250,0.2); }
+
+    .floating-blocks { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+    .block {
+      position: absolute;
+      image-rendering: pixelated;
+      animation: float linear infinite;
+      opacity: 0;
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      5% { opacity: 0.6; }
+      95% { opacity: 0.4; }
+      100% { transform: translateY(-200px) rotate(360deg); opacity: 0; }
+    }
+
+    .block-grass { width: 28px; height: 28px; background: linear-gradient(180deg, var(--grass) 30%, var(--dirt) 30%); }
+    .block-stone { width: 24px; height: 24px; background: var(--stone); box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.1); }
+    .block-diamond { width: 20px; height: 20px; background: var(--diamond); box-shadow: 0 0 12px var(--diamond); }
+    .block-gold { width: 22px; height: 22px; background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+    .block-lego { width: 26px; height: 20px; background: var(--lego-red); position: relative; }
+    .block-lego::before { content: ''; position: absolute; top: -6px; left: 50%; transform: translateX(-50%); width: 12px; height: 6px; background: inherit; border-radius: 50% 50% 0 0; }
+
+    .demo-section {
+      padding: 80px 48px;
+      position: relative; z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      display: flex; align-items: center; gap: 16px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .converter-ui {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .converter-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .converter-panel::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .panel-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+    .panel-title {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-left: 4px;
+    }
+
+    .panel-body { padding: 28px; }
+
+    .mc-preview {
+      aspect-ratio: 1/1;
+      background: linear-gradient(180deg, #1a1a4e 0%, #1a3a6e 100%);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+
+    .mc-building {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      width: 75%; height: 75%;
+      gap: 1px;
+    }
+
+    .mc-block { display: block; border: 1px solid rgba(0,0,0,0.3); }
+
+    .mc-stars { position: absolute; top: 0; left: 0; right: 0; height: 55%; overflow: hidden; }
+
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: white;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .convert-arrow { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    .arrow-track {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, var(--grass), var(--lego-yellow));
+      position: relative;
+    }
+
+    .arrow-track::after {
+      content: '▶';
+      position: absolute; right: -8px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--lego-yellow);
+      font-size: 12px;
+    }
+
+    .arrow-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .converting-dots { display: flex; gap: 4px; }
+
+    .converting-dots span {
+      width: 4px; height: 4px;
+      background: var(--grass);
+      border-radius: 50%;
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+
+    .converting-dots span:nth-child(2) { animation-delay: 0.2s; background: var(--accent); }
+    .converting-dots span:nth-child(3) { animation-delay: 0.4s; background: var(--lego-yellow); }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 0.4; }
+      50% { transform: scale(1.5); opacity: 1; }
+    }
+
+    .lego-preview {
+      aspect-ratio: 1/1;
+      background: #f0f0f0;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 2px;
+      padding: 16px;
+      background: linear-gradient(135deg, #e8e8e8, #f5f5f5);
+    }
+
+    .lego-brick {
+      position: relative;
+      border-radius: 2px;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 4px;
+    }
+
+    .lego-brick::before {
+      content: '';
+      width: 60%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: inherit;
+      filter: brightness(1.15);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border-bright);
+      padding: 40px 20px;
+      text-align: center;
+      cursor: crosshair;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-zone:hover { border-color: var(--grass); background: rgba(74,222,128,0.03); }
+
+    .demo-stat-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .demo-stat-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+
+    .demo-stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .demo-stat-val {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+    }
+
+    .upload-icon { font-size: 32px; margin-bottom: 12px; display: block; filter: grayscale(0.3); }
+
+    .upload-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      letter-spacing: 0.05em;
+    }
+
+    .upload-text strong { color: var(--grass); display: block; margin-bottom: 4px; font-size: 12px; }
+
+    .file-types { display: flex; justify-content: center; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+
+    .file-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 3px 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .steps-section {
+      padding: 80px 48px;
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-heading {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(14px, 2.5vw, 22px);
+      margin-bottom: 60px;
+      line-height: 1.6;
+    }
+
+    .section-heading .accent { color: var(--grass); }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .step-card {
+      background: linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+    }
+
+    .step-card:hover { border-color: var(--border-bright); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+
+    .step-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 0 0 16px 16px;
+      background: linear-gradient(90deg, var(--grass), var(--diamond));
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .step-card:hover::after { opacity: 1; }
+
+    .step-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .step-number::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    .step-icon { font-size: 36px; margin-bottom: 20px; display: block; image-rendering: pixelated; }
+
+    .step-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      line-height: 1.7;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+
+    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 300; }
+
+    .step-desc code {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--grass);
+      background: rgba(74,222,128,0.08);
+      padding: 1px 6px;
+    }
+
+
+
+    .stats-bar {
+      padding: 60px 48px;
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+
+    .stats-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 28px 20px;
+      background: linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .stat-item:hover { border-color: var(--border-bright); transform: translateY(-2px); }
+
+    .stat-item:last-child { border-right: 1px solid var(--border); }
+
+    .stat-number {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(22px, 3vw, 34px);
+      color: var(--grass);
+      display: block;
+      margin-bottom: 14px;
+      line-height: 1;
+      text-shadow: 0 0 20px rgba(74,222,128,0.3);
+    }
+
+    .stat-number span { color: var(--lego-yellow); text-shadow: 0 0 20px rgba(251,191,36,0.3); }
+    .stat-label { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; }
+
+    .cta-section {
+      padding: 120px 48px;
+      text-align: center;
+      position: relative; z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* ===== SHOWCASE SECTION ===== */
+    .showcase-section {
+      padding: 100px 48px;
+      position: relative; z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .showcase-grid {
+      display: grid;
+      gap: 40px;
+      margin-top: 48px;
+    }
+
+    .showcase-card {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .showcase-card:hover {
+      border-color: var(--border-bright);
+      box-shadow: 0 12px 48px rgba(100,100,200,0.08);
+    }
+
+    .showcase-visual {
+      position: relative;
+      min-height: 460px;
+      background: var(--bg2);
+      overflow: hidden;
+      display: flex;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .showcase-visual::before {
+      content: '';
+      position: absolute;
+      top: 24px;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(180deg, transparent 8%, rgba(255,255,255,0.14) 24%, rgba(255,255,255,0.14) 76%, transparent 92%);
+      width: 1px;
+      pointer-events: none;
+    }
+
+    .showcase-half {
+      position: relative;
+      min-height: 460px;
+      flex: 1 1 0;
+      min-width: 0;
+      isolation: isolate;
+    }
+
+    .showcase-half:first-child {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,0.95) 0 28px, rgba(255,255,255,0) 29px),
+        radial-gradient(circle at 25% 17%, rgba(255,255,255,0.9) 0 24px, rgba(255,255,255,0) 25px),
+        radial-gradient(circle at 32% 18%, rgba(255,255,255,0.88) 0 21px, rgba(255,255,255,0) 22px),
+        radial-gradient(circle at 68% 12%, rgba(255,255,255,0.92) 0 26px, rgba(255,255,255,0) 27px),
+        radial-gradient(circle at 75% 11%, rgba(255,255,255,0.88) 0 22px, rgba(255,255,255,0) 23px),
+        linear-gradient(180deg, #6ea2ea 0%, #4d79c8 40%, #315e9f 68%, #3b6a31 68%, #294f23 100%);
+    }
+
+    .showcase-half:last-child {
+      background:
+        radial-gradient(circle at 12px 12px, rgba(255,255,255,0.92) 0 6px, rgba(255,255,255,0) 7px),
+        linear-gradient(180deg, #f4f6fb 0%, #e8edf7 100%);
+      background-size: 56px 56px, 100% 100%;
+      background-position: 0 0, 0 0;
+    }
+
+    .showcase-half:first-child {
+      border-right: none;
+    }
+
+    .showcase-half:first-child::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 30%;
+      background:
+        linear-gradient(0deg, rgba(28, 58, 22, 0.65), rgba(28, 58, 22, 0.18)),
+        linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px),
+        linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 28px 28px, 28px 28px;
+      background-position: 0 0, 0 0, 0 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .showcase-half:last-child::before {
+      content: '';
+      position: absolute;
+      inset: auto 0 0 0;
+      height: 34%;
+      background:
+        linear-gradient(180deg, rgba(190, 198, 214, 0.18), rgba(190, 198, 214, 0.55)),
+        linear-gradient(90deg, rgba(120,130,155,0.18) 1px, transparent 1px),
+        linear-gradient(rgba(120,130,155,0.18) 1px, transparent 1px);
+      background-size: 100% 100%, 42px 42px, 42px 42px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .showcase-half:last-child::after {
+      content: '';
+      position: absolute;
+      inset: 16px 18px auto auto;
+      width: 180px;
+      height: 92px;
+      background:
+        radial-gradient(circle at 20px 18px, rgba(251,191,36,0.95) 0 10px, rgba(251,191,36,0) 11px),
+        radial-gradient(circle at 60px 18px, rgba(239,68,68,0.92) 0 10px, rgba(239,68,68,0) 11px),
+        radial-gradient(circle at 100px 18px, rgba(59,130,246,0.92) 0 10px, rgba(59,130,246,0) 11px),
+        radial-gradient(circle at 140px 18px, rgba(74,222,128,0.92) 0 10px, rgba(74,222,128,0) 11px),
+        linear-gradient(180deg, rgba(255,255,255,0.55), rgba(210,218,232,0.3));
+      border-radius: 18px;
+      border: 1px solid rgba(140,150,170,0.2);
+      opacity: 0.7;
+      z-index: 0;
+      pointer-events: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+
+    .showcase-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .showcase-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: #000;
+      letter-spacing: 0.05em;
+      z-index: 2;
+    }
+
+    .showcase-badge.mc { background: var(--grass); }
+    .showcase-badge.lego { background: var(--lego-yellow); }
+
+    .showcase-arrow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: rgba(10,10,15,0.94);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 28px rgba(0,0,0,0.28), 0 0 18px rgba(167,139,250,0.25);
+    }
+
+    .showcase-info {
+      padding: 28px 32px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0) 100%);
+    }
+
+    .showcase-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 17px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .showcase-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 24px;
+      max-width: 860px;
+    }
+
+    .showcase-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .showcase-stat {
+      text-align: center;
+      padding: 12px 8px;
+      background: rgba(100,100,200,0.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .showcase-stat-val {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .showcase-stat-label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-top: 4px;
+    }
+
+    .showcase-colors {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .showcase-color-chip {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .showcase-color-chip::after {
+      content: attr(data-name);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.9);
+      color: #fff;
+      font-size: 9px;
+      padding: 3px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      display: none;
+      pointer-events: none;
+    }
+
+    .showcase-color-chip:hover::after { display: block; }
+
+    .showcase-parts-preview {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+    }
+
+    .showcase-parts-preview table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .showcase-parts-preview th {
+      text-align: left;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      padding-bottom: 8px;
+    }
+
+    .showcase-parts-preview td {
+      padding: 4px 0;
+      border-top: 1px solid rgba(100,100,200,0.06);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .showcase-pipeline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .pipeline-step {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pipeline-step.mc { background: rgba(74,222,128,0.12); color: var(--grass); border: 1px solid rgba(74,222,128,0.2); }
+    .pipeline-step.convert { background: rgba(167,139,250,0.12); color: var(--accent); border: 1px solid rgba(167,139,250,0.2); }
+    .pipeline-step.lego { background: rgba(251,191,36,0.12); color: var(--gold); border: 1px solid rgba(251,191,36,0.2); }
+
+    .pipeline-arrow {
+      color: var(--text-dim);
+      font-size: 12px;
+    }
+
+    @media (max-width: 768px) {
+      .showcase-card { grid-template-columns: 1fr; }
+      .showcase-visual { min-height: 280px; gap: 16px; }
+      .showcase-half { min-height: 280px; }
+      .showcase-section { padding: 60px 24px; }
+      .showcase-stats { grid-template-columns: repeat(2, 1fr); }
+      .showcase-info { padding: 24px; }
+    }
+
+    .cta-section h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(16px, 2.5vw, 26px);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .cta-section h2 .highlight { color: var(--lego-yellow); display: block; margin-top: 8px; }
+    .cta-section p { font-size: 16px; color: var(--text-muted); margin-bottom: 48px; font-weight: 300; }
+    .cta-buttons { display: flex; align-items: center; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+    }
+
+    .footer-copy { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 0.05em; }
+
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .scanline {
+      position: fixed; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--grass), var(--diamond), var(--lego-yellow), transparent);
+      z-index: 200; opacity: 0;
+      animation: scan 8s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0% { top: 0; opacity: 0; }
+      5% { opacity: 0.6; }
+      95% { opacity: 0.3; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    .bricklink-badge {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      border: 1px solid rgba(74,222,128,0.3);
+      background: rgba(74,222,128,0.06);
+      padding: 10px 20px;
+      letter-spacing: 0.1em;
+      margin-bottom: 48px;
+      border-radius: 6px;
+    }
+
+    .badge-dot {
+      width: 8px; height: 8px;
+      background: var(--grass);
+      border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+      box-shadow: 0 0 8px rgba(74,222,128,0.5);
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .demo-section, .steps-section { padding: 60px 24px; }
+      .converter-ui { grid-template-columns: 1fr; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .stats-inner { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .stat-item { border-right: 1px solid var(--border); padding: 20px 16px; }
+      .results-overlay .results-inner { padding: 24px; }
+      .results-stats { grid-template-columns: repeat(2,1fr); }
+      .results-main { grid-template-columns: 1fr; }
+    }
+
+    /* ── Upload interaction states ── */
+    .upload-zone.drag-over { border-color: var(--grass); background: rgba(74,222,128,0.08); }
+    .upload-zone input[type=file] { display: none; }
+    .upload-zone.uploading { pointer-events: none; opacity: 0.6; }
+
+    /* ── Results Overlay ── */
+    .results-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: var(--bg);
+      overflow-y: auto;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+    .results-overlay.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    .results-topbar {
+      position: sticky; top: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 48px;
+      background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .results-topbar h2 { font-family:'Press Start 2P',monospace; font-size:13px; color:var(--text); }
+    .results-topbar h2 em { color:var(--grass); font-style:normal; }
+    .btn-back {
+      font-family:'DM Mono',monospace; font-size:11px;
+      padding:8px 18px; background:transparent; color:var(--text-muted);
+      border:1px solid var(--border-bright); cursor:pointer;
+      letter-spacing:0.05em; text-transform:uppercase; transition:all 0.2s;
+    }
+    .btn-back:hover { color:var(--text); border-color:var(--accent); }
+
+    .results-inner { max-width:1200px; margin:0 auto; padding:40px 48px 80px; }
+
+    .results-stats {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+      margin-bottom:40px;
+    }
+    .rstat {
+      background:var(--surface); border:1px solid var(--border); padding:20px 24px;
+      text-align:center;
+    }
+    .rstat-val {
+      font-family:'Press Start 2P',monospace; font-size:clamp(16px,2vw,24px);
+      color:var(--grass); display:block; margin-bottom:8px;
+    }
+    .rstat-val.cost { color:var(--lego-yellow); }
+    .rstat-val.parts { color:var(--diamond); }
+    .rstat-val.dim { color:var(--accent); }
+    .rstat-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; }
+
+    .results-main { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+
+    .results-panel {
+      background:var(--surface); border:1px solid var(--border); overflow:hidden;
+    }
+    .results-panel .rpanel-head {
+      background:var(--surface2); border-bottom:1px solid var(--border);
+      padding:12px 20px; font-family:'DM Mono',monospace; font-size:11px;
+      color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase;
+      display:flex; align-items:center; gap:10px;
+    }
+    .rpanel-head span.dot { width:8px; height:8px; border-radius:50%; }
+
+    /* 3D Viewer */
+    #viewer3d { width:100%; aspect-ratio:4/3; background:#0a0a12; cursor:grab; display:block; }
+    #viewer3d:active { cursor:grabbing; }
+
+    /* Parts table */
+    .parts-scroll { max-height:500px; overflow-y:auto; }
+    .parts-table { width:100%; border-collapse:collapse; }
+    .parts-table th {
+      position:sticky; top:0; background:var(--surface2);
+      font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim);
+      text-align:left; padding:10px 14px; letter-spacing:0.1em; text-transform:uppercase;
+      border-bottom:1px solid var(--border);
+    }
+    .parts-table td {
+      padding:10px 14px; font-family:'DM Mono',monospace; font-size:12px;
+      color:var(--text-muted); border-bottom:1px solid var(--border);
+    }
+    .parts-table tr:hover td { background:rgba(255,255,255,0.02); }
+    .color-chip {
+      display:inline-block; width:14px; height:14px; border-radius:2px;
+      vertical-align:middle; margin-right:8px; border:1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Color bar */
+    .color-bar { display:flex; height:28px; margin-bottom:24px; overflow:hidden; border:1px solid var(--border); }
+    .color-bar-seg { height:100%; transition:flex 0.3s; position:relative; cursor:pointer; }
+    .color-bar-seg:hover::after {
+      content:attr(data-tip); position:absolute; bottom:calc(100% + 6px); left:50%; transform:translateX(-50%);
+      background:var(--surface2); color:var(--text); padding:4px 10px;
+      font-family:'DM Mono',monospace; font-size:10px; white-space:nowrap;
+      border:1px solid var(--border); pointer-events:none; z-index:5;
+    }
+
+    /* Download buttons row */
+    .dl-row { display:flex; gap:12px; margin-top:32px; flex-wrap:wrap; }
+    .btn-dl {
+      flex:1; min-width:180px; text-align:center; padding:16px;
+      font-family:'Press Start 2P',monospace; font-size:10px;
+      text-decoration:none; cursor:pointer; border:none;
+      clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+      transition:opacity 0.2s, transform 0.1s;
+    }
+    .btn-dl:hover { opacity:0.85; transform:translateY(-1px); }
+    .btn-dl-ldr  { background:var(--grass); color:#000; }
+    .btn-dl-xml  { background:var(--lego-yellow); color:#000; }
+    .btn-dl-json { background:var(--accent); color:#000; }
+    .btn-dl-order { background:linear-gradient(135deg,#ef4444,#f97316); color:#fff; font-size:11px; }
+    .btn-dl-order:hover { opacity:0.9; }
+
+    /* Toast notification */
+    .toast {
+      position:fixed; bottom:32px; left:50%; transform:translateX(-50%) translateY(80px);
+      background:var(--surface2); border:1px solid var(--grass); color:var(--text);
+      padding:14px 28px; font-family:'DM Mono',monospace; font-size:12px;
+      letter-spacing:0.05em; z-index:700; opacity:0;
+      transition:transform 0.4s ease, opacity 0.4s ease;
+      display:flex; align-items:center; gap:12px;
+      clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+    .toast-icon { font-size:18px; }
+
+    /* Loading spinner */
+    .loading-overlay {
+      position:fixed; inset:0; z-index:600;
+      display:none; align-items:center; justify-content:center;
+      background:rgba(10,10,15,0.92); flex-direction:column; gap:24px;
+    }
+    .loading-overlay.active { display:flex; }
+    .spinner {
+      width:48px; height:48px;
+      border:3px solid var(--border); border-top-color:var(--grass);
+      border-radius:50%; animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .loading-text { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); letter-spacing:0.1em; }
+  </style>
+</head>
+<body>
+  <div class="scanline"></div>
+  <div class="grid-bg"></div>
+  <div class="floating-blocks" id="floatingBlocks"></div>
+
+  <nav>
+    <div class="nav-logo">
+      <div class="pixel-icon" id="pixelIcon"></div>
+      <span class="logo-text">Minecraft-to-Lego</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#demo">Try It</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#showcase">Examples</a></li>
+    </ul>
+    <a href="#demo" class="nav-cta">Try Free</a>
+  </nav>
+
+  <section class="hero">
+    <p class="hero-eyebrow">Minecraft → Real Life</p>
+    <h1 class="hero-title">
+      <span class="line1">Your Virtual World,</span>
+      <span class="line2">Now In Your Hands</span>
+      <span class="line3">One Brick At A Time.</span>
+    </h1>
+    <p class="hero-sub">
+      Upload your Minecraft <strong>schematic file</strong>, and we'll generate a complete
+      <strong>LEGO brick shopping list</strong> + 3D preview — ready to order from BrickLink.
+    </p>
+    <div class="bricklink-badge">
+      <span class="badge-dot"></span>
+      Connected to BrickLink · 6,000+ Brick Parts · 200+ Block Types Mapped
+    </div>
+    <div class="hero-actions">
+      <a href="#how" class="btn-see-how">▶ SEE HOW IT WORKS</a>
+      <a href="#demo" class="btn-primary">Start Converting</a>
+    </div>
+  </section>
+
+  <section class="demo-section" id="demo">
+    <p class="section-label">Live Converter Preview</p>
+    <div class="converter-ui reveal">
+
+      <div class="converter-panel">
+        <div class="panel-header">
+          <span class="panel-dot" style="background:#ef4444"></span>
+          <span class="panel-dot" style="background:#fbbf24"></span>
+          <span class="panel-dot" style="background:#4ade80"></span>
+          <span class="panel-title">starter_house.schem</span>
+        </div>
+        <div class="panel-body">
+          <div class="mc-preview" id="mcPreview">
+            <div class="mc-stars" id="mcStars"></div>
+            <div class="mc-building" id="mcBuilding"></div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" id="fileInput" accept=".schem,.schematic,.litematic">
+              <span class="upload-icon">📦</span>
+              <div class="upload-text">
+                <strong>Drop your schematic here</strong>
+                or click to browse
+              </div>
+              <div class="file-types">
+                <span class="file-tag">.schematic</span>
+                <span class="file-tag">.schem</span>
+                <span class="file-tag">.litematic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="convert-arrow">
+        <div class="arrow-track"></div>
+        <div class="converting-dots"><span></span><span></span><span></span></div>
+        <div class="arrow-label">AI<br/>Magic</div>
+      </div>
+
+      <div class="converter-panel">
+        <div class="panel-header">
+          <span class="panel-dot" style="background:#ef4444"></span>
+          <span class="panel-dot" style="background:#fbbf24"></span>
+          <span class="panel-dot" style="background:#4ade80"></span>
+          <span class="panel-title">lego_output.ldr — 64 bricks</span>
+        </div>
+        <div class="panel-body">
+          <div class="lego-preview" id="legoPreview"></div>
+          <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
+            <div class="showcase-stats">
+              <div class="showcase-stat">
+                <span class="showcase-stat-val">64</span>
+                <span class="showcase-stat-label">Bricks</span>
+              </div>
+              <div class="showcase-stat">
+                <span class="showcase-stat-val">12</span>
+                <span class="showcase-stat-label">Main Colors</span>
+              </div>
+              <div class="showcase-stat">
+                <span class="showcase-stat-val">8×8×1</span>
+                <span class="showcase-stat-label">Dimensions</span>
+              </div>
+            </div>
+            <div class="showcase-colors">
+              <span class="showcase-color-chip" style="background:#d4a76a" data-name="Wood Tan"></span>
+              <span class="showcase-color-chip" style="background:#ef4444" data-name="Red"></span>
+              <span class="showcase-color-chip" style="background:#dc2626" data-name="Dark Red"></span>
+              <span class="showcase-color-chip" style="background:#c09660" data-name="Dark Wood"></span>
+              <span class="showcase-color-chip" style="background:#60a5fa" data-name="Medium Blue"></span>
+              <span class="showcase-color-chip" style="background:#93c5fd" data-name="Light Blue"></span>
+              <span class="showcase-color-chip" style="background:#9ca3af" data-name="Stone Gray"></span>
+              <span class="showcase-color-chip" style="background:#92400e" data-name="Brown"></span>
+              <span class="showcase-color-chip" style="background:#a16207" data-name="Dark Orange"></span>
+              <span class="showcase-color-chip" style="background:#4ade80" data-name="Bright Green"></span>
+              <span class="showcase-color-chip" style="background:#22c55e" data-name="Dark Green"></span>
+              <span class="showcase-color-chip" style="background:#78716c" data-name="Dark Gray"></span>
+            </div>
+            <div class="showcase-parts-preview">
+              <table>
+                <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
+                <tr><td>Plate 1×1</td><td>Wood Tan</td><td>20</td></tr>
+                <tr><td>Plate 1×1</td><td>Red</td><td>8</td></tr>
+                <tr><td>Plate 1×1</td><td>Dark Gray</td><td>8</td></tr>
+                <tr><td>Plate 1×1</td><td>Stone Gray</td><td>6</td></tr>
+                <tr><td>Plate 1×1</td><td>Medium Blue</td><td>4</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps-section" id="how">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-heading">
+      <span class="accent">Three steps</span><br/>from pixels to bricks.
+    </h2>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-number">STEP 01</div>
+        <span class="step-icon">📁</span>
+        <h3 class="step-title">Export Your Build</h3>
+        <p class="step-desc">Use WorldEdit or Amulet to export your Minecraft structure as a <code>.schematic</code> or <code>.schem</code> file. Or just upload a screenshot — we handle both.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.1s">
+        <div class="step-number">STEP 02</div>
+        <span class="step-icon">⚡</span>
+        <h3 class="step-title">AI Maps Every Block</h3>
+        <p class="step-desc">Our engine reads your 3D block data and maps 200+ Minecraft block types to the nearest LEGO color and shape — accounting for stairs, slabs, glass, and more.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay:0.2s">
+        <div class="step-number">STEP 03</div>
+        <span class="step-icon">🧱</span>
+        <h3 class="step-title">Order & Build</h3>
+        <p class="step-desc">Get a complete BrickLink shopping cart with every part you need, a 3D preview in your browser, and step-by-step build instructions.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <span class="stat-number">200<span>+</span></span>
+        <span class="stat-label">Block Types Mapped</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">6K<span>+</span></span>
+        <span class="stat-label">LEGO Parts Available</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">1:1</span>
+        <span class="stat-label">Pixel-Perfect Scale</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">3D</span>
+        <span class="stat-label">Browser Preview</span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- SHOWCASE GALLERY -->
+  <section class="showcase-section" id="showcase">
+    <p class="section-label">Real Conversion Examples</p>
+    <h2 class="section-heading">From <span class="accent">Minecraft</span> voxels<br/>to real LEGO bricks.</h2>
+
+    <div class="showcase-grid">
+
+      <!-- 1: Dark Gothic Cathedral -->
+      <div class="showcase-card reveal">
+        <div class="showcase-visual">
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase1mc"></canvas>
+            <span class="showcase-badge mc">MINECRAFT</span>
+          </div>
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase1lego"></canvas>
+            <span class="showcase-badge lego">LEGO</span>
+          </div>
+          <span class="showcase-arrow">→</span>
+        </div>
+        <div class="showcase-info">
+          <div class="showcase-pipeline">
+            <span class="pipeline-step mc">.schematic</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step convert">Convert</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step lego">LEGO Model</span>
+          </div>
+          <h3 class="showcase-name">Dark Gothic Cathedral</h3>
+          <p class="showcase-desc">A towering cathedral with flying buttresses, stained-glass rose windows, twin bell towers, and a soaring central spire. Built with dark stone bricks and deep purple accents.</p>
+          <div class="showcase-stats">
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">3,240</span>
+              <span class="showcase-stat-label">Bricks</span>
+            </div>
+            <div class="showcase-stat">
+                <span class="showcase-stat-val">6</span>
+                <span class="showcase-stat-label">Main Colors</span>
+            </div>
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">20×31×14</span>
+              <span class="showcase-stat-label">Dimensions</span>
+            </div>
+          </div>
+          <div class="showcase-colors">
+            <span class="showcase-color-chip" style="background:#303038" data-name="Dark Stone Gray"></span>
+            <span class="showcase-color-chip" style="background:#505058" data-name="Stone Gray"></span>
+            <span class="showcase-color-chip" style="background:#6e6c74" data-name="Light Stone"></span>
+            <span class="showcase-color-chip" style="background:#a02020" data-name="Trans-Red (Stained Glass)"></span>
+            <span class="showcase-color-chip" style="background:#2030a0" data-name="Trans-Blue (Stained Glass)"></span>
+            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finials)"></span>
+          </div>
+          <div class="showcase-parts-preview">
+            <table>
+              <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
+              <tr><td>Brick 1×2</td><td>Dark Stone Gray</td><td>624</td></tr>
+              <tr><td>Brick 2×4</td><td>Stone Gray</td><td>418</td></tr>
+              <tr><td>Slope 2×2</td><td>Dark Bluish Gray</td><td>196</td></tr>
+              <tr><td>Trans Plate 1×1</td><td>Trans-Red</td><td>48</td></tr>
+              <tr><td>Brick 1×1</td><td>Pearl Gold</td><td>24</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2: Cherry Blossom Tree -->
+      <div class="showcase-card reveal">
+        <div class="showcase-visual">
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase2mc"></canvas>
+            <span class="showcase-badge mc">MINECRAFT</span>
+          </div>
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase2lego"></canvas>
+            <span class="showcase-badge lego">LEGO</span>
+          </div>
+          <span class="showcase-arrow">→</span>
+        </div>
+        <div class="showcase-info">
+          <div class="showcase-pipeline">
+            <span class="pipeline-step mc">.litematic</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step convert">Convert</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step lego">LEGO Model</span>
+          </div>
+          <h3 class="showcase-name">Cherry Blossom Tree</h3>
+          <p class="showcase-desc">A sakura tree from the Cherry Grove biome with pink petal leaves, stripped cherry log trunk, and fallen petals. Added in Minecraft 1.20.</p>
+          <div class="showcase-stats">
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">1,234</span>
+              <span class="showcase-stat-label">Bricks</span>
+            </div>
+            <div class="showcase-stat">
+                <span class="showcase-stat-val">6</span>
+                <span class="showcase-stat-label">Main Colors</span>
+            </div>
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">14×16×14</span>
+              <span class="showcase-stat-label">Dimensions</span>
+            </div>
+          </div>
+          <div class="showcase-colors">
+            <span class="showcase-color-chip" style="background:#f0a0b8" data-name="Bright Pink (Petals)"></span>
+            <span class="showcase-color-chip" style="background:#e87da0" data-name="Dark Pink (Dense Leaves)"></span>
+            <span class="showcase-color-chip" style="background:#ffc0d0" data-name="Light Pink (Outer)"></span>
+            <span class="showcase-color-chip" style="background:#c88070" data-name="Sand Red (Cherry Log)"></span>
+            <span class="showcase-color-chip" style="background:#88c070" data-name="Bright Green (Grass)"></span>
+            <span class="showcase-color-chip" style="background:#785030" data-name="Brown (Trunk)"></span>
+          </div>
+          <div class="showcase-parts-preview">
+            <table>
+              <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
+              <tr><td>Brick 1×1</td><td>Bright Pink</td><td>328</td></tr>
+              <tr><td>Brick 1×2</td><td>Dark Pink</td><td>214</td></tr>
+              <tr><td>Brick 2×2</td><td>Light Pink</td><td>156</td></tr>
+              <tr><td>Brick 1×2</td><td>Sand Red</td><td>88</td></tr>
+              <tr><td>Plate 1×1</td><td>Bright Green</td><td>64</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: Japanese Temple -->
+      <div class="showcase-card reveal">
+        <div class="showcase-visual">
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase3mc"></canvas>
+            <span class="showcase-badge mc">MINECRAFT</span>
+          </div>
+          <div class="showcase-half">
+            <canvas class="showcase-canvas" id="showcase3lego"></canvas>
+            <span class="showcase-badge lego">LEGO</span>
+          </div>
+          <span class="showcase-arrow">→</span>
+        </div>
+        <div class="showcase-info">
+          <div class="showcase-pipeline">
+            <span class="pipeline-step mc">.litematic</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step convert">Convert</span>
+            <span class="pipeline-arrow">→</span>
+            <span class="pipeline-step lego">LEGO Model</span>
+          </div>
+          <h3 class="showcase-name">Japanese Temple</h3>
+          <p class="showcase-desc">A two-tiered pagoda temple with upturned eaves, red lacquer pillars, shoji screen walls, and a golden shachihoko finial. Inspired by classic Kyoto architecture.</p>
+          <div class="showcase-stats">
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">2,816</span>
+              <span class="showcase-stat-label">Bricks</span>
+            </div>
+            <div class="showcase-stat">
+                <span class="showcase-stat-val">2</span>
+                <span class="showcase-stat-label">Roof Tiers</span>
+            </div>
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">16×22×14</span>
+              <span class="showcase-stat-label">Dimensions</span>
+            </div>
+          </div>
+          <div class="showcase-colors">
+            <span class="showcase-color-chip" style="background:#b42424" data-name="Red (Pillars)"></span>
+            <span class="showcase-color-chip" style="background:#282420" data-name="Dark Brown (Roof)"></span>
+            <span class="showcase-color-chip" style="background:#b08a50" data-name="Medium Nougat (Wood)"></span>
+            <span class="showcase-color-chip" style="background:#f0ecdc" data-name="White (Shoji Screens)"></span>
+            <span class="showcase-color-chip" style="background:#8c8c88" data-name="Light Gray (Stone)"></span>
+            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finial)"></span>
+          </div>
+          <div class="showcase-parts-preview">
+            <table>
+              <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
+              <tr><td>Brick 1×2</td><td>Dark Brown</td><td>486</td></tr>
+              <tr><td>Brick 1×1</td><td>Red</td><td>312</td></tr>
+              <tr><td>Plate 1×2</td><td>White</td><td>248</td></tr>
+              <tr><td>Brick 2×4</td><td>Medium Nougat</td><td>164</td></tr>
+              <tr><td>Plate 2×2</td><td>Light Gray</td><td>96</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <h2>Your build deserves<span class="highlight">to exist in real life.</span></h2>
+    <p>Start free — convert up to 3 builds per month. No credit card required.</p>
+    <div class="cta-buttons">
+      <a href="#demo" class="btn-primary">Convert My First Build</a>
+    </div>
+  </section>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Converting blocks to bricks…</div>
+  </div>
+
+  <!-- Results overlay -->
+  <div class="results-overlay" id="resultsOverlay">
+    <div class="results-topbar">
+      <button class="btn-back" id="btnBack">← Back</button>
+      <h2>Minecraft-to-Lego — Results</h2>
+      <span></span>
+    </div>
+    <div class="results-inner">
+      <div class="results-stats" id="resultsStats"></div>
+      <div class="color-bar" id="colorBar"></div>
+      <div class="results-main">
+        <div class="results-panel">
+          <div class="rpanel-head">
+            <span class="dot" style="background:#4ade80"></span>
+            3D Preview
+          </div>
+          <canvas id="viewer3d"></canvas>
+        </div>
+        <div class="results-panel">
+          <div class="rpanel-head">
+            <span class="dot" style="background:#fbbf24"></span>
+            Parts List
+          </div>
+          <div class="parts-scroll">
+            <table class="parts-table">
+              <thead><tr><th>Part</th><th>Color</th><th>Qty</th></tr></thead>
+              <tbody id="partsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="dl-row" id="dlRow"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"><span class="toast-icon"></span><span id="toastMsg"></span></div>
+
+  <footer>
+    <span class="footer-copy">© 2026 Minecraft-to-Lego — Not affiliated with LEGO® or Mojang®</span>
+  </footer>
+  <script>
+    const icon = document.getElementById('pixelIcon');
+    const palette = ['#4ade80','#22c55e','#a16207','#6b7280','#4ade80','#4ade80','#a16207','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280','#6b7280'];
+    palette.forEach(c => { const s = document.createElement('span'); s.style.background = c; icon.appendChild(s); });
+
+    const container = document.getElementById('floatingBlocks');
+    const blockTypes = ['block-grass','block-stone','block-diamond','block-gold','block-lego'];
+    for (let i = 0; i < 18; i++) {
+      const el = document.createElement('div');
+      el.className = 'block ' + blockTypes[Math.floor(Math.random()*blockTypes.length)];
+      el.style.left = Math.random()*100 + 'vw';
+      el.style.animationDuration = (12 + Math.random()*18) + 's';
+      el.style.animationDelay = (Math.random()*20) + 's';
+      container.appendChild(el);
+    }
+
+    const starsEl = document.getElementById('mcStars');
+    for (let i = 0; i < 20; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random()*100+'%';
+      s.style.top = Math.random()*100+'%';
+      s.style.animationDelay = Math.random()*3+'s';
+      s.style.animationDuration = (1.5+Math.random()*2)+'s';
+      starsEl.appendChild(s);
+    }
+
+    const mcBuilding = document.getElementById('mcBuilding');
+    // Starter house 8x8 pixel art
+    const _=  '#1a2a4e', R='#b91c1c', RR='#991b1b', W='#a0845e', WW='#8b7355', BL='#60a5fa', BW='#93c5fd', D='#78350f', DD='#92400e', S='#9ca3af', G='#4ade80', GD='#16a34a', ST='#6b7280';
+    const blockColors = [
+      _,_,R,R,R,R,_,_,
+      _,R,RR,R,R,RR,R,_,
+      W,W,WW,W,W,WW,W,W,
+      W,BL,BW,W,W,BL,BW,W,
+      W,BL,BW,W,W,BL,BW,W,
+      S,S,S,D,DD,S,S,S,
+      G,G,GD,D,DD,GD,G,G,
+      ST,ST,ST,ST,ST,ST,ST,ST,
+    ];
+    blockColors.forEach(c => {
+      const b = document.createElement('span');
+      b.className = 'mc-block';
+      b.style.background = c;
+      b.style.boxShadow = 'inset -2px -2px 0 rgba(0,0,0,0.25), inset 2px 2px 0 rgba(255,255,255,0.08)';
+      mcBuilding.appendChild(b);
+    });
+
+    const legoPreview = document.getElementById('legoPreview');
+    // Starter house in LEGO colors
+    const LR='#ef4444', LRD='#dc2626', LW='#d4a76a', LWD='#c09660', LB='#60a5fa', LBW='#93c5fd', LD='#92400e', LDD='#a16207', LS='#9ca3af', LG='#4ade80', LGD='#22c55e', LST='#78716c';
+    const legoColors = [
+      LW,LW,LR,LR,LR,LR,LW,LW,
+      LW,LR,LRD,LR,LR,LRD,LR,LW,
+      LW,LW,LWD,LW,LW,LWD,LW,LW,
+      LW,LB,LBW,LW,LW,LB,LBW,LW,
+      LW,LB,LBW,LW,LW,LB,LBW,LW,
+      LS,LS,LS,LD,LDD,LS,LS,LS,
+      LG,LG,LGD,LD,LDD,LGD,LG,LG,
+      LST,LST,LST,LST,LST,LST,LST,LST,
+    ];
+    legoColors.forEach(c => {
+      const b = document.createElement('div');
+      b.className = 'lego-brick';
+      b.style.background = c;
+      b.style.boxShadow = 'inset -2px -2px 0 rgba(0,0,0,0.15), inset 2px 2px 0 rgba(255,255,255,0.25), 0 2px 4px rgba(0,0,0,0.1)';
+      legoPreview.appendChild(b);
+    });
+
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    let lastX = 0, lastY = 0, moved = 0;
+    document.addEventListener('mousemove', (e) => {
+      moved++;
+      if (moved % 8 !== 0) return;
+      const dx = e.clientX - lastX, dy = e.clientY - lastY;
+      if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+      lastX = e.clientX; lastY = e.clientY;
+      const crumb = document.createElement('div');
+      const size = 6 + Math.random()*6;
+      crumb.style.cssText = `position:fixed;pointer-events:none;z-index:9998;left:${e.clientX-size/2}px;top:${e.clientY-size/2}px;width:${size}px;height:${size}px;background:${['#4ade80','#67e8f9','#fbbf24','#a78bfa'][Math.floor(Math.random()*4)]};opacity:0.7;transition:all 0.8s ease;image-rendering:pixelated;`;
+      document.body.appendChild(crumb);
+      requestAnimationFrame(() => { crumb.style.opacity='0'; crumb.style.transform=`translateY(${20+Math.random()*30}px) scale(0)`; });
+      setTimeout(() => crumb.remove(), 900);
+    });
+  </script>
+
+  <!-- Three.js for 3D preview -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Showcase 3D renderers -->
+  <script>
+  (function initShowcase() {
+    if (typeof THREE === 'undefined') { setTimeout(initShowcase, 200); return; }
+
+    // === VOXEL MODEL DATA ===
+    // [x, y, z, r, g, b]
+    function gothicCathedral() {
+      const v = [];
+      const darkStone=[48,48,56], stone=[80,80,88], lightStone=[110,108,116], stainedR=[160,32,32], stainedB=[32,48,160], stainedG=[32,140,48], stainedP=[120,40,160], gold=[220,180,40], darkFloor=[36,34,40], slate=[64,62,72];
+      // Foundation platform
+      for(let x=0;x<20;x++) for(let z=0;z<12;z++) v.push([x,0,z,...darkFloor]);
+      // Nave walls
+      for(let y=1;y<=14;y++) for(let x=2;x<18;x++){
+        if(x>=7&&x<=12&&y>=4&&y<=10) continue; // window openings on front/back
+        v.push([x,y,0,...(y%3===0?lightStone:stone)]);
+        v.push([x,y,11,...(y%3===0?lightStone:stone)]);
+      }
+      // Side walls
+      for(let y=1;y<=14;y++) for(let z=1;z<11;z++){
+        v.push([2,y,z,...(y%3===0?lightStone:stone)]);
+        v.push([17,y,z,...(y%3===0?lightStone:stone)]);
+      }
+      // Flying buttresses (4 on each side)
+      for(let i=0;i<4;i++){
+        const bx=4+i*3;
+        for(let y=1;y<=8-i%2;y++) { v.push([1,y,bx>10?11:0,...darkStone]); }
+        for(let y=1;y<=8-i%2;y++) { v.push([18,y,bx>10?11:0,...darkStone]); }
+        v.push([1,9-i%2,bx>10?11:0,...slate]);
+        v.push([18,9-i%2,bx>10?11:0,...slate]);
+      }
+      // External buttress pillars
+      for(let bi=0;bi<3;bi++){
+        const bz=2+bi*4;
+        for(let y=1;y<=10;y++){v.push([0,y,bz,...darkStone]);v.push([0,y,bz+1,...darkStone]);v.push([19,y,bz,...darkStone]);v.push([19,y,bz+1,...darkStone]);}
+        // Buttress arches connecting to main wall
+        v.push([1,10,bz,...slate],[1,10,bz+1,...slate],[18,10,bz,...slate],[18,10,bz+1,...slate]);
+        v.push([1,11,bz,...slate],[18,11,bz,...slate]);
+      }
+      // Stained glass windows (front)
+      for(let x=8;x<=11;x++) for(let y=5;y<=9;y++){
+        const c=((x+y)%4===0)?stainedR:((x+y)%4===1)?stainedB:((x+y)%4===2)?stainedG:stainedP;
+        v.push([x,y,0,...c]);
+        v.push([x,y,11,...c]);
+      }
+      // Rose window circle (front, centered)
+      const rCx=10,rCy=12;
+      for(let dx=-2;dx<=2;dx++) for(let dy=-2;dy<=2;dy++){
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<=2.3&&d>=0.8){
+          const c=(dx+dy+4)%4===0?stainedR:(dx+dy+4)%4===1?stainedB:(dx+dy+4)%4===2?stainedP:stainedG;
+          v.push([rCx+dx,rCy+dy,0,...c]);
+        }
+      }
+      v.push([rCx,rCy,0,...gold]); // center of rose window
+      // Pointed roof (Gothic arch profile)
+      for(let y=15;y<=20;y++){
+        const w=Math.max(0,8-(y-15)*2);
+        const startX=10-Math.floor(w/2), endX=10+Math.ceil(w/2);
+        for(let x=startX;x<=endX;x++) for(let z=1;z<11;z++){
+          if(x===startX||x===endX) v.push([x,y,z,...slate]);
+        }
+      }
+      // Roof ridge
+      for(let z=0;z<12;z++) v.push([10,21,z,...darkStone]);
+      // Central spire
+      for(let y=15;y<=28;y++){
+        const w=y<22?2:1;
+        for(let dx=-w;dx<=w;dx++) for(let dz=-w;dz<=w;dz++){
+          if(Math.abs(dx)===w||Math.abs(dz)===w) v.push([10+dx,y,6+dz,...darkStone]);
+        }
+      }
+      v.push([10,29,6,...gold],[10,30,6,...gold]); // cross/finial
+      // Two front towers/spires
+      for(let y=1;y<=22;y++){
+        for(let dx=0;dx<3;dx++) for(let dz=0;dz<3;dz++){
+          if(dx===0||dx===2||dz===0||dz===2){
+            v.push([2+dx,y,0+dz,...darkStone]);
+            v.push([15+dx,y,0+dz,...darkStone]);
+          }
+        }
+      }
+      // Tower caps (pyramids)
+      for(let y=23;y<=26;y++){
+        const r=y<25?1:0;
+        for(let dx=-r;dx<=r;dx++) for(let dz=-r;dz<=r;dz++){
+          v.push([3+dx,y,1+dz,...slate]);
+          v.push([16+dx,y,1+dz,...slate]);
+        }
+      }
+      v.push([3,27,1,...gold],[16,27,1,...gold]); // tower finials
+      // Interior columns
+      for(let y=1;y<=13;y++){
+        v.push([5,y,3,...lightStone]);v.push([5,y,8,...lightStone]);
+        v.push([10,y,3,...lightStone]);v.push([10,y,8,...lightStone]);
+        v.push([14,y,3,...lightStone]);v.push([14,y,8,...lightStone]);
+      }
+      // Altar at far end
+      for(let x=8;x<=12;x++) for(let z=9;z<=10;z++) v.push([x,1,z,...lightStone]);
+      v.push([10,2,10,...gold],[10,3,10,...gold]); // altar cross
+      // Front entrance
+      for(let y=1;y<=6;y++) for(let x=8;x<=11;x++){
+        if(y<=4) continue; // door opening
+        v.push([x,y,0,...darkStone]);
+      }
+      // Arched doorway top
+      v.push([8,5,0,...stone],[11,5,0,...stone],[9,6,0,...stone],[10,6,0,...stone]);
+      return v;
+    }
+
+    function cherryTree() {
+      const v = [];
+      const trunk = [200,128,112], bark = [120,80,48], pink1 = [240,160,184], pink2 = [232,125,160], pink3 = [255,192,208], grass = [136,192,112], petal = [255,180,200];
+      // Ground
+      for (let x=0;x<14;x++) for (let z=0;z<14;z++) v.push([x,0,z,...grass]);
+      // Fallen petals on ground
+      for (const [px,pz] of [[2,3],[5,1],[8,4],[1,8],[4,11],[10,2],[12,8],[3,6],[9,10],[6,13]]) v.push([px,1,pz,...petal]);
+      // Trunk
+      for (let y=1;y<=7;y++) { v.push([6,y,6,...trunk]); v.push([7,y,6,...trunk]); v.push([6,y,7,...trunk]); v.push([7,y,7,...trunk]); }
+      // Trunk lean
+      v.push([5,5,6,...bark],[5,6,5,...bark],[8,4,7,...bark],[8,5,8,...bark]);
+      // Branch arms
+      for (let i=0;i<3;i++) { v.push([4-i,7+i,6,...bark]); v.push([9+i,7+i,7,...bark]); v.push([6,7+i,3-i,...bark]); v.push([7,7+i,10+i,...bark]); }
+      // Canopy - layered sphere of pink
+      const cx=7,cy=11,cz=7;
+      for (let x=2;x<12;x++) for (let y=8;y<15;y++) for (let z=2;z<12;z++) {
+        const dx=x-cx,dy=(y-cy)*0.8,dz=z-cz;
+        const d=Math.sqrt(dx*dx+dy*dy+dz*dz);
+        if (d<4.5) {
+          const c = d<2.5 ? pink2 : d<3.8 ? pink1 : pink3;
+          if (Math.random()>0.12) v.push([x,y,z,...c]);
+        }
+      }
+      return v;
+    }
+
+    function japaneseTemple() {
+      const v = [];
+      const darkWood=[62,42,28], oak=[176,138,80], red=[180,36,36], darkRed=[120,24,24], white=[230,228,220], stone=[140,140,136], darkRoof=[40,36,32], gold=[220,180,40], tatami=[192,176,120], paper=[240,236,220], moss=[80,128,64];
+      // Stone foundation platform
+      for(let x=0;x<16;x++) for(let z=0;z<14;z++) v.push([x,0,z,...stone]);
+      for(let x=1;x<15;x++) for(let z=1;z<13;z++) v.push([x,1,z,...stone]);
+      // Moss on stone
+      for(const[px,pz] of [[0,2],[15,5],[2,0],[13,13],[0,10],[15,1]]) v.push([px,1,pz,...moss]);
+      // Main floor
+      for(let x=2;x<14;x++) for(let z=2;z<12;z++) v.push([x,2,z,...tatami]);
+      // Red pillars (main structure)
+      const pillars=[[2,2],[2,6],[2,11],[7,2],[7,6],[7,11],[13,2],[13,6],[13,11]];
+      for(const[px,pz] of pillars) for(let y=3;y<=10;y++) v.push([px,y,pz,...red]);
+      // Additional corner pillars
+      for(let y=3;y<=10;y++){v.push([2,y,2,...darkRed]);v.push([13,y,2,...darkRed]);v.push([2,y,11,...darkRed]);v.push([13,y,11,...darkRed]);}
+      // Shoji screen walls (paper panels between pillars)
+      for(let x=3;x<7;x++) for(let y=3;y<=6;y++){v.push([x,y,2,...paper]);v.push([x,y,11,...paper]);}
+      for(let x=8;x<13;x++) for(let y=3;y<=6;y++){v.push([x,y,2,...paper]);v.push([x,y,11,...paper]);}
+      // Side shoji
+      for(let z=3;z<6;z++) for(let y=3;y<=6;y++){v.push([2,y,z,...paper]);v.push([13,y,z,...paper]);}
+      for(let z=7;z<11;z++) for(let y=3;y<=6;y++){v.push([2,y,z,...paper]);v.push([13,y,z,...paper]);}
+      // Wood beam header at y=7 and y=10
+      for(let x=2;x<=13;x++){v.push([x,7,2,...darkWood]);v.push([x,7,11,...darkWood]);v.push([x,10,2,...darkWood]);v.push([x,10,11,...darkWood]);}
+      for(let z=2;z<=11;z++){v.push([2,7,z,...darkWood]);v.push([13,7,z,...darkWood]);v.push([2,10,z,...darkWood]);v.push([13,10,z,...darkWood]);}
+      // Second floor at y=7
+      for(let x=3;x<13;x++) for(let z=3;z<11;z++) v.push([x,7,z,...oak]);
+      // === First tier roof (y=11-14) wide ===
+      for(let y=11;y<=13;y++){
+        const overhang=14-y;
+        for(let x=1-overhang+2;x<15+overhang-2;x++){
+          v.push([x,y,1-overhang+2,...darkRoof]);
+          v.push([x,y,12+overhang-2,...darkRoof]);
+        }
+        for(let z=1-overhang+2;z<=12+overhang-2;z++){
+          v.push([1-overhang+2,y,z,...darkRoof]);
+          v.push([14+overhang-2,y,z,...darkRoof]);
+        }
+      }
+      // Roof surface first tier
+      for(let x=1;x<15;x++) for(let z=1;z<13;z++) v.push([x,11,z,...darkRoof]);
+      // Curved eave edges
+      for(let x=0;x<16;x++){v.push([x,10,0,...darkRoof]);v.push([x,10,13,...darkRoof]);}
+      for(let z=0;z<14;z++){v.push([0,10,z,...darkRoof]);v.push([15,10,z,...darkRoof]);}
+      // Upturned eave corners
+      v.push([0,11,0,...darkRoof],[15,11,0,...darkRoof],[0,11,13,...darkRoof],[15,11,13,...darkRoof]);
+      // === Second tier (smaller pagoda top, y=14-18) ===
+      // Inner pillars for top tier
+      for(let y=12;y<=15;y++){
+        v.push([5,y,4,...red]);v.push([10,y,4,...red]);v.push([5,y,9,...red]);v.push([10,y,9,...red]);
+      }
+      // Second tier roof
+      for(let x=3;x<13;x++) for(let z=3;z<11;z++) v.push([x,16,z,...darkRoof]);
+      // Eaves second tier
+      for(let x=2;x<14;x++){v.push([x,15,2,...darkRoof]);v.push([x,15,11,...darkRoof]);}
+      for(let z=2;z<12;z++){v.push([2,15,z,...darkRoof]);v.push([13,15,z,...darkRoof]);}
+      // Upturned corners tier 2
+      v.push([2,16,2,...darkRoof],[13,16,2,...darkRoof],[2,16,11,...darkRoof],[13,16,11,...darkRoof]);
+      // Ridge peak
+      for(let x=5;x<=10;x++) v.push([x,17,7,...darkRoof]);
+      v.push([6,18,7,...darkRoof],[7,18,7,...darkRoof],[8,18,7,...darkRoof],[9,18,7,...darkRoof]);
+      v.push([7,19,7,...darkRoof],[8,19,7,...darkRoof]);
+      // Gold finial (shachihoko)
+      v.push([7,20,7,...gold],[8,20,7,...gold],[7,21,7,...gold],[8,21,7,...gold]);
+      // Front entrance torii-style gate
+      for(let y=3;y<=8;y++){v.push([6,y,0,...red]);v.push([9,y,0,...red]);}
+      v.push([5,8,0,...darkWood],[6,8,0,...darkWood],[7,8,0,...darkWood],[8,8,0,...darkWood],[9,8,0,...darkWood],[10,8,0,...darkWood]);
+      v.push([5,9,0,...darkRoof],[6,9,0,...darkRoof],[7,9,0,...darkRoof],[8,9,0,...darkRoof],[9,9,0,...darkRoof],[10,9,0,...darkRoof]);
+      // Lanterns at entrance
+      v.push([5,3,1,...gold],[10,3,1,...gold],[5,4,1,...white],[10,4,1,...white]);
+      // Stone path to entrance
+      for(let z=-2;z<2;z++) for(let x=7;x<=8;x++) if(z>=0) v.push([x,1,z,...stone]);
+      return v;
+    }
+
+    function renderShowcase(canvasId, voxelsFn, style) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const w = rect.width || 280, h = rect.height || 320;
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 5000);
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+      renderer.setSize(w, h, false);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+      if (style === 'mc') {
+        // Minecraft: outdoor world lighting
+        scene.background = new THREE.Color(0x223f73);
+        scene.fog = new THREE.Fog(0x223f73, 65, 140);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+        const sun = new THREE.DirectionalLight(0xffefbf, 0.92);
+        sun.position.set(2, 4, 1);
+        scene.add(sun);
+        const skyFill = new THREE.DirectionalLight(0x9fd0ff, 0.28);
+        skyFill.position.set(-1, 2, -1);
+        scene.add(skyFill);
+        const fill = new THREE.DirectionalLight(0x6b8c5a, 0.18);
+        fill.position.set(-1, -1, 0);
+        scene.add(fill);
+      } else {
+        // LEGO: bright studio lighting
+        scene.background = new THREE.Color(0xe9edf5);
+        renderer.physicallyCorrectLights = true;
+        scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+        const key = new THREE.DirectionalLight(0xffffff, 1.25);
+        key.position.set(1, 3, 2);
+        scene.add(key);
+        const rim = new THREE.DirectionalLight(0xd9e9ff, 0.52);
+        rim.position.set(-2, 1, -1);
+        scene.add(rim);
+        const bottom = new THREE.DirectionalLight(0xfff4df, 0.28);
+        bottom.position.set(0, -2, 0);
+        scene.add(bottom);
+      }
+
+      const voxels = voxelsFn();
+      const groups = {};
+      for (const [x,y,z,r,g,b] of voxels) {
+        const key = `${r},${g},${b}`;
+        if (!groups[key]) groups[key] = { rgb: [r,g,b], positions: [] };
+        groups[key].positions.push([x,y,z]);
+      }
+
+      let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+      for (const [x,y,z] of voxels) { minX=Math.min(minX,x);minY=Math.min(minY,y);minZ=Math.min(minZ,z);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);maxZ=Math.max(maxZ,z); }
+      const cx=(minX+maxX)/2, cy=(minY+maxY)/2, cz=(minZ+maxZ)/2;
+      const size = Math.max(maxX-minX,maxY-minY,maxZ-minZ)||10;
+
+      const dummy = new THREE.Object3D();
+
+      if (style === 'mc') {
+        // Minecraft style: flat faces, per-face color variation, thick dark outlines
+        const geo = new THREE.BoxGeometry(1, 1, 1);
+        const edgeGeo = new THREE.EdgesGeometry(geo);
+        for (const g of Object.values(groups)) {
+          const baseR = g.rgb[0]/255, baseG = g.rgb[1]/255, baseB = g.rgb[2]/255;
+          // Slightly vary each instance for that hand-placed MC feel
+          const mat = new THREE.MeshLambertMaterial({
+            color: new THREE.Color(baseR, baseG, baseB),
+            flatShading: true
+          });
+          const mesh = new THREE.InstancedMesh(geo, mat, g.positions.length);
+          g.positions.forEach(([x,y,z], i) => {
+            dummy.position.set(x-cx, y-cy, z-cz);
+            dummy.updateMatrix();
+            mesh.setMatrixAt(i, dummy.matrix);
+          });
+          scene.add(mesh);
+        }
+        // Strong black outlines — Minecraft's signature look
+        const edgeMat = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.35, transparent: true, linewidth: 1 });
+        for (const [x,y,z] of voxels) {
+          const edges = new THREE.LineSegments(edgeGeo, edgeMat);
+          edges.position.set(x-cx, y-cy, z-cz);
+          scene.add(edges);
+        }
+        // Add a faint ground grid plane under the model
+        const gridSize = size + 6;
+        const gridGeo = new THREE.PlaneGeometry(gridSize, gridSize);
+        const gridMat = new THREE.MeshBasicMaterial({ color: 0x46753a, opacity: 0.42, transparent: true });
+        const grid = new THREE.Mesh(gridGeo, gridMat);
+        grid.rotation.x = -Math.PI / 2;
+        grid.position.y = minY - cy - 0.5;
+        scene.add(grid);
+        // Grid lines
+        const gridHelper = new THREE.GridHelper(gridSize, gridSize, 0x7db56b, 0x5b8d49);
+        gridHelper.position.y = minY - cy - 0.49;
+        gridHelper.material.opacity = 0.24;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+      } else {
+        // LEGO style: gaps between bricks, big studs, glossy plastic material
+        const gap = 0.92;
+        const geo = new THREE.BoxGeometry(gap, gap, gap);
+        // Bevel edges with a chamfer
+        const studGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.14, 12);
+        const studRingGeo = new THREE.CylinderGeometry(0.30, 0.30, 0.02, 12);
+        // Baseplate under the model
+        const bpW = (maxX-minX+2), bpD = (maxZ-minZ+2);
+        const bpGeo = new THREE.BoxGeometry(bpW, 0.15, bpD);
+        const bpMat = new THREE.MeshPhongMaterial({ color: 0xd8dde8, shininess: 55, specular: 0x2a2a2a });
+        const bp = new THREE.Mesh(bpGeo, bpMat);
+        bp.position.set(0, minY - cy - 0.58, 0);
+        scene.add(bp);
+        // Baseplate studs
+        const bpStudGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 8);
+        const bpStudMat = new THREE.MeshPhongMaterial({ color: 0xd8dde8, shininess: 65, specular: 0x303030 });
+        for (let bx = Math.ceil(minX); bx <= Math.floor(maxX); bx += 2) {
+          for (let bz = Math.ceil(minZ); bz <= Math.floor(maxZ); bz += 2) {
+            const s = new THREE.Mesh(bpStudGeo, bpStudMat);
+            s.position.set(bx - cx, minY - cy - 0.46, bz - cz);
+            scene.add(s);
+          }
+        }
+        for (const g of Object.values(groups)) {
+          const color = new THREE.Color(g.rgb[0]/255,g.rgb[1]/255,g.rgb[2]/255);
+          const mat = new THREE.MeshPhongMaterial({
+            color,
+            shininess: 90,
+            specular: new THREE.Color(0.24, 0.24, 0.24),
+            reflectivity: 0.4
+          });
+          const mesh = new THREE.InstancedMesh(geo, mat, g.positions.length);
+          // Stud on top - same color, extra shiny
+          const studColor = color.clone().lerp(new THREE.Color(1,1,1), 0.08);
+          const studMat = new THREE.MeshPhongMaterial({
+            color: studColor,
+            shininess: 120,
+            specular: new THREE.Color(0.25, 0.25, 0.25)
+          });
+          const studMesh = new THREE.InstancedMesh(studGeo, studMat, g.positions.length);
+          // Stud ring (subtle ring around stud base)
+          const ringMat = new THREE.MeshPhongMaterial({ color, shininess: 60, specular: new THREE.Color(0.1,0.1,0.1) });
+          const ringMesh = new THREE.InstancedMesh(studRingGeo, ringMat, g.positions.length);
+          g.positions.forEach(([x,y,z], i) => {
+            dummy.position.set(x-cx, y-cy, z-cz);
+            dummy.updateMatrix();
+            mesh.setMatrixAt(i, dummy.matrix);
+            dummy.position.set(x-cx, y-cy + gap/2 + 0.07, z-cz);
+            dummy.updateMatrix();
+            studMesh.setMatrixAt(i, dummy.matrix);
+            dummy.position.set(x-cx, y-cy + gap/2 + 0.01, z-cz);
+            dummy.updateMatrix();
+            ringMesh.setMatrixAt(i, dummy.matrix);
+          });
+          scene.add(mesh);
+          scene.add(studMesh);
+          scene.add(ringMesh);
+        }
+      }
+
+      // Different camera distance and angle per style
+      const camDist = style === 'mc' ? 1.38 : 1.42;
+      camera.position.set(size*camDist*0.85, size*0.8, size*camDist);
+      camera.lookAt(0, 0, 0);
+
+      let angle = style === 'mc' ? 0 : Math.PI * 0.05;
+      const rotSpeed = style === 'mc' ? 0.003 : 0.005;
+      function animate() {
+        requestAnimationFrame(animate);
+        const currentWidth = canvas.clientWidth || w;
+        const currentHeight = canvas.clientHeight || h;
+        if (canvas.width !== Math.floor(currentWidth * renderer.getPixelRatio()) || canvas.height !== Math.floor(currentHeight * renderer.getPixelRatio())) {
+          renderer.setSize(currentWidth, currentHeight, false);
+          camera.aspect = currentWidth / currentHeight;
+          camera.updateProjectionMatrix();
+        }
+        angle += rotSpeed;
+        camera.position.x = Math.cos(angle) * size * camDist;
+        camera.position.z = Math.sin(angle) * size * camDist;
+        camera.position.y = size * (style === 'mc' ? 0.62 : 0.68);
+        camera.lookAt(0, size*0.05, 0);
+        renderer.render(scene, camera);
+      }
+      animate();
+    }
+
+    // Wait for canvases to be visible
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const id = e.target.id;
+          if (id === 'showcase1mc') { renderShowcase('showcase1mc', gothicCathedral, 'mc'); renderShowcase('showcase1lego', gothicCathedral, 'lego'); }
+          if (id === 'showcase2mc') { renderShowcase('showcase2mc', cherryTree, 'mc'); renderShowcase('showcase2lego', cherryTree, 'lego'); }
+          if (id === 'showcase3mc') { renderShowcase('showcase3mc', japaneseTemple, 'mc'); renderShowcase('showcase3lego', japaneseTemple, 'lego'); }
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.showcase-canvas').forEach(c => {
+      if (c.id.endsWith('mc')) obs.observe(c);
+    });
+  })();
+  </script>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

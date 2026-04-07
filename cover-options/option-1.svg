@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640">
+  <defs>
+    <!-- Grid pattern -->
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="rgba(100,100,255,0.06)" stroke-width="0.5"/>
+    </pattern>
+    <!-- Noise texture -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.06"/>
+      </feComponentTransfer>
+      <feBlend in="SourceGraphic" mode="overlay"/>
+    </filter>
+    <!-- Glow -->
+    <filter id="glow-green">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-gold">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="glow-diamond">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <!-- Radial gradients for atmosphere -->
+    <radialGradient id="atmo1" cx="25%" cy="30%" r="40%">
+      <stop offset="0%" stop-color="#4ade80" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="atmo2" cx="75%" cy="60%" r="35%">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="atmo3" cx="50%" cy="45%" r="50%">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0f0ff"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="#0a0a0f"/>
+
+  <!-- Grid -->
+  <rect width="1280" height="640" fill="url(#grid)" opacity="0.8"/>
+
+  <!-- Atmospheric glows -->
+  <rect width="1280" height="640" fill="url(#atmo1)"/>
+  <rect width="1280" height="640" fill="url(#atmo2)"/>
+  <rect width="1280" height="640" fill="url(#atmo3)"/>
+
+  <!-- Noise texture -->
+  <rect width="1280" height="640" filter="url(#noise)" opacity="0.4"/>
+
+  <!-- ===== Minecraft side (left) ===== -->
+  <!-- Large Minecraft structure -->
+  <g transform="translate(80, 180)">
+    <!-- House base -->
+    <rect x="0" y="120" width="200" height="160" fill="#6b7280" opacity="0.9"/>
+    <rect x="0" y="120" width="200" height="160" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <!-- Grass top -->
+    <rect x="-10" y="100" width="220" height="28" fill="#22c55e" opacity="0.85"/>
+    <!-- Roof -->
+    <polygon points="100,-10 -20,100 220,100" fill="#a16207" opacity="0.8"/>
+    <polygon points="100,-10 -20,100 220,100" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+    <!-- Window -->
+    <rect x="30" y="160" width="40" height="40" fill="#67e8f9" opacity="0.5"/>
+    <rect x="130" y="160" width="40" height="40" fill="#67e8f9" opacity="0.5"/>
+    <!-- Door -->
+    <rect x="75" y="210" width="50" height="70" fill="#a16207" opacity="0.7"/>
+    <!-- Grid lines on structure -->
+    <line x1="50" y1="120" x2="50" y2="280" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+    <line x1="100" y1="120" x2="100" y2="280" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+    <line x1="150" y1="120" x2="150" y2="280" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+    <line x1="0" y1="170" x2="200" y2="170" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+    <line x1="0" y1="220" x2="200" y2="220" stroke="rgba(0,0,0,0.3)" stroke-width="1"/>
+  </g>
+
+  <!-- Floating Minecraft blocks (left) -->
+  <g filter="url(#glow-green)">
+    <rect x="320" y="100" width="24" height="24" fill="#4ade80" opacity="0.7" transform="rotate(15, 332, 112)"/>
+  </g>
+  <rect x="350" y="220" width="20" height="20" fill="#fbbf24" opacity="0.5" transform="rotate(-10, 360, 230)"/>
+  <g filter="url(#glow-diamond)">
+    <rect x="300" y="350" width="18" height="18" fill="#67e8f9" opacity="0.6" transform="rotate(25, 309, 359)"/>
+  </g>
+  <rect x="100" y="430" width="22" height="22" fill="#6b7280" opacity="0.4" transform="rotate(-20, 111, 441)"/>
+
+  <!-- ===== Transform Arrow (center) ===== -->
+  <g transform="translate(500, 280)">
+    <!-- Arrow line -->
+    <line x1="0" y1="0" x2="240" y2="0" stroke="url(#titleGrad)" stroke-width="2" opacity="0.6"/>
+    <!-- Arrow head -->
+    <polygon points="240,-8 256,0 240,8" fill="#a78bfa" opacity="0.7"/>
+    <!-- Dots animation (static representation) -->
+    <circle cx="60" cy="0" r="3" fill="#4ade80" opacity="0.8"/>
+    <circle cx="120" cy="0" r="3" fill="#a78bfa" opacity="0.8"/>
+    <circle cx="180" cy="0" r="3" fill="#fbbf24" opacity="0.8"/>
+    <!-- Label -->
+    <text x="120" y="-20" text-anchor="middle" font-family="monospace" font-size="10" fill="rgba(240,240,255,0.35)" letter-spacing="3">CONVERTING</text>
+    <text x="120" y="30" text-anchor="middle" font-family="monospace" font-size="9" fill="rgba(240,240,255,0.25)" letter-spacing="2">BLOCK → BRICK</text>
+  </g>
+
+  <!-- ===== LEGO side (right) ===== -->
+  <g transform="translate(810, 180)">
+    <!-- LEGO base plate -->
+    <rect x="0" y="120" width="200" height="160" rx="4" fill="#ef4444" opacity="0.85"/>
+    <!-- LEGO studs row 1 -->
+    <circle cx="25" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="55" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="85" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="115" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="145" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="175" cy="135" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <!-- LEGO studs row 2 -->
+    <circle cx="25" cy="165" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="55" cy="165" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="85" cy="165" r="8" fill="#3b82f6" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="115" cy="165" r="8" fill="#3b82f6" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="145" cy="165" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="175" cy="165" r="8" fill="#ef4444" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <!-- Yellow roof bricks -->
+    <rect x="-10" y="80" width="220" height="48" rx="4" fill="#fbbf24" opacity="0.85"/>
+    <circle cx="15" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="40" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="65" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="90" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="115" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="140" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="165" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <circle cx="190" cy="90" r="7" fill="#fbbf24" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <!-- Green base -->
+    <rect x="0" y="280" width="200" height="20" rx="3" fill="#22c55e" opacity="0.7"/>
+    <circle cx="15" cy="284" r="5" fill="#22c55e" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <circle cx="35" cy="284" r="5" fill="#22c55e" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <circle cx="55" cy="284" r="5" fill="#22c55e" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+    <circle cx="75" cy="284" r="5" fill="#22c55e" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+  </g>
+
+  <!-- Floating LEGO bricks (right) -->
+  <g filter="url(#glow-gold)" opacity="0.6">
+    <rect x="1080" y="120" width="32" height="16" rx="2" fill="#fbbf24" transform="rotate(20, 1096, 128)"/>
+    <circle cx="1084" cy="118" r="4" fill="#fbbf24"/>
+    <circle cx="1096" cy="118" r="4" fill="#fbbf24"/>
+  </g>
+  <g opacity="0.5">
+    <rect x="1150" y="300" width="28" height="14" rx="2" fill="#ef4444" transform="rotate(-15, 1164, 307)"/>
+    <circle cx="1154" cy="298" r="4" fill="#ef4444"/>
+    <circle cx="1166" cy="298" r="4" fill="#ef4444"/>
+  </g>
+  <g opacity="0.4">
+    <rect x="1100" y="450" width="24" height="12" rx="2" fill="#3b82f6" transform="rotate(30, 1112, 456)"/>
+  </g>
+
+  <!-- ===== Title overlay ===== -->
+  <text x="640" y="560" text-anchor="middle" font-family="'Press Start 2P', 'Courier New', monospace" font-size="38" fill="url(#titleGrad)" letter-spacing="2">
+    Minecraft → LEGO
+  </text>
+  <text x="640" y="600" text-anchor="middle" font-family="monospace" font-size="13" fill="rgba(74,222,128,0.6)" letter-spacing="4">
+    YOUR VIRTUAL WORLD, NOW IN YOUR HANDS
+  </text>
+
+  <!-- Corner decorations -->
+  <rect x="24" y="24" width="48" height="1" fill="rgba(74,222,128,0.3)"/>
+  <rect x="24" y="24" width="1" height="48" fill="rgba(74,222,128,0.3)"/>
+  <rect x="1208" y="24" width="48" height="1" fill="rgba(167,139,250,0.3)"/>
+  <rect x="1255" y="24" width="1" height="48" fill="rgba(167,139,250,0.3)"/>
+  <rect x="24" y="615" width="48" height="1" fill="rgba(251,191,36,0.3)"/>
+  <rect x="24" y="568" width="1" height="48" fill="rgba(251,191,36,0.3)"/>
+  <rect x="1208" y="615" width="48" height="1" fill="rgba(103,232,249,0.3)"/>
+  <rect x="1255" y="568" width="1" height="48" fill="rgba(103,232,249,0.3)"/>
+
+  <!-- Vignette -->
+  <rect width="1280" height="640" fill="url(#vignette)" opacity="0"/>
+</svg>

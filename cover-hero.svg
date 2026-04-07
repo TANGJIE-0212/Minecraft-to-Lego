@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bgGlow" x1="600" y1="0" x2="600" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#101018"/>
+      <stop offset="1" stop-color="#09090d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bgGlow)"/>
+
+  <g stroke="#1b2236" stroke-width="1" opacity="0.52">
+    <path d="M0 32.5H1200M0 64.5H1200M0 96.5H1200M0 128.5H1200M0 160.5H1200M0 192.5H1200M0 224.5H1200M0 256.5H1200M0 288.5H1200M0 320.5H1200M0 352.5H1200M0 384.5H1200M0 416.5H1200M0 448.5H1200M0 480.5H1200M0 512.5H1200M0 544.5H1200M0 576.5H1200M0 608.5H1200"/>
+    <path d="M32.5 0V630M64.5 0V630M96.5 0V630M128.5 0V630M160.5 0V630M192.5 0V630M224.5 0V630M256.5 0V630M288.5 0V630M320.5 0V630M352.5 0V630M384.5 0V630M416.5 0V630M448.5 0V630M480.5 0V630M512.5 0V630M544.5 0V630M576.5 0V630M608.5 0V630M640.5 0V630M672.5 0V630M704.5 0V630M736.5 0V630M768.5 0V630M800.5 0V630M832.5 0V630M864.5 0V630M896.5 0V630M928.5 0V630M960.5 0V630M992.5 0V630M1024.5 0V630M1056.5 0V630M1088.5 0V630M1120.5 0V630M1152.5 0V630M1184.5 0V630"/>
+  </g>
+
+  <g font-family="monospace" text-anchor="middle">
+    <line x1="442" y1="76" x2="515" y2="76" stroke="#56dd8f" stroke-opacity="0.45"/>
+    <text x="600" y="82" fill="#56dd8f" font-size="18" letter-spacing="4">MINECRAFT → REAL LIFE</text>
+    <line x1="685" y1="76" x2="758" y2="76" stroke="#56dd8f" stroke-opacity="0.45"/>
+  </g>
+
+  <g text-anchor="middle" font-family="'Courier New', monospace" font-weight="700">
+    <text x="600" y="168" fill="#f1efff" font-size="74">Your Virtual World,</text>
+    <text x="600" y="262" fill="none" stroke="#57dc8e" stroke-width="2.2" font-size="72">Now In Your Hands</text>
+    <text x="600" y="352" fill="#ffc640" font-size="76">One Brick At A</text>
+    <text x="600" y="438" fill="#ffc640" font-size="76">Time.</text>
+  </g>
+
+  <g text-anchor="middle" font-family="Arial, sans-serif" fill="#b2afbf">
+    <text x="600" y="492" font-size="18">Upload your Minecraft <tspan fill="#ececf5" font-weight="700">schematic file</tspan>, and we'll generate a</text>
+    <text x="600" y="526" font-size="18">complete <tspan fill="#ececf5" font-weight="700">LEGO brick shopping list</tspan> + 3D preview — ready to</text>
+    <text x="600" y="560" font-size="18">order from BrickLink.</text>
+  </g>
+
+  <g opacity="0.92">
+    <rect x="96" y="300" width="26" height="13" fill="#8a5a23" transform="rotate(-8 96 300)"/>
+    <rect x="96" y="313" width="26" height="9" fill="#4cb884" transform="rotate(-8 96 313)"/>
+    <rect x="1041" y="314" width="20" height="20" rx="1" fill="#71ecfb" transform="rotate(-3 1041 314)"/>
+    <rect x="552" y="551" width="26" height="13" fill="#8a5a23" transform="rotate(33 552 551)"/>
+    <rect x="568" y="551" width="10" height="13" fill="#48bf87" transform="rotate(33 568 551)"/>
+  </g>
+
+  <g opacity="0.78">
+    <rect x="355" y="487" width="490" height="24" rx="0" fill="none" stroke="#262a35"/>
+    <circle cx="375" cy="499" r="3" fill="#4ade80"/>
+    <text x="600" y="503" text-anchor="middle" font-family="monospace" font-size="12" fill="#70758a" letter-spacing="1.6">Connected to BrickLink · 6,000+ Brick Parts · 200+ Block Types Mapped</text>
+  </g>
+
+  <g>
+    <path d="M380 558H582L592 568V606L582 616H380L370 606V568L380 558Z" fill="#65ea95"/>
+    <text x="481" y="592" text-anchor="middle" font-family="'Courier New', monospace" font-size="22" font-weight="700" fill="#0a0a0f">Start Converting</text>
+
+    <rect x="610.5" y="560.5" width="180" height="54" fill="rgba(16,16,26,0.3)" stroke="#323751"/>
+    <text x="700" y="592" text-anchor="middle" font-family="monospace" font-size="18" fill="#8a8fa3">▶ SEE HOW IT WORKS</text>
+  </g>
+</svg>
