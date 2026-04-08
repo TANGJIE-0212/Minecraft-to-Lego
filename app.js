@@ -1,4 +1,5 @@
 import { read as readNbt } from "https://cdn.jsdelivr.net/npm/nbtify@2.2.0/+esm";
+import { gunzipSync } from "https://cdn.jsdelivr.net/npm/fflate@0.8.2/esm/browser.js";
 
 const LEGO_COLORS = [
   [1,"Blue",[0,87,168]],[2,"Green",[35,120,52]],[3,"Dark Turquoise",[0,143,155]],[4,"Red",[196,40,28]],[6,"Brown",[106,44,6]],[7,"Light Gray",[156,156,156]],[8,"Dark Gray",[99,95,82]],[9,"Light Blue",[180,210,228]],[10,"Bright Green",[75,151,75]],[14,"Yellow",[245,205,48]],[15,"White",[255,255,255]],[19,"Tan",[228,205,158]],[25,"Earth Orange",[196,112,38]],[26,"Black",[33,33,33]],[27,"Dark Green",[0,69,26]],[28,"Dark Brown",[77,47,28]],[29,"Salmon",[249,167,119]],[36,"Bright Orange",[255,126,20]],[37,"Bright Lime",[165,202,24]],[38,"Dark Orange",[169,85,0]],[39,"Very Light Gray",[214,214,214]],[40,"Trans-Clear",[252,252,252]],[41,"Trans-Red",[201,26,9]],[43,"Trans-Light Blue",[174,239,236]],[44,"Trans-Yellow",[245,205,48]],[45,"Trans-Dark Blue",[0,32,160]],[46,"Trans-Orange",[255,128,13]],[47,"Trans-Bright Green",[0,187,40]],[69,"Bright Purple",[129,0,123]],[70,"Dark Red",[114,14,15]],[71,"Light Bluish Gray",[175,181,199]],[72,"Dark Bluish Gray",[89,93,96]],[73,"Medium Blue",[115,150,200]],[74,"Medium Green",[127,196,117]],[77,"Light Pink",[254,204,207]],[85,"Dark Purple",[82,0,115]],[86,"Dark Flesh",[126,96,55]],[92,"Nougat",[213,144,52]],[100,"Light Salmon",[254,186,163]],[110,"Violet",[67,84,163]],[112,"Medium Violet",[110,104,187]],[115,"Medium Lime",[199,210,60]],[118,"Aqua",[177,227,227]],[124,"Dark Pink",[203,97,140]],[135,"Sand Blue",[112,130,160]],[138,"Sand Yellow",[186,169,119]],[140,"Earth Blue",[0,32,96]],[141,"Earth Green",[0,69,26]],[151,"Sand Green",[120,144,130]],[191,"Flame Yellowish Orange",[252,172,0]],[216,"Rust",[180,76,13]],[226,"Cool Yellow",[253,234,141]],[272,"Dark Blue",[0,32,96]],[288,"Dark Green",[39,70,45]],[297,"Pearl Gold",[170,127,46]],[308,"Dark Brown",[53,33,0]],[320,"Dark Red",[114,14,15]],[321,"Dark Azure",[70,155,195]],[322,"Medium Azure",[104,195,226]],[323,"Light Aqua",[211,242,234]],[324,"Lavender",[205,164,222]],[325,"Medium Lavender",[169,142,214]],[330,"Olive Green",[119,119,78]],[335,"Sand Red",[188,127,114]],[351,"Medium Dark Pink",[247,133,177]],[353,"Coral",[255,109,98]],[366,"Dust Orange",[224,143,78]],[373,"Sand Purple",[135,124,144]],[378,"Sand Green",[114,143,112]],[379,"Sand Blue",[112,130,157]],
@@ -153,11 +154,17 @@ async function readRoot(file) {
 
 async function maybeDecompress(buffer) {
   const bytes = new Uint8Array(buffer);
-  if (bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b && "DecompressionStream" in globalThis) {
-    const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
-    return await new Response(stream).arrayBuffer();
+  const isGzip = bytes.length > 2 && bytes[0] === 0x1f && bytes[1] === 0x8b;
+  if (!isGzip) return buffer;
+  if ("DecompressionStream" in globalThis) {
+    try {
+      const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream("gzip"));
+      return await new Response(stream).arrayBuffer();
+    } catch {
+      // Fall through to JS decompression for browsers with partial gzip stream support.
+    }
   }
-  return buffer;
+  return gunzipSync(bytes).buffer;
 }
 
 function unwrapTag(value) {
