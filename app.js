@@ -70,9 +70,11 @@ async function upload(file) {
   }
   loadingOvl.classList.add("active");
   uploadZone.classList.add("uploading");
+  if (typeof gtag === 'function') gtag('event', 'file_upload', { file_type: ext, file_name: file.name });
   try {
     const data = await convertAndOptimize(file);
     currentXml = data.bricklink_xml || null;
+    if (typeof gtag === 'function') gtag('event', 'convert_complete', { total_blocks: data.total_blocks, total_bricks: data.total_bricks, unique_parts: data.unique_parts });
     showResults(data);
     showToast("🧱", "Converted locally in your browser.");
   } catch (error) {
