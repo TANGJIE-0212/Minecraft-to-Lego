@@ -481,7 +481,7 @@ function createViewer(canvas, voxels, palette, style) {
   renderer.setSize(width, height, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = style === "lego" ? 0.88 : 1.04;
+  renderer.toneMappingExposure = style === "lego" ? 0.88 : 1.1;
   if (style === "lego") {
     scene.background = new THREE.Color(0xf0f2f6);
     const hemi = new THREE.HemisphereLight(0xffffff, 0xd9dfeb, 1.0);
@@ -499,13 +499,13 @@ function createViewer(canvas, voxels, palette, style) {
     bounce.position.set(0, -2, 1.4);
     scene.add(bounce);
   } else {
-    scene.background = new THREE.Color(0x4d74bd);
-    scene.fog = new THREE.Fog(0x4d74bd, 80, 210);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    scene.background = new THREE.Color(0x3f67b3);
+    scene.fog = new THREE.Fog(0x3f67b3, 140, 320);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.96));
     const sun = new THREE.DirectionalLight(0xfff3d8, 1.12);
     sun.position.set(2.5, 4.2, 2.1);
     scene.add(sun);
-    const sky = new THREE.DirectionalLight(0xb7d7ff, 0.58);
+    const sky = new THREE.DirectionalLight(0xcfe2ff, 0.72);
     sky.position.set(-2, 2.8, -2);
     scene.add(sky);
     const groundBounce = new THREE.DirectionalLight(0x86b66a, 0.18);
@@ -585,14 +585,14 @@ function createViewer(canvas, voxels, palette, style) {
     ground.position.y = groundY - 0.03;
     scene.add(ground);
   }
-  const targetY = groundY + spanY * (style === "lego" ? 0.49 : 0.46);
+  const targetY = groundY + spanY * (style === "lego" ? 0.49 : 0.48);
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
   const verticalFit = Math.max(spanY * (style === "lego" ? 0.74 : 0.68), 7) / Math.tan(vFov / 2);
   const horizontalFit = Math.max(footprint * 1.08, 7) / Math.tan(hFov / 2);
-  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 0.9 : 0.88);
+  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 0.9 : 0.76);
   let theta = Math.PI * (style === "lego" ? 0.8 : 0.74);
-  let phi = Math.PI * (style === "lego" ? 0.135 : 0.17);
+  let phi = Math.PI * (style === "lego" ? 0.135 : 0.16);
   let radius = fitRadius;
   function updateCam() {
     camera.position.set(
