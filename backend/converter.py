@@ -137,23 +137,23 @@ LEGO_COLOR_RGB  = {c[0]: c[2] for c in LEGO_COLORS}
 LEGO_COLOR_NAME = {c[0]: c[1] for c in LEGO_COLORS}
 
 # ── LEGO brick part catalog ──
-# type → (w, l) → (part_id, name, avg_price_usd)
+# type → (w, l) → (part_id, name)
 BRICK_CATALOG = {
     "brick": {
-        (1,1):("3005","Brick 1x1",0.06),(1,2):("3004","Brick 1x2",0.08),
-        (1,3):("3622","Brick 1x3",0.10),(1,4):("3010","Brick 1x4",0.10),
-        (2,2):("3003","Brick 2x2",0.10),(2,3):("3002","Brick 2x3",0.12),
-        (2,4):("3001","Brick 2x4",0.12),
+        (1,1):("3005","Brick 1x1"),(1,2):("3004","Brick 1x2"),
+        (1,3):("3622","Brick 1x3"),(1,4):("3010","Brick 1x4"),
+        (2,2):("3003","Brick 2x2"),(2,3):("3002","Brick 2x3"),
+        (2,4):("3001","Brick 2x4"),
     },
     "plate": {
-        (1,1):("3024","Plate 1x1",0.03),(1,2):("3023","Plate 1x2",0.04),
-        (1,3):("3623","Plate 1x3",0.05),(1,4):("3710","Plate 1x4",0.05),
-        (2,2):("3022","Plate 2x2",0.06),(2,3):("3021","Plate 2x3",0.07),
-        (2,4):("3020","Plate 2x4",0.08),
+        (1,1):("3024","Plate 1x1"),(1,2):("3023","Plate 1x2"),
+        (1,3):("3623","Plate 1x3"),(1,4):("3710","Plate 1x4"),
+        (2,2):("3022","Plate 2x2"),(2,3):("3021","Plate 2x3"),
+        (2,4):("3020","Plate 2x4"),
     },
     "slope": {
-        (1,1):("54200","Slope 1x1x2/3",0.06),(1,2):("3040","Slope 45 2x1",0.08),
-        (2,2):("3039","Slope 45 2x2",0.12),(2,4):("3037","Slope 45 2x4",0.15),
+        (1,1):("54200","Slope 1x1x2/3"),(1,2):("3040","Slope 45 2x1"),
+        (2,2):("3039","Slope 45 2x2"),(2,4):("3037","Slope 45 2x4"),
     },
 }
 
@@ -162,7 +162,7 @@ def _get_part_info(brick_type, w, l):
     key = (min(w, l), max(w, l))
     if key in cat:
         return cat[key]
-    return cat.get((1, 1), ("3005", "Brick 1x1", 0.06))
+    return cat.get((1, 1), ("3005", "Brick 1x1"))
 
 # ── Legacy MC block IDs (.schematic format) ──
 MC_LEGACY_IDS = {
@@ -584,12 +584,10 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
     # 4. Statistics
     parts_counter = Counter()
     color_counter = Counter()
-    total_cost = 0.0
     for (x, y, z, w, l, cid, bt) in all_bricks:
-        pid, pname, price = _get_part_info(bt, w, l)
+        pid, pname = _get_part_info(bt, w, l)
         parts_counter[(pid, cid, pname, bt)] += 1
         color_counter[cid] += 1
-        total_cost += price
 
     color_summary = [
         {"color_id": cid, "name": LEGO_COLOR_NAME.get(cid, f"#{cid}"),
@@ -633,7 +631,7 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
         "total_blocks": len(blocks),
         "total_bricks": len(all_bricks),
         "unique_parts": len(parts_counter),
-        "estimated_cost": round(total_cost, 2),
+
         "color_summary": color_summary,
         "brick_summary": brick_summary,
         "voxels": voxels,

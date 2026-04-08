@@ -13,7 +13,7 @@ const MC_BLOCK_MAP = {
 const LDRAW_TO_BL = {1:7,2:6,3:39,4:5,6:8,7:9,8:10,9:62,10:36,14:3,15:1,19:2,25:91,26:11,27:80,28:120,29:27,36:4,37:34,38:68,39:49,40:12,41:17,43:15,44:19,45:14,46:98,47:20,69:71,70:59,71:86,72:85,73:42,74:37,77:56,85:89,86:91,92:28,100:26,110:43,112:73,115:76,118:152,124:104,135:55,138:69,140:63,141:80,151:48,191:110,216:27,226:103,272:63,288:80,297:115,308:120,320:59,321:153,322:156,323:152,324:154,325:157,330:155,335:58,351:23,353:220,366:68,373:54,378:48,379:55};
 const LEGO_COLOR_RGB = Object.fromEntries(LEGO_COLORS.map(([id,,rgb]) => [id, rgb]));
 const LEGO_COLOR_NAME = Object.fromEntries(LEGO_COLORS.map(([id,name]) => [id, name]));
-const BRICK_CATALOG = {brick:{"1x1":["3005","Brick 1x1",0.06],"1x2":["3004","Brick 1x2",0.08],"1x3":["3622","Brick 1x3",0.10],"1x4":["3010","Brick 1x4",0.10],"2x2":["3003","Brick 2x2",0.10],"2x3":["3002","Brick 2x3",0.12],"2x4":["3001","Brick 2x4",0.12]},plate:{"1x1":["3024","Plate 1x1",0.03],"1x2":["3023","Plate 1x2",0.04],"1x3":["3623","Plate 1x3",0.05],"1x4":["3710","Plate 1x4",0.05],"2x2":["3022","Plate 2x2",0.06],"2x3":["3021","Plate 2x3",0.07],"2x4":["3020","Plate 2x4",0.08]},slope:{"1x1":["54200","Slope 1x1x2/3",0.06],"1x2":["3040","Slope 45 2x1",0.08],"2x2":["3039","Slope 45 2x2",0.12],"2x4":["3037","Slope 45 2x4",0.15]}};
+const BRICK_CATALOG = {brick:{"1x1":["3005","Brick 1x1"],"1x2":["3004","Brick 1x2"],"1x3":["3622","Brick 1x3"],"1x4":["3010","Brick 1x4"],"2x2":["3003","Brick 2x2"],"2x3":["3002","Brick 2x3"],"2x4":["3001","Brick 2x4"]},plate:{"1x1":["3024","Plate 1x1"],"1x2":["3023","Plate 1x2"],"1x3":["3623","Plate 1x3"],"1x4":["3710","Plate 1x4"],"2x2":["3022","Plate 2x2"],"2x3":["3021","Plate 2x3"],"2x4":["3020","Plate 2x4"]},slope:{"1x1":["54200","Slope 1x1x2/3"],"1x2":["3040","Slope 45 2x1"],"2x2":["3039","Slope 45 2x2"],"2x4":["3037","Slope 45 2x4"]}};
 const LEGO_PREVIEW_HEIGHT = { brick: 1.2, plate: 0.4, slope: 0.8 };
 const MC_LEGACY_IDS = {0:"air",1:"stone",2:"grass_block",3:"dirt",4:"cobblestone",5:"oak_planks",7:"bedrock",8:"water",9:"water",10:"lava",11:"lava",12:"sand",13:"gravel",14:"gold_ore",15:"iron_ore",16:"coal_ore",17:"oak_log",18:"oak_leaves",20:"glass",21:"lapis_ore",22:"lapis_block",24:"sandstone",35:"white_wool",41:"gold_block",42:"iron_block",43:"stone_slab",44:"stone_slab",45:"bricks",47:"bookshelf",48:"mossy_stone_bricks",49:"obsidian",53:"oak_stairs",56:"diamond_ore",57:"diamond_block",67:"cobblestone_stairs",79:"ice",80:"snow_block",82:"clay",87:"netherrack",89:"glowstone",98:"stone_bricks",108:"brick_stairs",109:"stone_brick_stairs",112:"nether_bricks",114:"nether_brick_stairs",121:"end_stone",125:"oak_planks",126:"oak_slab",128:"sandstone_stairs",129:"emerald_ore",133:"emerald_block",134:"spruce_stairs",135:"birch_stairs",136:"jungle_stairs",152:"redstone_block",155:"quartz_block",156:"quartz_stairs",159:"terracotta",170:"hay_block",172:"terracotta",174:"packed_ice",179:"red_sandstone",201:"purpur_block",203:"purpur_stairs",206:"end_stone_bricks",251:"white_concrete"};
 const COLOR_NAMES = ["white","orange","magenta","light_blue","yellow","lime","pink","gray","light_gray","cyan","purple","blue","brown","green","red","black"];
@@ -92,31 +92,40 @@ async function convertAndOptimize(file) {
     throw new Error("No blocks found. File may be empty or unsupported.");
   }
   const legoBlocks = new Map();
+  const layers = new Map();
   for (const [key, name] of blocks.entries()) {
     const mapped = mapBlockToLego(name);
-    if (mapped) legoBlocks.set(key, mapped);
+    if (!mapped) continue;
+    legoBlocks.set(key, mapped);
+    const [x, y, z] = parseKey3(key);
+    let layer = layers.get(y);
+    if (!layer) {
+      layer = new Map();
+      layers.set(y, layer);
+    }
+    layer.set(key2(x, z), mapped);
   }
   const allBricks = [];
-  for (let y = 0; y < height; y++) {
-    const layer = new Map();
-    for (const [key, value] of legoBlocks.entries()) {
-      const [x0, y0, z0] = parseKey3(key);
-      if (y0 === y) layer.set(key2(x0, z0), value);
-    }
-    if (!layer.size) continue;
+  const sortedLayers = [...layers.entries()].sort((a, b) => a[0] - b[0]);
+  for (const [y, layer] of sortedLayers) {
     for (const brick of optimizeLayer(layer, width, length)) {
       allBricks.push([brick[0], y, brick[1], brick[2], brick[3], brick[4], brick[5]]);
     }
   }
+  return buildOutputFromBricks(allBricks, { width, height, length }, blocks.size);
+}
+
+
+
+function buildOutputFromBricks(allBricks, dimensions, totalBlocks) {
+  const { width, height, length } = dimensions;
   const partsCounter = new Map();
   const colorCounter = new Map();
-  let totalCost = 0;
   for (const [x, y, z, w, l, cid, bt] of allBricks) {
-    const [partId, partName, price] = getPartInfo(bt, w, l);
+    const [partId, partName] = getPartInfo(bt, w, l);
     const pKey = `${partId}|${cid}|${partName}|${bt}`;
     partsCounter.set(pKey, (partsCounter.get(pKey) || 0) + 1);
     colorCounter.set(cid, (colorCounter.get(cid) || 0) + 1);
-    totalCost += price;
   }
   const colorSummary = [...colorCounter.entries()].sort((a, b) => b[1] - a[1]).map(([cid, count]) => ({ color_id: cid, name: LEGO_COLOR_NAME[cid] || `#${cid}`, rgb: LEGO_COLOR_RGB[cid] || [128,128,128], count }));
   const brickSummary = [...partsCounter.entries()].map(([key, count]) => {
@@ -137,21 +146,28 @@ async function convertAndOptimize(file) {
     const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
     voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
   }
-  if (voxels.length > 60000) {
-    const step = Math.floor(voxels.length / 60000) + 1;
-    voxels = voxels.filter((_, i) => i % step === 0);
-  }
+  voxels = downsamplePreviewVoxels(voxels);
   const ldrContent = generateLdr(allBricks);
   const bricklinkXml = generateBricklinkXml(partsCounter);
-  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: blocks.size, total_bricks: allBricks.length, unique_parts: partsCounter.size, estimated_cost: Math.round(totalCost * 100) / 100, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml };
+  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: totalBlocks, total_bricks: allBricks.length, unique_parts: partsCounter.size, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml };
 }
 
 async function readRoot(file) {
   let buffer = await file.arrayBuffer();
   buffer = await maybeDecompress(buffer);
-  const parsed = await readNbt(buffer);
+  const parsed = await readNbtSafely(buffer);
   const root = parsed && typeof parsed === "object" && "data" in parsed ? parsed.data : parsed;
   return unwrapTag(root);
+}
+
+async function readNbtSafely(buffer) {
+  try {
+    return await readNbt(buffer);
+  } catch (error) {
+    const repaired = trimTrailingNbtPadding(buffer, error);
+    if (!repaired) throw error;
+    return await readNbt(repaired);
+  }
 }
 
 async function maybeDecompress(buffer) {
@@ -186,11 +202,61 @@ function unwrapTag(value) {
   return value;
 }
 
+function trimTrailingNbtPadding(buffer, error) {
+  const bytes = new Uint8Array(buffer);
+  const message = String(error?.message || "");
+  const unreadMatch = message.match(/(\d+) unread bytes remaining/i);
+  if (unreadMatch) {
+    const unread = Number(unreadMatch[1]);
+    if (Number.isFinite(unread) && unread > 0 && unread < bytes.length) {
+      const tail = bytes.slice(bytes.length - unread);
+      if (tail.every((value) => value === 0)) return bytes.slice(0, bytes.length - unread).buffer;
+    }
+  }
+  let trimCount = 0;
+  for (let i = bytes.length - 1; i >= 0 && bytes[i] === 0 && trimCount < 64; i--) trimCount += 1;
+  if (trimCount > 0) return bytes.slice(0, bytes.length - trimCount).buffer;
+  return null;
+}
+
 function parseFile(filename, nbtData) {
   const ext = filename.toLowerCase().split(".").pop() || "";
-  if (ext === "litematic") return parseLitematic(nbtData);
-  if (ext === "schematic") return parseSchematic(nbtData);
-  try { return parseSchem(nbtData); } catch { try { return parseSchematic(nbtData); } catch { return parseLitematic(nbtData); } }
+  if (ext === "litematic") return normalizeParsedStructure(parseLitematic(nbtData));
+  if (ext === "schematic") return normalizeParsedStructure(parseSchematic(nbtData));
+  try { return normalizeParsedStructure(parseSchem(nbtData)); } catch { try { return normalizeParsedStructure(parseSchematic(nbtData)); } catch { return normalizeParsedStructure(parseLitematic(nbtData)); } }
+}
+
+function normalizeParsedStructure(parsed) {
+  if (!parsed?.blocks?.size) return parsed;
+  let minX = Infinity;
+  let minY = Infinity;
+  let minZ = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let maxZ = -Infinity;
+  for (const key of parsed.blocks.keys()) {
+    const [x, y, z] = parseKey3(key);
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (z < minZ) minZ = z;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+    if (z > maxZ) maxZ = z;
+  }
+  if (minX === 0 && minY === 0 && minZ === 0 && maxX + 1 === parsed.width && maxY + 1 === parsed.height && maxZ + 1 === parsed.length) {
+    return parsed;
+  }
+  const blocks = new Map();
+  for (const [key, name] of parsed.blocks.entries()) {
+    const [x, y, z] = parseKey3(key);
+    blocks.set(key3(x - minX, y - minY, z - minZ), name);
+  }
+  return {
+    width: maxX - minX + 1,
+    height: maxY - minY + 1,
+    length: maxZ - minZ + 1,
+    blocks,
+  };
 }
 
 function parseSchem(nbtData) {
@@ -402,7 +468,7 @@ function generateBricklinkXml(partsCounter) {
 function getPartInfo(brickType, w, l) {
   const catalog = BRICK_CATALOG[brickType] || BRICK_CATALOG.brick;
   const key = `${Math.min(w, l)}x${Math.max(w, l)}`;
-  return catalog[key] || catalog["1x1"] || ["3005", "Brick 1x1", 0.06];
+  return catalog[key] || catalog["1x1"] || ["3005", "Brick 1x1"];
 }
 
 function createSessionId() { if (crypto?.randomUUID) return crypto.randomUUID().replace(/-/g, "").slice(0, 8); return Math.random().toString(16).slice(2, 10); }
@@ -411,9 +477,9 @@ function showResults(data) {
   const dim = `${data.dimensions.width}×${data.dimensions.height}×${data.dimensions.length}`;
   statsEl.innerHTML = `
     <div class="rstat"><span class="rstat-val">${data.total_bricks.toLocaleString()}</span><span class="rstat-label">Total Bricks</span></div>
-    <div class="rstat"><span class="rstat-val cost">$${data.estimated_cost.toFixed(2)}</span><span class="rstat-label">Est. Cost</span></div>
     <div class="rstat"><span class="rstat-val parts">${data.unique_parts}</span><span class="rstat-label">Unique Parts</span></div>
-    <div class="rstat"><span class="rstat-val dim">${dim}</span><span class="rstat-label">Dimensions</span></div>`;
+    <div class="rstat"><span class="rstat-val dim">${dim}</span><span class="rstat-label">Dimensions</span></div>
+    <div class="rstat"><span class="rstat-val">${data.color_summary.length}</span><span class="rstat-label">Colors</span></div>`;
   const total = data.color_summary.reduce((sum, item) => sum + item.count, 0) || 1;
   colorBarEl.innerHTML = data.color_summary.map((item) => {
     const pct = ((item.count / total) * 100).toFixed(1);
@@ -462,6 +528,15 @@ function disposeViewer() {
     if (viewer.onPointerUp) window.removeEventListener("pointerup", viewer.onPointerUp);
     if (viewer.onPointerMove) window.removeEventListener("pointermove", viewer.onPointerMove);
     if (viewer.renderer) viewer.renderer.dispose();
+    if (viewer.scene) {
+      viewer.scene.traverse((obj) => {
+        if (obj.geometry) obj.geometry.dispose?.();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach((mat) => mat?.dispose?.());
+          else obj.material.dispose?.();
+        }
+      });
+    }
   }
   _viewers = [];
 }
@@ -475,11 +550,12 @@ function initViewers(voxels, palette) {
 function createViewer(canvas, voxels, palette, style) {
   const width = canvas.clientWidth || 600;
   const height = canvas.clientHeight || 600;
+  const previewSettings = getPreviewSettings(voxels, style);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(style === "lego" ? 36 : 42, width / height, 0.1, 10000);
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: previewSettings.antialias, alpha: false });
   renderer.setSize(width, height, false);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, previewSettings.pixelRatio));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = style === "lego" ? 0.88 : 1.1;
   if (style === "lego") {
@@ -499,8 +575,8 @@ function createViewer(canvas, voxels, palette, style) {
     bounce.position.set(0, -2, 1.4);
     scene.add(bounce);
   } else {
-    scene.background = new THREE.Color(0x3f67b3);
-    scene.fog = new THREE.Fog(0x3f67b3, 140, 320);
+    scene.background = new THREE.Color(0x355ca8);
+    if (previewSettings.useFog) scene.fog = new THREE.Fog(0x355ca8, 170, 420);
     scene.add(new THREE.AmbientLight(0xffffff, 0.96));
     const sun = new THREE.DirectionalLight(0xfff3d8, 1.12);
     sun.position.set(2.5, 4.2, 2.1);
@@ -524,10 +600,14 @@ function createViewer(canvas, voxels, palette, style) {
   const groups = {};
   for (const v of voxels) { const pi = v[6]; if (!groups[pi]) groups[pi] = []; groups[pi].push(v); }
   const dummy = new THREE.Object3D();
-  const studGeo = style === "lego" ? new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12) : null;
-  const studRingGeo = style === "lego" ? new THREE.CylinderGeometry(0.25, 0.25, 0.02, 12) : null;
-  const edgeGeo = style === "mc" ? new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)) : null;
-  const edgeMat = style === "mc" ? new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.28, transparent: true }) : null;
+  const studGeo = style === "lego" && previewSettings.showStuds ? new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12) : null;
+  const studRingGeo = style === "lego" && previewSettings.showStuds ? new THREE.CylinderGeometry(0.25, 0.25, 0.02, 12) : null;
+  const edgeGeo = style === "mc" && previewSettings.showOutlines ? new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)) : null;
+  const edgeMat = style === "mc" && previewSettings.showOutlines ? new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.28, transparent: true }) : null;
+  const boxGeo = new THREE.BoxGeometry(1, 1, 1);
+  const shellMat = style === "mc" && previewSettings.outlineMode === "shell"
+    ? new THREE.MeshBasicMaterial({ color: 0x13213f, transparent: true, opacity: 0.92 })
+    : null;
   for (const [pi, list] of Object.entries(groups)) {
     const rgb = palette[Number(pi)] || [128,128,128];
     const material = style === "lego"
@@ -540,8 +620,10 @@ function createViewer(canvas, voxels, palette, style) {
           color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255),
           flatShading: true
         });
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const mesh = new THREE.InstancedMesh(geometry, material, list.length);
+    const mesh = new THREE.InstancedMesh(boxGeo, material, list.length);
+    const shellMesh = style === "mc" && previewSettings.outlineMode === "shell"
+      ? new THREE.InstancedMesh(boxGeo, shellMat, list.length)
+      : null;
     const gap = style === "lego" ? 0.94 : 0.985;
     const studPositions = [];
     list.forEach((v, i) => {
@@ -550,7 +632,12 @@ function createViewer(canvas, voxels, palette, style) {
       dummy.scale.set(w * gap, h * gap, l * gap);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      if (style === "lego") {
+      if (shellMesh) {
+        dummy.scale.set(w * 1.06, h * 1.06, l * 1.06);
+        dummy.updateMatrix();
+        shellMesh.setMatrixAt(i, dummy.matrix);
+      }
+      if (style === "lego" && previewSettings.showStuds) {
         for (let sx = 0; sx < Math.max(1, Math.round(w)); sx++) {
           for (let sz = 0; sz < Math.max(1, Math.round(l)); sz++) {
             studPositions.push([
@@ -562,8 +649,9 @@ function createViewer(canvas, voxels, palette, style) {
         }
       }
     });
+    if (shellMesh) scene.add(shellMesh);
     scene.add(mesh);
-    if (style === "mc") {
+    if (style === "mc" && previewSettings.showOutlines) {
       list.forEach((v) => {
         const [x, y, z, w, h, l] = v;
         const outline = new THREE.LineSegments(edgeGeo, edgeMat);
@@ -613,13 +701,15 @@ function createViewer(canvas, voxels, palette, style) {
     const baseplate = new THREE.Mesh(baseplateGeo, baseplateMat);
     baseplate.position.set(0, groundY - 0.18, 0);
     scene.add(baseplate);
-    const baseplateStudGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 10);
-    const baseplateStudMat = new THREE.MeshStandardMaterial({ color: 0x718b59, roughness: 0.58, metalness: 0.0 });
-    for (let bx = Math.ceil(minX); bx < Math.ceil(maxX); bx++) {
-      for (let bz = Math.ceil(minZ); bz < Math.ceil(maxZ); bz++) {
-        const stud = new THREE.Mesh(baseplateStudGeo, baseplateStudMat);
-        stud.position.set(bx + 0.5 - cx, groundY - 0.01, bz + 0.5 - cz);
-        scene.add(stud);
+    if (previewSettings.showBaseplateStuds) {
+      const baseplateStudGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 10);
+      const baseplateStudMat = new THREE.MeshStandardMaterial({ color: 0x718b59, roughness: 0.58, metalness: 0.0 });
+      for (let bx = Math.ceil(minX); bx < Math.ceil(maxX); bx++) {
+        for (let bz = Math.ceil(minZ); bz < Math.ceil(maxZ); bz++) {
+          const stud = new THREE.Mesh(baseplateStudGeo, baseplateStudMat);
+          stud.position.set(bx + 0.5 - cx, groundY - 0.01, bz + 0.5 - cz);
+          scene.add(stud);
+        }
       }
     }
     const floor = new THREE.Mesh(
@@ -673,12 +763,14 @@ function createViewer(canvas, voxels, palette, style) {
     phi = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, phi));
     prevX = e.clientX; prevY = e.clientY;
     updateCam();
+    requestRender();
   };
   const onWheel = (e) => {
     e.preventDefault();
     radius *= e.deltaY > 0 ? 1.08 : 0.93;
     radius = Math.max(fitRadius * 0.55, Math.min(fitRadius * 2.8, radius));
     updateCam();
+    requestRender();
   };
   canvas.addEventListener("pointerdown", onPointerDown);
   window.addEventListener("pointerup", onPointerUp);
@@ -689,15 +781,66 @@ function createViewer(canvas, voxels, palette, style) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    requestRender();
   });
   resizeObserver.observe(canvas);
-  const viewer = { canvas, renderer, resizeObserver, onPointerDown, onPointerUp, onPointerMove, onWheel, raf: 0 };
-  function animate() {
-    viewer.raf = requestAnimationFrame(animate);
-    renderer.render(scene, camera);
+  const viewer = { canvas, renderer, resizeObserver, onPointerDown, onPointerUp, onPointerMove, onWheel, raf: 0, scene };
+  function requestRender() {
+    if (viewer.raf) return;
+    viewer.raf = requestAnimationFrame(() => {
+      viewer.raf = 0;
+      renderer.render(scene, camera);
+    });
   }
-  animate();
+  function animate() {
+    if (!previewSettings.autoRotate) return;
+    theta += previewSettings.autoRotateSpeed;
+    updateCam();
+    renderer.render(scene, camera);
+    viewer.raf = requestAnimationFrame(animate);
+  }
+  if (previewSettings.autoRotate) animate();
+  else requestRender();
   return viewer;
+}
+
+function downsamplePreviewVoxels(voxels) {
+  const budget = getPreviewVoxelBudget(voxels.length);
+  if (voxels.length <= budget) return voxels;
+  const step = Math.ceil(voxels.length / budget);
+  return voxels.filter((_, index) => index % step === 0);
+}
+
+function getPreviewVoxelBudget(count) {
+  if (count > 80000) return 7000;
+  if (count > 40000) return 10000;
+  if (count > 20000) return 14000;
+  if (count > 10000) return 18000;
+  return 60000;
+}
+
+function getPreviewSettings(voxels, style) {
+  let studCount = 0;
+  let footprintArea = 0;
+  for (const [,, , w, , l] of voxels) {
+    studCount += Math.max(1, Math.round(w)) * Math.max(1, Math.round(l));
+    footprintArea += Math.max(1, Math.round(w)) * Math.max(1, Math.round(l));
+  }
+  const heavy = voxels.length > 16000 || studCount > 24000;
+  const outlineMode = style === "mc"
+    ? (voxels.length <= 7000 ? "edge" : "shell")
+    : "none";
+  return {
+    antialias: !heavy,
+    pixelRatio: heavy ? 1.15 : 2,
+    showStuds: style === "lego" && studCount <= 18000,
+    showBaseplateStuds: style === "lego" && footprintArea <= 900,
+    showOutlines: outlineMode === "edge",
+    outlineMode,
+    useFog: style === "mc" && !heavy && voxels.length <= 9000,
+    autoRotate: false,
+    autoRotateSpeed: 0,
+  };
 }
 
 function readVarInt(data, offset) {
