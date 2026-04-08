@@ -526,6 +526,8 @@ function createViewer(canvas, voxels, palette, style) {
   const dummy = new THREE.Object3D();
   const studGeo = style === "lego" ? new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12) : null;
   const studRingGeo = style === "lego" ? new THREE.CylinderGeometry(0.25, 0.25, 0.02, 12) : null;
+  const edgeGeo = style === "mc" ? new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)) : null;
+  const edgeMat = style === "mc" ? new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.28, transparent: true }) : null;
   for (const [pi, list] of Object.entries(groups)) {
     const rgb = palette[Number(pi)] || [128,128,128];
     const material = style === "lego"
@@ -561,6 +563,15 @@ function createViewer(canvas, voxels, palette, style) {
       }
     });
     scene.add(mesh);
+    if (style === "mc") {
+      list.forEach((v) => {
+        const [x, y, z, w, h, l] = v;
+        const outline = new THREE.LineSegments(edgeGeo, edgeMat);
+        outline.position.set(x + w / 2 - cx, y + h / 2 - cy, z + l / 2 - cz);
+        outline.scale.set(w * gap, h * gap, l * gap);
+        scene.add(outline);
+      });
+    }
     if (style === "lego" && studPositions.length) {
       const color = new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
       const studColor = color.clone().lerp(new THREE.Color(1, 1, 1), 0.08);
@@ -595,6 +606,22 @@ function createViewer(canvas, voxels, palette, style) {
   grid.material.transparent = true;
   scene.add(grid);
   if (style === "lego") {
+    const baseplateWidth = Math.max(Math.ceil(spanX) + 2, 10);
+    const baseplateDepth = Math.max(Math.ceil(spanZ) + 2, 10);
+    const baseplateGeo = new THREE.BoxGeometry(baseplateWidth, 0.18, baseplateDepth);
+    const baseplateMat = new THREE.MeshStandardMaterial({ color: 0x7f9a66, roughness: 0.72, metalness: 0.0 });
+    const baseplate = new THREE.Mesh(baseplateGeo, baseplateMat);
+    baseplate.position.set(0, groundY - 0.18, 0);
+    scene.add(baseplate);
+    const baseplateStudGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 10);
+    const baseplateStudMat = new THREE.MeshStandardMaterial({ color: 0x718b59, roughness: 0.58, metalness: 0.0 });
+    for (let bx = Math.ceil(minX); bx < Math.ceil(maxX); bx++) {
+      for (let bz = Math.ceil(minZ); bz < Math.ceil(maxZ); bz++) {
+        const stud = new THREE.Mesh(baseplateStudGeo, baseplateStudMat);
+        stud.position.set(bx + 0.5 - cx, groundY - 0.01, bz + 0.5 - cz);
+        scene.add(stud);
+      }
+    }
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(gridSize * 1.08, gridSize * 1.08),
       new THREE.MeshBasicMaterial({ color: 0xf7f8fb, opacity: 0.98, transparent: true })
