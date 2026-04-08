@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to Export a Schematic from Minecraft | DayToy</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface2: #20203a;
+      --border: rgba(100,100,200,0.15);
+      --border-bright: rgba(120,120,255,0.35);
+      --grass: #4ade80;
+      --accent: #a78bfa;
+      --accent2: #67e8f9;
+      --lego-yellow: #fbbf24;
+      --text: #f0f0ff;
+      --text-muted: rgba(240,240,255,0.45);
+      --text-dim: rgba(240,240,255,0.25);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      padding: 24px 48px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .back-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover { color: var(--grass); }
+
+    .logo-text {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .tutorial-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 60px 48px 100px;
+    }
+
+    .tutorial-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(16px, 3vw, 24px);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .tutorial-title .accent { color: var(--grass); }
+
+    .tutorial-subtitle {
+      font-size: 17px;
+      color: var(--text-muted);
+      margin-bottom: 56px;
+      font-weight: 300;
+      max-width: 600px;
+    }
+
+    .method-section {
+      margin-bottom: 64px;
+    }
+
+    .method-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .method-badge {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      color: #000;
+      flex-shrink: 0;
+    }
+
+    .method-badge.we { background: var(--grass); }
+    .method-badge.litematica { background: var(--accent); }
+    .method-badge.amulet { background: var(--lego-yellow); }
+
+    .method-name {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+    }
+
+    .method-desc {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 32px;
+      font-weight: 300;
+    }
+
+    .guide-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .guide-step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.3s;
+    }
+
+    .guide-step:hover { border-color: var(--border-bright); }
+
+    .guide-step-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: var(--grass);
+    }
+
+    .guide-step-content { flex: 1; min-width: 0; }
+
+    .guide-step-content h4 {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      margin-bottom: 8px;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    .guide-step-content p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 300;
+      line-height: 1.7;
+    }
+
+    .cmd-block {
+      display: inline-block;
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      background: rgba(74,222,128,0.08);
+      border: 1px solid rgba(74,222,128,0.2);
+      color: var(--grass);
+      padding: 3px 10px;
+      border-radius: 4px;
+      margin: 4px 2px;
+      word-break: break-all;
+    }
+
+    .guide-visual {
+      margin-top: 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .visual-icon {
+      font-size: 32px;
+      flex-shrink: 0;
+    }
+
+    .visual-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    .visual-text strong { color: var(--text-muted); }
+
+    .tip-box {
+      background: rgba(167,139,250,0.06);
+      border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-top: 28px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .tip-box .tip-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .tip-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+
+    .tip-box strong { color: var(--accent); font-weight: 500; }
+
+    .format-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 48px;
+      margin-bottom: 32px;
+    }
+
+    .format-table th {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .format-table td {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .format-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .format-tag {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: rgba(74,222,128,0.1);
+      color: var(--grass);
+      border: 1px solid rgba(74,222,128,0.2);
+    }
+
+    .cta-bottom {
+      text-align: center;
+      margin-top: 64px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .cta-bottom h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 13px;
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+
+    .cta-bottom p {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-weight: 300;
+    }
+
+    .btn-primary {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      padding: 18px 32px;
+      background: var(--grass);
+      color: #000;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(74,222,128,0.3); }
+
+    @media (max-width: 768px) {
+      .page-header { padding: 16px 24px; }
+      .tutorial-container { padding: 40px 24px 80px; }
+      .guide-step { flex-direction: column; gap: 12px; }
+      .guide-visual { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <a href="index.html" class="back-link">← Back to Converter</a>
+    <span class="logo-text">Minecraft-to-Lego</span>
+  </div>
+
+  <div class="tutorial-container">
+    <h1 class="tutorial-title">How to <span class="accent">export</span> a schematic<br/>from your Minecraft world</h1>
+    <p class="tutorial-subtitle">Three popular methods to turn your in-game builds into uploadable files.</p>
+
+    <!-- ═══ METHOD 1: WorldEdit ═══ -->
+    <div class="method-section">
+      <div class="method-header">
+        <span class="method-badge we">WORLDEDIT</span>
+        <h2 class="method-name">Using WorldEdit (Java Edition)</h2>
+      </div>
+      <p class="method-desc">WorldEdit is the most popular way to export builds. It works on both servers and single-player with Forge/Fabric.</p>
+
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <h4>Install WorldEdit</h4>
+            <p>Download WorldEdit from <strong>CurseForge</strong> and place the .jar file in your <span class="cmd-block">mods/</span> folder (Fabric/Forge) or <span class="cmd-block">plugins/</span> folder (server).</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <h4>Select your build</h4>
+            <p>Stand at one corner of your build. Use a <strong>wooden axe</strong> (WorldEdit wand) and left-click the first corner block, then right-click the opposite corner block.</p>
+            <div class="guide-visual">
+              <span class="visual-icon">🪓</span>
+              <div class="visual-text">
+                <strong>Left-click</strong> → Set Position 1 (bottom corner)<br/>
+                <strong>Right-click</strong> → Set Position 2 (top corner)<br/>
+                Or type: <span class="cmd-block">//pos1</span> and <span class="cmd-block">//pos2</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <h4>Copy the selection</h4>
+            <p>Type the following command in chat:</p>
+            <div class="guide-visual">
+              <span class="visual-icon">📋</span>
+              <div class="visual-text">
+                <span class="cmd-block">//copy</span><br/>
+                This copies the selected region to your clipboard.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <h4>Save as schematic</h4>
+            <p>Type the following to save the clipboard to a file:</p>
+            <div class="guide-visual">
+              <span class="visual-icon">💾</span>
+              <div class="visual-text">
+                <span class="cmd-block">//schematic save myBuild</span><br/>
+                Saves to: <span class="cmd-block">.minecraft/config/worldedit/schematics/myBuild.schem</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">5</div>
+          <div class="guide-step-content">
+            <h4>Upload to DayToy</h4>
+            <p>Find the <span class="cmd-block">.schem</span> file in the schematics folder and drag it into our converter.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ METHOD 2: Litematica ═══ -->
+    <div class="method-section">
+      <div class="method-header">
+        <span class="method-badge litematica">LITEMATICA</span>
+        <h2 class="method-name">Using Litematica (Fabric)</h2>
+      </div>
+      <p class="method-desc">Litematica is a client-side Fabric mod with a visual GUI — great for precise selections without server-side mods.</p>
+
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <h4>Install Litematica</h4>
+            <p>Install <strong>Fabric Loader</strong> + <strong>Litematica</strong> + <strong>MaLiLib</strong> (required dependency) from CurseForge.</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <h4>Enter Area Selection mode</h4>
+            <p>Press <span class="cmd-block">M</span> to open the Litematica menu, then switch the tool mode to <strong>Area Selection</strong>.</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <h4>Select two corners</h4>
+            <p>Use the selection tool: press <span class="cmd-block">Left-click</span> on corner 1 and <span class="cmd-block">Right-click</span> on corner 2. The selection box will highlight in blue.</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">4</div>
+          <div class="guide-step-content">
+            <h4>Save as .litematic</h4>
+            <p>Press <span class="cmd-block">M</span> → <strong>Save Schematic</strong>, name your file, and click Save.</p>
+            <div class="guide-visual">
+              <span class="visual-icon">📦</span>
+              <div class="visual-text">
+                Saves to: <span class="cmd-block">.minecraft/schematics/yourBuild.litematic</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ METHOD 3: Amulet ═══ -->
+    <div class="method-section">
+      <div class="method-header">
+        <span class="method-badge amulet">AMULET</span>
+        <h2 class="method-name">Using Amulet Editor (External Tool)</h2>
+      </div>
+      <p class="method-desc">Amulet is a standalone world editor that works with both Java and Bedrock worlds — no mods needed.</p>
+
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-step-num">1</div>
+          <div class="guide-step-content">
+            <h4>Download & Install Amulet</h4>
+            <p>Download Amulet from <strong>amuletmc.com</strong>. It runs on Windows, Mac, and Linux.</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">2</div>
+          <div class="guide-step-content">
+            <h4>Open your world</h4>
+            <p>Launch Amulet → <strong>Open World</strong> → navigate to your <span class="cmd-block">.minecraft/saves/</span> folder and select your world.</p>
+          </div>
+        </div>
+
+        <div class="guide-step">
+          <div class="guide-step-num">3</div>
+          <div class="guide-step-content">
+            <h4>Select & Export</h4>
+            <p>Use the 3D selection tool to box your build, then go to <strong>File → Export → Construction/Schematic</strong> and save the file.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box">
+        <span class="tip-icon">💡</span>
+        <p><strong>Tip:</strong> Amulet is ideal for Bedrock Edition players, since WorldEdit and Litematica only support Java Edition.</p>
+      </div>
+    </div>
+
+    <!-- ═══ File Format Summary ═══ -->
+    <h3 style="font-family:'Press Start 2P',monospace;font-size:12px;margin-bottom:8px;">Supported Formats</h3>
+    <table class="format-table">
+      <thead>
+        <tr>
+          <th>Format</th>
+          <th>Extension</th>
+          <th>Created By</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Sponge Schematic</td>
+          <td><span class="format-tag">.schem</span></td>
+          <td>WorldEdit (modern)</td>
+          <td>Recommended — includes block states</td>
+        </tr>
+        <tr>
+          <td>Legacy Schematic</td>
+          <td><span class="format-tag">.schematic</span></td>
+          <td>WorldEdit (old) / MCEdit</td>
+          <td>Older format, widely available</td>
+        </tr>
+        <tr>
+          <td>Litematica</td>
+          <td><span class="format-tag">.litematic</span></td>
+          <td>Litematica mod</td>
+          <td>Client-side, detailed metadata</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="cta-bottom">
+      <h3>Ready to convert?</h3>
+      <p>Go back and drop your schematic file to start building with real LEGO bricks.</p>
+      <a href="index.html#demo" class="btn-primary">← Back to Converter</a>
+    </div>
+  </div>
+</body>
+</html>

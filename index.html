@@ -439,12 +439,13 @@
 
     .upload-zone {
       border: 2px dashed var(--border-bright);
-      padding: 40px 20px;
+      padding: 24px 16px;
       text-align: center;
       cursor: crosshair;
       transition: all 0.2s;
       position: relative;
       overflow: hidden;
+      border-radius: 8px;
     }
 
     .upload-zone:hover { border-color: var(--grass); background: rgba(74,222,128,0.03); }
@@ -477,7 +478,7 @@
       font-size: 11px;
     }
 
-    .upload-icon { font-size: 32px; margin-bottom: 12px; display: block; filter: grayscale(0.3); }
+    .upload-icon { font-size: 24px; margin-bottom: 8px; display: block; filter: grayscale(0.3); }
 
     .upload-text {
       font-family: 'DM Mono', monospace;
@@ -502,7 +503,7 @@
     }
 
     .steps-section {
-      padding: 80px 48px;
+      padding: 80px 48px 60px;
       position: relative; z-index: 1;
       max-width: 1100px;
       margin: 0 auto;
@@ -511,7 +512,7 @@
     .section-heading {
       font-family: 'Press Start 2P', monospace;
       font-size: clamp(14px, 2.5vw, 22px);
-      margin-bottom: 60px;
+      margin-bottom: 40px;
       line-height: 1.6;
     }
 
@@ -521,71 +522,288 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
+      margin-bottom: 36px;
     }
 
     .step-card {
       background: linear-gradient(160deg, var(--surface) 0%, var(--surface2) 100%);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 36px 32px;
+      border-radius: 14px;
+      padding: 24px 22px 20px;
       position: relative;
       overflow: hidden;
       transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      display: flex;
+      flex-direction: column;
     }
 
-    .step-card:hover { border-color: var(--border-bright); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
+    .step-card:hover { border-color: var(--border-bright); transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+
+    .step-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .step-num-badge {
+      flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .step-num-badge.s1 { background: var(--grass); }
+    .step-num-badge.s2 { background: var(--accent); }
+    .step-num-badge.s3 { background: var(--lego-yellow); }
+
+    .step-card-header h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .step-visual {
+      flex: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+
+    .mc-preview {
+      aspect-ratio: 1/1;
+      background: linear-gradient(180deg, #1a1a4e 0%, #1a3a6e 100%);
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+
+    .mc-building {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      width: 75%; height: 75%;
+      gap: 1px;
+    }
+
+    .mc-block { display: block; border: 1px solid rgba(0,0,0,0.3); }
+
+    .mc-stars { position: absolute; top: 0; left: 0; right: 0; height: 55%; overflow: hidden; }
+
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      background: white;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.2; }
+    }
+
+    .lego-preview {
+      aspect-ratio: 1/1;
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      grid-template-rows: repeat(8, 1fr);
+      gap: 2px;
+      padding: 16px;
+      background: linear-gradient(135deg, #e8e8e8, #f5f5f5);
+    }
+
+    .lego-brick {
+      position: relative;
+      border-radius: 2px;
+      display: flex; align-items: flex-start; justify-content: center;
+      padding-top: 4px;
+    }
+
+    .lego-brick::before {
+      content: '';
+      width: 60%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: inherit;
+      filter: brightness(1.15);
+      border: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      flex-shrink: 0;
+    }
+
+    .step-card-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    .step-card-desc code {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--grass);
+      background: rgba(74,222,128,0.08);
+      padding: 1px 5px;
+    }
+
+    /* Step 3 details */
+    .step-details-visual {
+      aspect-ratio: 1/1;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .step-details-visual .showcase-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .step-details-visual .showcase-stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 6px;
+      text-align: center;
+    }
+
+    .step-details-visual .showcase-stat-val {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: var(--grass);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .step-details-visual .showcase-stat-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .step-details-visual .showcase-colors {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .step-details-visual .showcase-color-chip {
+      width: 18px; height: 18px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .step-details-visual .showcase-parts-preview {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .step-details-visual .showcase-parts-preview table {
+      width: 100%;
+      font-size: 9px;
+      border-collapse: collapse;
+    }
+
+    .step-details-visual .showcase-parts-preview th {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--text-dim);
+      text-align: left;
+      padding: 3px 4px;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .step-details-visual .showcase-parts-preview td {
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      color: var(--text-muted);
+      padding: 3px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Full-width upload zone */
+    .upload-full {
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+
+    .upload-full .upload-zone {
+      padding: 48px 20px;
+    }
+
+    .upload-full { text-align: center; }
+
+    .how-to-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      color: var(--grass);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      margin-top: 14px;
+      padding: 6px 0;
+      transition: color 0.2s;
+    }
+
+    .how-to-link:hover { color: #86efac; }
+    .how-to-link::after {
+      content: '→';
+      font-size: 13px;
+      transition: transform 0.2s;
+    }
+    .how-to-link:hover::after { transform: translateX(3px); }
 
     .step-card::after {
       content: '';
       position: absolute; bottom: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: 0 0 16px 16px;
-      background: linear-gradient(90deg, var(--grass), var(--diamond));
-      opacity: 0.6;
+      height: 2px;
+      border-radius: 0 0 14px 14px;
+      opacity: 0.5;
       transition: opacity 0.2s;
     }
 
+    .step-card:nth-child(1)::after { background: var(--grass); }
+    .step-card:nth-child(2)::after { background: var(--accent); }
+    .step-card:nth-child(3)::after { background: var(--lego-yellow); }
+
     .step-card:hover::after { opacity: 1; }
-
-    .step-number {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 9px;
-      color: var(--text-dim);
-      letter-spacing: 0.1em;
-      margin-bottom: 20px;
-      display: flex; align-items: center; gap: 10px;
-    }
-
-    .step-number::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-    .step-icon { font-size: 36px; margin-bottom: 20px; display: block; image-rendering: pixelated; }
-
-    .step-title {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 11px;
-      line-height: 1.7;
-      margin-bottom: 16px;
-      color: var(--text);
-    }
-
-    .step-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; font-weight: 300; }
-
-    .step-desc code {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px;
-      color: var(--grass);
-      background: rgba(74,222,128,0.08);
-      padding: 1px 6px;
-    }
-
 
 
     .stats-bar {
-      padding: 60px 48px;
+      padding: 80px 48px;
       background: var(--bg2);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border-top: none;
+      border-bottom: none;
       position: relative; z-index: 1;
+    }
+
+    .stats-bar::before {
+      content: '';
+      position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    }
+
+    .stats-bar::after {
+      content: '';
+      position: absolute; bottom: 0; left: 10%; right: 10%; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
     }
 
     .stats-inner {
@@ -959,6 +1177,10 @@
       .showcase-section { padding: 60px 24px; }
       .showcase-stats { grid-template-columns: repeat(2, 1fr); }
       .showcase-info { padding: 24px; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .upload-wide { flex-direction: column; padding: 28px 24px; gap: 24px; }
+      .upload-wide-right { width: 100%; }
+      .steps-section { padding: 60px 24px 40px; }
     }
 
     .cta-section h2 {
@@ -1251,7 +1473,6 @@
     <ul class="nav-links">
       <li><a href="#demo">Try It</a></li>
       <li><a href="#how">How it works</a></li>
-      <li><a href="#showcase">Examples</a></li>
     </ul>
     <a href="#demo" class="nav-cta">Try Free</a>
   </nav>
@@ -1277,127 +1498,104 @@
     </div>
   </section>
 
-  <section class="demo-section" id="demo">
-    <p class="section-label">Live Converter Preview</p>
-    <div class="converter-ui reveal">
-
-      <div class="converter-panel">
-        <div class="panel-header">
-          <span class="panel-dot" style="background:#ef4444"></span>
-          <span class="panel-dot" style="background:#fbbf24"></span>
-          <span class="panel-dot" style="background:#4ade80"></span>
-          <span class="panel-title">starter_house.schem</span>
-        </div>
-        <div class="panel-body">
-          <div class="mc-preview" id="mcPreview">
-            <div class="mc-stars" id="mcStars"></div>
-            <div class="mc-building" id="mcBuilding"></div>
-          </div>
-          <div style="margin-top:16px;">
-            <div class="upload-zone" id="uploadZone">
-              <input type="file" id="fileInput" accept=".schem,.schematic,.litematic">
-              <span class="upload-icon">📦</span>
-              <div class="upload-text">
-                <strong>Drop your schematic here</strong>
-                or click to browse
-              </div>
-              <div class="file-types">
-                <span class="file-tag">.schematic</span>
-                <span class="file-tag">.schem</span>
-                <span class="file-tag">.litematic</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="convert-arrow">
-        <div class="arrow-track"></div>
-        <div class="converting-dots"><span></span><span></span><span></span></div>
-        <div class="arrow-label">AI<br/>Magic</div>
-      </div>
-
-      <div class="converter-panel">
-        <div class="panel-header">
-          <span class="panel-dot" style="background:#ef4444"></span>
-          <span class="panel-dot" style="background:#fbbf24"></span>
-          <span class="panel-dot" style="background:#4ade80"></span>
-          <span class="panel-title">lego_output.ldr — 64 bricks</span>
-        </div>
-        <div class="panel-body">
-          <div class="lego-preview" id="legoPreview"></div>
-          <div style="margin-top:16px; display:flex; flex-direction:column; gap:12px;">
-            <div class="showcase-stats">
-              <div class="showcase-stat">
-                <span class="showcase-stat-val">64</span>
-                <span class="showcase-stat-label">Bricks</span>
-              </div>
-              <div class="showcase-stat">
-                <span class="showcase-stat-val">12</span>
-                <span class="showcase-stat-label">Main Colors</span>
-              </div>
-              <div class="showcase-stat">
-                <span class="showcase-stat-val">8×8×1</span>
-                <span class="showcase-stat-label">Dimensions</span>
-              </div>
-            </div>
-            <div class="showcase-colors">
-              <span class="showcase-color-chip" style="background:#d4a76a" data-name="Wood Tan"></span>
-              <span class="showcase-color-chip" style="background:#ef4444" data-name="Red"></span>
-              <span class="showcase-color-chip" style="background:#dc2626" data-name="Dark Red"></span>
-              <span class="showcase-color-chip" style="background:#c09660" data-name="Dark Wood"></span>
-              <span class="showcase-color-chip" style="background:#60a5fa" data-name="Medium Blue"></span>
-              <span class="showcase-color-chip" style="background:#93c5fd" data-name="Light Blue"></span>
-              <span class="showcase-color-chip" style="background:#9ca3af" data-name="Stone Gray"></span>
-              <span class="showcase-color-chip" style="background:#92400e" data-name="Brown"></span>
-              <span class="showcase-color-chip" style="background:#a16207" data-name="Dark Orange"></span>
-              <span class="showcase-color-chip" style="background:#4ade80" data-name="Bright Green"></span>
-              <span class="showcase-color-chip" style="background:#22c55e" data-name="Dark Green"></span>
-              <span class="showcase-color-chip" style="background:#78716c" data-name="Dark Gray"></span>
-            </div>
-            <div class="showcase-parts-preview">
-              <table>
-                <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
-                <tr><td>Plate 1×1</td><td>Wood Tan</td><td>20</td></tr>
-                <tr><td>Plate 1×1</td><td>Red</td><td>8</td></tr>
-                <tr><td>Plate 1×1</td><td>Dark Gray</td><td>8</td></tr>
-                <tr><td>Plate 1×1</td><td>Stone Gray</td><td>6</td></tr>
-                <tr><td>Plate 1×1</td><td>Medium Blue</td><td>4</td></tr>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="steps-section" id="how">
-    <p class="section-label">How It Works</p>
+  <!-- ═══ SECTION 1: TRY IT ═══ -->
+  <section class="steps-section" id="demo">
+    <p class="section-label">Try It</p>
     <h2 class="section-heading">
       <span class="accent">Three steps</span><br/>from pixels to bricks.
     </h2>
     <div class="steps-grid">
       <div class="step-card reveal">
-        <div class="step-number">STEP 01</div>
-        <span class="step-icon">📁</span>
-        <h3 class="step-title">Export Your Build</h3>
-        <p class="step-desc">Use WorldEdit or Amulet to export your Minecraft structure as a <code>.schematic</code> or <code>.schem</code> file. Or just upload a screenshot — we handle both.</p>
+        <div class="step-card-header">
+          <div class="step-num-badge s1">01</div>
+          <h3>Export Your Build</h3>
+        </div>
+        <div class="step-visual">
+          <div class="mc-preview" id="mcPreview">
+            <div class="mc-stars" id="mcStars"></div>
+            <div class="mc-building" id="mcBuilding"></div>
+          </div>
+        </div>
+        <p class="step-card-desc">Export your Minecraft structure as <code>.schematic</code>, <code>.schem</code> or <code>.litematic</code>.</p>
       </div>
       <div class="step-card reveal" style="transition-delay:0.1s">
-        <div class="step-number">STEP 02</div>
-        <span class="step-icon">⚡</span>
-        <h3 class="step-title">AI Maps Every Block</h3>
-        <p class="step-desc">Our engine reads your 3D block data and maps 200+ Minecraft block types to the nearest LEGO color and shape — accounting for stairs, slabs, glass, and more.</p>
+        <div class="step-card-header">
+          <div class="step-num-badge s2">02</div>
+          <h3>Maps Every Block</h3>
+        </div>
+        <div class="step-visual">
+          <div class="lego-preview" id="legoPreview"></div>
+        </div>
+        <p class="step-card-desc">200+ block types auto-mapped to the nearest LEGO color and shape.</p>
       </div>
       <div class="step-card reveal" style="transition-delay:0.2s">
-        <div class="step-number">STEP 03</div>
-        <span class="step-icon">🧱</span>
-        <h3 class="step-title">Order & Build</h3>
-        <p class="step-desc">Get a complete BrickLink shopping cart with every part you need, a 3D preview in your browser, and step-by-step build instructions.</p>
+        <div class="step-card-header">
+          <div class="step-num-badge s3">03</div>
+          <h3>Order & Build</h3>
+        </div>
+        <div class="step-details-visual">
+          <div class="showcase-stats">
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">64</span>
+              <span class="showcase-stat-label">Bricks</span>
+            </div>
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">12</span>
+              <span class="showcase-stat-label">Colors</span>
+            </div>
+            <div class="showcase-stat">
+              <span class="showcase-stat-val">8×8×1</span>
+              <span class="showcase-stat-label">Size</span>
+            </div>
+          </div>
+          <div class="showcase-colors">
+            <span class="showcase-color-chip" style="background:#d4a76a"></span>
+            <span class="showcase-color-chip" style="background:#ef4444"></span>
+            <span class="showcase-color-chip" style="background:#dc2626"></span>
+            <span class="showcase-color-chip" style="background:#c09660"></span>
+            <span class="showcase-color-chip" style="background:#60a5fa"></span>
+            <span class="showcase-color-chip" style="background:#93c5fd"></span>
+            <span class="showcase-color-chip" style="background:#9ca3af"></span>
+            <span class="showcase-color-chip" style="background:#92400e"></span>
+            <span class="showcase-color-chip" style="background:#a16207"></span>
+            <span class="showcase-color-chip" style="background:#4ade80"></span>
+            <span class="showcase-color-chip" style="background:#22c55e"></span>
+            <span class="showcase-color-chip" style="background:#78716c"></span>
+          </div>
+          <div class="showcase-parts-preview">
+            <table>
+              <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
+              <tr><td>Plate 1×1</td><td>Wood Tan</td><td>20</td></tr>
+              <tr><td>Plate 1×1</td><td>Red</td><td>8</td></tr>
+              <tr><td>Plate 1×1</td><td>Dark Gray</td><td>8</td></tr>
+              <tr><td>Plate 1×1</td><td>Stone Gray</td><td>6</td></tr>
+              <tr><td>Plate 1×1</td><td>Medium Blue</td><td>4</td></tr>
+            </table>
+          </div>
+        </div>
+        <p class="step-card-desc">Get a BrickLink parts list, 3D preview, and build instructions.</p>
       </div>
+    </div>
+
+    <div class="upload-full reveal" style="transition-delay:0.3s">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept=".schem,.schematic,.litematic">
+        <span class="upload-icon">📦</span>
+        <div class="upload-text">
+          <strong>Drop your schematic here</strong>
+          or click to browse
+        </div>
+        <div class="file-types">
+          <span class="file-tag">.schematic</span>
+          <span class="file-tag">.schem</span>
+          <span class="file-tag">.litematic</span>
+        </div>
+      </div>
+      <a href="how-to-export.html" class="how-to-link">How to get a schematic from your Minecraft world?</a>
     </div>
   </section>
 
+  <!-- ═══ SECTION 2: HOW IT WORKS ═══ -->
   <div class="stats-bar">
     <div class="stats-inner">
       <div class="stat-item">
@@ -1419,16 +1617,14 @@
     </div>
   </div>
 
-
-
-  <!-- SHOWCASE GALLERY -->
   <section class="showcase-section" id="showcase">
+  <div id="how" style="position:absolute;margin-top:-80px"></div>
     <p class="section-label">Real Conversion Examples</p>
     <h2 class="section-heading">From <span class="accent">Minecraft</span> voxels<br/>to real LEGO bricks.</h2>
 
     <div class="showcase-grid">
 
-      <!-- 1: Dark Gothic Cathedral -->
+      <!-- 1: Japanese Temple -->
       <div class="showcase-card reveal">
         <div class="showcase-visual">
           <div class="showcase-half">
@@ -1443,44 +1639,44 @@
         </div>
         <div class="showcase-info">
           <div class="showcase-pipeline">
-            <span class="pipeline-step mc">.schematic</span>
+            <span class="pipeline-step mc">.litematic</span>
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step convert">Convert</span>
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step lego">LEGO Model</span>
           </div>
-          <h3 class="showcase-name">Dark Gothic Cathedral</h3>
-          <p class="showcase-desc">A towering cathedral with flying buttresses, stained-glass rose windows, twin bell towers, and a soaring central spire. Built with dark stone bricks and deep purple accents.</p>
+          <h3 class="showcase-name">Japanese Temple</h3>
+          <p class="showcase-desc">A two-tiered pagoda temple with upturned eaves, red lacquer pillars, shoji screen walls, and a golden shachihoko finial. Inspired by classic Kyoto architecture.</p>
           <div class="showcase-stats">
             <div class="showcase-stat">
-              <span class="showcase-stat-val">3,240</span>
+              <span class="showcase-stat-val">2,816</span>
               <span class="showcase-stat-label">Bricks</span>
             </div>
             <div class="showcase-stat">
-                <span class="showcase-stat-val">6</span>
-                <span class="showcase-stat-label">Main Colors</span>
+                <span class="showcase-stat-val">2</span>
+                <span class="showcase-stat-label">Roof Tiers</span>
             </div>
             <div class="showcase-stat">
-              <span class="showcase-stat-val">20×31×14</span>
+              <span class="showcase-stat-val">16×22×14</span>
               <span class="showcase-stat-label">Dimensions</span>
             </div>
           </div>
           <div class="showcase-colors">
-            <span class="showcase-color-chip" style="background:#303038" data-name="Dark Stone Gray"></span>
-            <span class="showcase-color-chip" style="background:#505058" data-name="Stone Gray"></span>
-            <span class="showcase-color-chip" style="background:#6e6c74" data-name="Light Stone"></span>
-            <span class="showcase-color-chip" style="background:#a02020" data-name="Trans-Red (Stained Glass)"></span>
-            <span class="showcase-color-chip" style="background:#2030a0" data-name="Trans-Blue (Stained Glass)"></span>
-            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finials)"></span>
+            <span class="showcase-color-chip" style="background:#b42424" data-name="Red (Pillars)"></span>
+            <span class="showcase-color-chip" style="background:#282420" data-name="Dark Brown (Roof)"></span>
+            <span class="showcase-color-chip" style="background:#b08a50" data-name="Medium Nougat (Wood)"></span>
+            <span class="showcase-color-chip" style="background:#f0ecdc" data-name="White (Shoji Screens)"></span>
+            <span class="showcase-color-chip" style="background:#8c8c88" data-name="Light Gray (Stone)"></span>
+            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finial)"></span>
           </div>
           <div class="showcase-parts-preview">
             <table>
               <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
-              <tr><td>Brick 1×2</td><td>Dark Stone Gray</td><td>624</td></tr>
-              <tr><td>Brick 2×4</td><td>Stone Gray</td><td>418</td></tr>
-              <tr><td>Slope 2×2</td><td>Dark Bluish Gray</td><td>196</td></tr>
-              <tr><td>Trans Plate 1×1</td><td>Trans-Red</td><td>48</td></tr>
-              <tr><td>Brick 1×1</td><td>Pearl Gold</td><td>24</td></tr>
+              <tr><td>Brick 1×2</td><td>Dark Brown</td><td>486</td></tr>
+              <tr><td>Brick 1×1</td><td>Red</td><td>312</td></tr>
+              <tr><td>Plate 1×2</td><td>White</td><td>248</td></tr>
+              <tr><td>Brick 2×4</td><td>Medium Nougat</td><td>164</td></tr>
+              <tr><td>Plate 2×2</td><td>Light Gray</td><td>96</td></tr>
             </table>
           </div>
         </div>
@@ -1544,7 +1740,7 @@
         </div>
       </div>
 
-      <!-- 3: Japanese Temple -->
+      <!-- 3: Dark Gothic Cathedral -->
       <div class="showcase-card reveal">
         <div class="showcase-visual">
           <div class="showcase-half">
@@ -1559,44 +1755,44 @@
         </div>
         <div class="showcase-info">
           <div class="showcase-pipeline">
-            <span class="pipeline-step mc">.litematic</span>
+            <span class="pipeline-step mc">.schematic</span>
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step convert">Convert</span>
             <span class="pipeline-arrow">→</span>
             <span class="pipeline-step lego">LEGO Model</span>
           </div>
-          <h3 class="showcase-name">Japanese Temple</h3>
-          <p class="showcase-desc">A two-tiered pagoda temple with upturned eaves, red lacquer pillars, shoji screen walls, and a golden shachihoko finial. Inspired by classic Kyoto architecture.</p>
+          <h3 class="showcase-name">Dark Gothic Cathedral</h3>
+          <p class="showcase-desc">A towering cathedral with flying buttresses, stained-glass rose windows, twin bell towers, and a soaring central spire. Built with dark stone bricks and deep purple accents.</p>
           <div class="showcase-stats">
             <div class="showcase-stat">
-              <span class="showcase-stat-val">2,816</span>
+              <span class="showcase-stat-val">3,240</span>
               <span class="showcase-stat-label">Bricks</span>
             </div>
             <div class="showcase-stat">
-                <span class="showcase-stat-val">2</span>
-                <span class="showcase-stat-label">Roof Tiers</span>
+                <span class="showcase-stat-val">6</span>
+                <span class="showcase-stat-label">Main Colors</span>
             </div>
             <div class="showcase-stat">
-              <span class="showcase-stat-val">16×22×14</span>
+              <span class="showcase-stat-val">20×31×14</span>
               <span class="showcase-stat-label">Dimensions</span>
             </div>
           </div>
           <div class="showcase-colors">
-            <span class="showcase-color-chip" style="background:#b42424" data-name="Red (Pillars)"></span>
-            <span class="showcase-color-chip" style="background:#282420" data-name="Dark Brown (Roof)"></span>
-            <span class="showcase-color-chip" style="background:#b08a50" data-name="Medium Nougat (Wood)"></span>
-            <span class="showcase-color-chip" style="background:#f0ecdc" data-name="White (Shoji Screens)"></span>
-            <span class="showcase-color-chip" style="background:#8c8c88" data-name="Light Gray (Stone)"></span>
-            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finial)"></span>
+            <span class="showcase-color-chip" style="background:#303038" data-name="Dark Stone Gray"></span>
+            <span class="showcase-color-chip" style="background:#505058" data-name="Stone Gray"></span>
+            <span class="showcase-color-chip" style="background:#6e6c74" data-name="Light Stone"></span>
+            <span class="showcase-color-chip" style="background:#a02020" data-name="Trans-Red (Stained Glass)"></span>
+            <span class="showcase-color-chip" style="background:#2030a0" data-name="Trans-Blue (Stained Glass)"></span>
+            <span class="showcase-color-chip" style="background:#dcb428" data-name="Pearl Gold (Finials)"></span>
           </div>
           <div class="showcase-parts-preview">
             <table>
               <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
-              <tr><td>Brick 1×2</td><td>Dark Brown</td><td>486</td></tr>
-              <tr><td>Brick 1×1</td><td>Red</td><td>312</td></tr>
-              <tr><td>Plate 1×2</td><td>White</td><td>248</td></tr>
-              <tr><td>Brick 2×4</td><td>Medium Nougat</td><td>164</td></tr>
-              <tr><td>Plate 2×2</td><td>Light Gray</td><td>96</td></tr>
+              <tr><td>Brick 1×2</td><td>Dark Stone Gray</td><td>624</td></tr>
+              <tr><td>Brick 2×4</td><td>Stone Gray</td><td>418</td></tr>
+              <tr><td>Slope 2×2</td><td>Dark Bluish Gray</td><td>196</td></tr>
+              <tr><td>Trans Plate 1×1</td><td>Trans-Red</td><td>48</td></tr>
+              <tr><td>Brick 1×1</td><td>Pearl Gold</td><td>24</td></tr>
             </table>
           </div>
         </div>
@@ -1691,6 +1887,7 @@
       container.appendChild(el);
     }
 
+    // MC pixel art stars
     const starsEl = document.getElementById('mcStars');
     for (let i = 0; i < 20; i++) {
       const s = document.createElement('div');
@@ -1702,12 +1899,12 @@
       starsEl.appendChild(s);
     }
 
+    // MC pixel art building
     const mcBuilding = document.getElementById('mcBuilding');
-    // Starter house 8x8 pixel art
-    const _=  '#1a2a4e', R='#b91c1c', RR='#991b1b', W='#a0845e', WW='#8b7355', BL='#60a5fa', BW='#93c5fd', D='#78350f', DD='#92400e', S='#9ca3af', G='#4ade80', GD='#16a34a', ST='#6b7280';
+    const _mc='#1a2a4e', R='#b91c1c', RR='#991b1b', W='#a0845e', WW='#8b7355', BL='#60a5fa', BW='#93c5fd', D='#78350f', DD='#92400e', S='#9ca3af', G='#4ade80', GD='#16a34a', ST='#6b7280';
     const blockColors = [
-      _,_,R,R,R,R,_,_,
-      _,R,RR,R,R,RR,R,_,
+      _mc,_mc,R,R,R,R,_mc,_mc,
+      _mc,R,RR,R,R,RR,R,_mc,
       W,W,WW,W,W,WW,W,W,
       W,BL,BW,W,W,BL,BW,W,
       W,BL,BW,W,W,BL,BW,W,
@@ -1723,8 +1920,8 @@
       mcBuilding.appendChild(b);
     });
 
+    // LEGO brick preview
     const legoPreview = document.getElementById('legoPreview');
-    // Starter house in LEGO colors
     const LR='#ef4444', LRD='#dc2626', LW='#d4a76a', LWD='#c09660', LB='#60a5fa', LBW='#93c5fd', LD='#92400e', LDD='#a16207', LS='#9ca3af', LG='#4ade80', LGD='#22c55e', LST='#78716c';
     const legoColors = [
       LW,LW,LR,LR,LR,LR,LW,LW,
@@ -2168,9 +2365,9 @@
       entries.forEach(e => {
         if (e.isIntersecting) {
           const id = e.target.id;
-          if (id === 'showcase1mc') { renderShowcase('showcase1mc', gothicCathedral, 'mc'); renderShowcase('showcase1lego', gothicCathedral, 'lego'); }
+          if (id === 'showcase1mc') { renderShowcase('showcase1mc', japaneseTemple, 'mc'); renderShowcase('showcase1lego', japaneseTemple, 'lego'); }
           if (id === 'showcase2mc') { renderShowcase('showcase2mc', cherryTree, 'mc'); renderShowcase('showcase2lego', cherryTree, 'lego'); }
-          if (id === 'showcase3mc') { renderShowcase('showcase3mc', japaneseTemple, 'mc'); renderShowcase('showcase3lego', japaneseTemple, 'lego'); }
+          if (id === 'showcase3mc') { renderShowcase('showcase3mc', gothicCathedral, 'mc'); renderShowcase('showcase3lego', gothicCathedral, 'lego'); }
           obs.unobserve(e.target);
         }
       });
