@@ -480,32 +480,37 @@ function createViewer(canvas, voxels, palette, style) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
   renderer.setSize(width, height, false);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = style === "lego" ? 0.88 : 1.04;
   if (style === "lego") {
-    scene.background = new THREE.Color(0xf7f8fb);
-    const hemi = new THREE.HemisphereLight(0xffffff, 0xe5eaf2, 1.45);
+    scene.background = new THREE.Color(0xf0f2f6);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xd9dfeb, 1.0);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 1.35);
-    key.position.set(2.4, 4.8, 3.6);
+    const key = new THREE.DirectionalLight(0xffffff, 0.92);
+    key.position.set(2.4, 4.6, 3.2);
     scene.add(key);
-    const fill = new THREE.DirectionalLight(0xf6f8ff, 0.95);
-    fill.position.set(-3.2, 2.2, 2.8);
+    const fill = new THREE.DirectionalLight(0xf8fbff, 0.42);
+    fill.position.set(-3.2, 2.1, 2.5);
     scene.add(fill);
-    const rim = new THREE.DirectionalLight(0xffffff, 0.72);
-    rim.position.set(-2.5, 3.5, -3.5);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.32);
+    rim.position.set(-2.5, 3.2, -3.5);
     scene.add(rim);
-    const bounce = new THREE.DirectionalLight(0xfff6ea, 0.38);
-    bounce.position.set(0, -2, 1.5);
+    const bounce = new THREE.DirectionalLight(0xfff4ea, 0.14);
+    bounce.position.set(0, -2, 1.4);
     scene.add(bounce);
   } else {
-    scene.background = new THREE.Color(0x16284a);
-    scene.fog = new THREE.Fog(0x16284a, 48, 170);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.72));
-    const sun = new THREE.DirectionalLight(0xfff0d0, 0.94);
+    scene.background = new THREE.Color(0x4d74bd);
+    scene.fog = new THREE.Fog(0x4d74bd, 80, 210);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const sun = new THREE.DirectionalLight(0xfff3d8, 1.12);
     sun.position.set(2.5, 4.2, 2.1);
     scene.add(sun);
-    const sky = new THREE.DirectionalLight(0x9cc8ff, 0.4);
+    const sky = new THREE.DirectionalLight(0xb7d7ff, 0.58);
     sky.position.set(-2, 2.8, -2);
     scene.add(sky);
+    const groundBounce = new THREE.DirectionalLight(0x86b66a, 0.18);
+    groundBounce.position.set(0, -1.5, 0.5);
+    scene.add(groundBounce);
   }
 
   let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
@@ -522,10 +527,10 @@ function createViewer(canvas, voxels, palette, style) {
   for (const [pi, list] of Object.entries(groups)) {
     const rgb = palette[Number(pi)] || [128,128,128];
     const material = style === "lego"
-      ? new THREE.MeshPhongMaterial({
+      ? new THREE.MeshStandardMaterial({
           color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255),
-          shininess: 90,
-          specular: new THREE.Color(0.2, 0.2, 0.2)
+          roughness: 0.52,
+          metalness: 0.0
         })
       : new THREE.MeshLambertMaterial({
           color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255),
@@ -549,30 +554,45 @@ function createViewer(canvas, voxels, palette, style) {
   const grid = new THREE.GridHelper(
     gridSize,
     gridDivisions,
-    style === "lego" ? 0xd9e1ee : 0x2d3f73,
-    style === "lego" ? 0xe7edf7 : 0x1a2555
+    style === "lego" ? 0xc5cfde : 0x3f5da3,
+    style === "lego" ? 0xe7edf7 : 0x253870
   );
   grid.position.y = groundY;
-  grid.material.opacity = style === "lego" ? 0.5 : 0.35;
+  grid.material.opacity = style === "lego" ? 0.72 : 0.46;
   grid.material.transparent = true;
   scene.add(grid);
   if (style === "lego") {
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(gridSize * 1.08, gridSize * 1.08),
-      new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.95, transparent: true })
+      new THREE.MeshBasicMaterial({ color: 0xf7f8fb, opacity: 0.98, transparent: true })
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = groundY - 0.06;
     scene.add(floor);
+    const shadow = new THREE.Mesh(
+      new THREE.CircleGeometry(Math.max(footprint * 0.5, 6), 48),
+      new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.1, transparent: true })
+    );
+    shadow.rotation.x = -Math.PI / 2;
+    shadow.position.y = groundY + 0.02;
+    scene.add(shadow);
+  } else {
+    const ground = new THREE.Mesh(
+      new THREE.PlaneGeometry(gridSize * 1.05, gridSize * 1.05),
+      new THREE.MeshBasicMaterial({ color: 0x4b6f42, opacity: 0.18, transparent: true })
+    );
+    ground.rotation.x = -Math.PI / 2;
+    ground.position.y = groundY - 0.03;
+    scene.add(ground);
   }
-  const targetY = groundY + spanY * (style === "lego" ? 0.52 : 0.44);
+  const targetY = groundY + spanY * (style === "lego" ? 0.49 : 0.46);
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-  const verticalFit = Math.max(spanY * (style === "lego" ? 0.8 : 0.72), 7) / Math.tan(vFov / 2);
-  const horizontalFit = Math.max(footprint * 1.15, 7) / Math.tan(hFov / 2);
-  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 1.02 : 0.94);
-  let theta = Math.PI * (style === "lego" ? 0.8 : 0.72);
-  let phi = Math.PI * (style === "lego" ? 0.15 : 0.18);
+  const verticalFit = Math.max(spanY * (style === "lego" ? 0.74 : 0.68), 7) / Math.tan(vFov / 2);
+  const horizontalFit = Math.max(footprint * 1.08, 7) / Math.tan(hFov / 2);
+  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 0.9 : 0.88);
+  let theta = Math.PI * (style === "lego" ? 0.8 : 0.74);
+  let phi = Math.PI * (style === "lego" ? 0.135 : 0.17);
   let radius = fitRadius;
   function updateCam() {
     camera.position.set(

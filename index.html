@@ -1066,7 +1066,7 @@
     }
     .btn-back:hover { color:var(--text); border-color:var(--accent); }
 
-    .results-inner { max-width:1480px; margin:0 auto; padding:40px 48px 80px; }
+    .results-inner { max-width:1680px; margin:0 auto; padding:40px 40px 80px; }
 
     .results-stats {
       display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
@@ -1087,7 +1087,7 @@
 
     .results-main {
       display:grid;
-      grid-template-columns:minmax(0, 1.45fr) minmax(360px, 0.9fr);
+      grid-template-columns:minmax(0, 1.75fr) minmax(320px, 0.72fr);
       gap:24px;
       align-items:start;
     }
@@ -1140,16 +1140,17 @@
     }
     .viewer-canvas {
       width:100%;
-      aspect-ratio:1 / 1;
+      aspect-ratio:4 / 5;
+      min-height:640px;
       display:block;
       cursor:grab;
     }
     .viewer-canvas:active { cursor:grabbing; }
-    #viewerMc { background:linear-gradient(180deg, #243f72 0%, #0d1527 100%); }
-    #viewerLego { background:linear-gradient(180deg, #fbfbfd 0%, #eef1f6 100%); }
+    #viewerMc { background:linear-gradient(180deg, #547dc8 0%, #132342 100%); }
+    #viewerLego { background:linear-gradient(180deg, #f2f4f8 0%, #e6eaf1 100%); }
 
     /* Parts table */
-    .parts-scroll { max-height:700px; overflow-y:auto; }
+    .parts-scroll { max-height:920px; overflow-y:auto; }
     .parts-table { width:100%; border-collapse:collapse; }
     .parts-table th {
       position:sticky; top:0; background:var(--surface2);
@@ -1226,13 +1227,14 @@
       .results-main { grid-template-columns:1fr; }
       .viewer-dual { grid-template-columns:1fr; }
       .parts-scroll { max-height:none; }
+      .viewer-canvas { min-height:520px; }
     }
 
     @media (max-width: 720px) {
       .results-topbar { padding:14px 20px; }
       .results-stats { grid-template-columns:repeat(2, 1fr); }
       .viewer-dual { padding:14px; gap:14px; }
-      .viewer-canvas { aspect-ratio: 6 / 5; }
+      .viewer-canvas { aspect-ratio: 5 / 6; min-height:360px; }
     }
   </style>
 </head>
