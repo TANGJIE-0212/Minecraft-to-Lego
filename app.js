@@ -473,8 +473,12 @@ function initViewer(voxels, palette) {
   _scene.add(dir);
   let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
   for (const v of voxels) { minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0] + v[3]); minY = Math.min(minY, v[1]); maxY = Math.max(maxY, v[1] + v[4]); minZ = Math.min(minZ, v[2]); maxZ = Math.max(maxZ, v[2] + v[5]); }
+  const spanX = maxX - minX;
+  const spanY = maxY - minY;
+  const spanZ = maxZ - minZ;
+  const footprint = Math.max(spanX, spanZ) || 1;
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
-  const size = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 10;
+  const size = Math.max(spanX, spanY, spanZ) || 10;
   const groups = {};
   for (const v of voxels) { const pi = v[6]; if (!groups[pi]) groups[pi] = []; groups[pi].push(v); }
   const dummy = new THREE.Object3D();
@@ -493,16 +497,28 @@ function initViewer(voxels, palette) {
     });
     _scene.add(mesh);
   }
-  const grid = new THREE.GridHelper(size * 1.5, 20, 0x222244, 0x111133);
-  grid.position.y = -cy;
+  const groundY = minY - cy;
+  const gridSize = Math.max(footprint * 1.8, Math.min(size * 1.15, footprint * 2.4), 12);
+  const gridDivisions = Math.max(14, Math.min(32, Math.round(gridSize)));
+  const grid = new THREE.GridHelper(gridSize, gridDivisions, 0x222244, 0x111133);
+  grid.position.y = groundY;
   _scene.add(grid);
-  const dist = size * 1.5;
-  let theta = Math.PI / 4;
-  let phi = Math.PI / 6;
-  let radius = dist;
+  const targetY = groundY + spanY * 0.38;
+  const vFov = THREE.MathUtils.degToRad(_camera.fov);
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * _camera.aspect);
+  const verticalFit = Math.max(spanY * 0.62, 6) / Math.tan(vFov / 2);
+  const horizontalFit = Math.max(footprint * 0.9, 6) / Math.tan(hFov / 2);
+  const fitRadius = Math.max(verticalFit, horizontalFit) * 0.92;
+  let theta = Math.PI * 0.72;
+  let phi = Math.PI * 0.18;
+  let radius = fitRadius;
   function updateCam() {
-    _camera.position.set(radius * Math.cos(phi) * Math.sin(theta), radius * Math.sin(phi), radius * Math.cos(phi) * Math.cos(theta));
-    _camera.lookAt(0, 0, 0);
+    _camera.position.set(
+      radius * Math.cos(phi) * Math.sin(theta),
+      targetY + radius * Math.sin(phi),
+      radius * Math.cos(phi) * Math.cos(theta)
+    );
+    _camera.lookAt(0, targetY, 0);
   }
   updateCam();
   let isDragging = false, prevX = 0, prevY = 0;
@@ -519,7 +535,7 @@ function initViewer(voxels, palette) {
   canvas.onwheel = (e) => {
     e.preventDefault();
     radius *= e.deltaY > 0 ? 1.08 : 0.93;
-    radius = Math.max(size * 0.3, Math.min(size * 5, radius));
+    radius = Math.max(fitRadius * 0.55, Math.min(fitRadius * 2.8, radius));
     updateCam();
   };
   const ro = new ResizeObserver(() => {
