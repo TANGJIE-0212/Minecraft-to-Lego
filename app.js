@@ -31,12 +31,13 @@ const statsEl = document.getElementById("resultsStats");
 const colorBarEl = document.getElementById("colorBar");
 const partsBody = document.getElementById("partsBody");
 const dlRow = document.getElementById("dlRow");
-const canvas = document.getElementById("viewer3d");
+const mcCanvas = document.getElementById("viewerMc");
+const legoCanvas = document.getElementById("viewerLego");
 
 let currentXml = null;
 let currentLdrUrl = null;
 let currentXmlUrl = null;
-let _scene, _camera, _renderer, _raf;
+let _viewers = [];
 
 function showToast(icon, msg, duration = 4000) {
   const t = document.getElementById("toast");
@@ -434,7 +435,7 @@ function showResults(data) {
     <button class="btn-dl btn-dl-order" id="btnOrder">🛒 Order on BrickLink →</button>`;
   document.getElementById("btnOrder").addEventListener("click", orderOnBrickLink);
   resultsOvl.classList.add("active");
-  if (data.voxels?.length && typeof THREE !== "undefined") initViewer(data.voxels, data.palette);
+  if (data.voxels?.length && typeof THREE !== "undefined") initViewers(data.voxels, data.palette);
 }
 
 async function orderOnBrickLink() {
@@ -453,25 +454,60 @@ async function orderOnBrickLink() {
 }
 
 function disposeViewer() {
-  if (_raf) cancelAnimationFrame(_raf);
-  if (_renderer) _renderer.dispose();
-  _scene = _camera = _renderer = _raf = null;
+  for (const viewer of _viewers) {
+    if (viewer.raf) cancelAnimationFrame(viewer.raf);
+    if (viewer.resizeObserver) viewer.resizeObserver.disconnect();
+    if (viewer.canvas && viewer.onPointerDown) viewer.canvas.removeEventListener("pointerdown", viewer.onPointerDown);
+    if (viewer.canvas && viewer.onWheel) viewer.canvas.removeEventListener("wheel", viewer.onWheel);
+    if (viewer.onPointerUp) window.removeEventListener("pointerup", viewer.onPointerUp);
+    if (viewer.onPointerMove) window.removeEventListener("pointermove", viewer.onPointerMove);
+    if (viewer.renderer) viewer.renderer.dispose();
+  }
+  _viewers = [];
 }
 
-function initViewer(voxels, palette) {
+function initViewers(voxels, palette) {
   disposeViewer();
+  if (mcCanvas) _viewers.push(createViewer(mcCanvas, voxels, palette, "mc"));
+  if (legoCanvas) _viewers.push(createViewer(legoCanvas, voxels, palette, "lego"));
+}
+
+function createViewer(canvas, voxels, palette, style) {
   const width = canvas.clientWidth || 600;
-  const height = canvas.clientHeight || 450;
-  _scene = new THREE.Scene();
-  _scene.background = new THREE.Color(0x0a0a12);
-  _camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
-  _renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  _renderer.setSize(width, height);
-  _renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  _scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-  dir.position.set(1, 2, 1.5);
-  _scene.add(dir);
+  const height = canvas.clientHeight || 600;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(style === "lego" ? 36 : 42, width / height, 0.1, 10000);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setSize(width, height, false);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  if (style === "lego") {
+    scene.background = new THREE.Color(0xf7f8fb);
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xe5eaf2, 1.45);
+    scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xffffff, 1.35);
+    key.position.set(2.4, 4.8, 3.6);
+    scene.add(key);
+    const fill = new THREE.DirectionalLight(0xf6f8ff, 0.95);
+    fill.position.set(-3.2, 2.2, 2.8);
+    scene.add(fill);
+    const rim = new THREE.DirectionalLight(0xffffff, 0.72);
+    rim.position.set(-2.5, 3.5, -3.5);
+    scene.add(rim);
+    const bounce = new THREE.DirectionalLight(0xfff6ea, 0.38);
+    bounce.position.set(0, -2, 1.5);
+    scene.add(bounce);
+  } else {
+    scene.background = new THREE.Color(0x16284a);
+    scene.fog = new THREE.Fog(0x16284a, 48, 170);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.72));
+    const sun = new THREE.DirectionalLight(0xfff0d0, 0.94);
+    sun.position.set(2.5, 4.2, 2.1);
+    scene.add(sun);
+    const sky = new THREE.DirectionalLight(0x9cc8ff, 0.4);
+    sky.position.set(-2, 2.8, -2);
+    scene.add(sky);
+  }
+
   let minX = Infinity, minY = Infinity, minZ = Infinity, maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
   for (const v of voxels) { minX = Math.min(minX, v[0]); maxX = Math.max(maxX, v[0] + v[3]); minY = Math.min(minY, v[1]); maxY = Math.max(maxY, v[1] + v[4]); minZ = Math.min(minZ, v[2]); maxZ = Math.max(maxZ, v[2] + v[5]); }
   const spanX = maxX - minX;
@@ -485,10 +521,19 @@ function initViewer(voxels, palette) {
   const dummy = new THREE.Object3D();
   for (const [pi, list] of Object.entries(groups)) {
     const rgb = palette[Number(pi)] || [128,128,128];
-    const material = new THREE.MeshLambertMaterial({ color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255) });
+    const material = style === "lego"
+      ? new THREE.MeshPhongMaterial({
+          color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255),
+          shininess: 90,
+          specular: new THREE.Color(0.2, 0.2, 0.2)
+        })
+      : new THREE.MeshLambertMaterial({
+          color: new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255),
+          flatShading: true
+        });
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const mesh = new THREE.InstancedMesh(geometry, material, list.length);
-    const gap = 0.97;
+    const gap = style === "lego" ? 0.94 : 0.985;
     list.forEach((v, i) => {
       const [x, y, z, w, h, l] = v;
       dummy.position.set(x + w / 2 - cx, y + h / 2 - cy, z + l / 2 - cz);
@@ -496,36 +541,52 @@ function initViewer(voxels, palette) {
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
     });
-    _scene.add(mesh);
+    scene.add(mesh);
   }
   const groundY = minY - cy;
   const gridSize = Math.max(footprint * 1.8, Math.min(size * 1.15, footprint * 2.4), 12);
-  const gridDivisions = Math.max(14, Math.min(32, Math.round(gridSize)));
-  const grid = new THREE.GridHelper(gridSize, gridDivisions, 0x222244, 0x111133);
+  const gridDivisions = Math.max(14, Math.min(36, Math.round(gridSize)));
+  const grid = new THREE.GridHelper(
+    gridSize,
+    gridDivisions,
+    style === "lego" ? 0xd9e1ee : 0x2d3f73,
+    style === "lego" ? 0xe7edf7 : 0x1a2555
+  );
   grid.position.y = groundY;
-  _scene.add(grid);
-  const targetY = groundY + spanY * 0.38;
-  const vFov = THREE.MathUtils.degToRad(_camera.fov);
-  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * _camera.aspect);
-  const verticalFit = Math.max(spanY * 0.62, 6) / Math.tan(vFov / 2);
-  const horizontalFit = Math.max(footprint * 0.9, 6) / Math.tan(hFov / 2);
-  const fitRadius = Math.max(verticalFit, horizontalFit) * 0.92;
-  let theta = Math.PI * 0.72;
-  let phi = Math.PI * 0.18;
+  grid.material.opacity = style === "lego" ? 0.5 : 0.35;
+  grid.material.transparent = true;
+  scene.add(grid);
+  if (style === "lego") {
+    const floor = new THREE.Mesh(
+      new THREE.PlaneGeometry(gridSize * 1.08, gridSize * 1.08),
+      new THREE.MeshBasicMaterial({ color: 0xffffff, opacity: 0.95, transparent: true })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = groundY - 0.06;
+    scene.add(floor);
+  }
+  const targetY = groundY + spanY * (style === "lego" ? 0.52 : 0.44);
+  const vFov = THREE.MathUtils.degToRad(camera.fov);
+  const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+  const verticalFit = Math.max(spanY * (style === "lego" ? 0.8 : 0.72), 7) / Math.tan(vFov / 2);
+  const horizontalFit = Math.max(footprint * 1.15, 7) / Math.tan(hFov / 2);
+  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 1.02 : 0.94);
+  let theta = Math.PI * (style === "lego" ? 0.8 : 0.72);
+  let phi = Math.PI * (style === "lego" ? 0.15 : 0.18);
   let radius = fitRadius;
   function updateCam() {
-    _camera.position.set(
+    camera.position.set(
       radius * Math.cos(phi) * Math.sin(theta),
       targetY + radius * Math.sin(phi),
       radius * Math.cos(phi) * Math.cos(theta)
     );
-    _camera.lookAt(0, targetY, 0);
+    camera.lookAt(0, targetY, 0);
   }
   updateCam();
   let isDragging = false, prevX = 0, prevY = 0;
-  canvas.onpointerdown = (e) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; };
-  window.onpointerup = () => { isDragging = false; };
-  window.onpointermove = (e) => {
+  const onPointerDown = (e) => { isDragging = true; prevX = e.clientX; prevY = e.clientY; };
+  const onPointerUp = () => { isDragging = false; };
+  const onPointerMove = (e) => {
     if (!isDragging) return;
     theta -= (e.clientX - prevX) * 0.008;
     phi += (e.clientY - prevY) * 0.008;
@@ -533,21 +594,30 @@ function initViewer(voxels, palette) {
     prevX = e.clientX; prevY = e.clientY;
     updateCam();
   };
-  canvas.onwheel = (e) => {
+  const onWheel = (e) => {
     e.preventDefault();
     radius *= e.deltaY > 0 ? 1.08 : 0.93;
     radius = Math.max(fitRadius * 0.55, Math.min(fitRadius * 2.8, radius));
     updateCam();
   };
-  const ro = new ResizeObserver(() => {
+  canvas.addEventListener("pointerdown", onPointerDown);
+  window.addEventListener("pointerup", onPointerUp);
+  window.addEventListener("pointermove", onPointerMove);
+  canvas.addEventListener("wheel", onWheel, { passive: false });
+  const resizeObserver = new ResizeObserver(() => {
     const w = canvas.clientWidth, h = canvas.clientHeight;
-    _renderer.setSize(w, h);
-    _camera.aspect = w / h;
-    _camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
   });
-  ro.observe(canvas);
-  function animate() { _raf = requestAnimationFrame(animate); _renderer.render(_scene, _camera); }
+  resizeObserver.observe(canvas);
+  const viewer = { canvas, renderer, resizeObserver, onPointerDown, onPointerUp, onPointerMove, onWheel, raf: 0 };
+  function animate() {
+    viewer.raf = requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+  }
   animate();
+  return viewer;
 }
 
 function readVarInt(data, offset) {

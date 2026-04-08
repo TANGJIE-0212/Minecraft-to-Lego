@@ -1066,7 +1066,7 @@
     }
     .btn-back:hover { color:var(--text); border-color:var(--accent); }
 
-    .results-inner { max-width:1200px; margin:0 auto; padding:40px 48px 80px; }
+    .results-inner { max-width:1480px; margin:0 auto; padding:40px 48px 80px; }
 
     .results-stats {
       display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
@@ -1085,7 +1085,12 @@
     .rstat-val.dim { color:var(--accent); }
     .rstat-label { font-family:'DM Mono',monospace; font-size:10px; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; }
 
-    .results-main { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+    .results-main {
+      display:grid;
+      grid-template-columns:minmax(0, 1.45fr) minmax(360px, 0.9fr);
+      gap:24px;
+      align-items:start;
+    }
 
     .results-panel {
       background:var(--surface); border:1px solid var(--border); overflow:hidden;
@@ -1098,12 +1103,53 @@
     }
     .rpanel-head span.dot { width:8px; height:8px; border-radius:50%; }
 
-    /* 3D Viewer */
-    #viewer3d { width:100%; aspect-ratio:4/3; background:#0a0a12; cursor:grab; display:block; }
-    #viewer3d:active { cursor:grabbing; }
+    .preview-panel {
+      display:flex;
+      flex-direction:column;
+    }
+    .viewer-dual {
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:18px;
+      padding:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0));
+    }
+    .viewer-card {
+      border:1px solid var(--border);
+      background:#10131c;
+      overflow:hidden;
+      min-width:0;
+    }
+    .viewer-card-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 14px;
+      border-bottom:1px solid var(--border);
+      font-family:'DM Mono',monospace;
+      font-size:10px;
+      letter-spacing:0.14em;
+      text-transform:uppercase;
+      color:var(--text-dim);
+      background:rgba(255,255,255,0.03);
+    }
+    .viewer-card-head strong {
+      color:var(--text);
+      font-weight:500;
+      letter-spacing:0.08em;
+    }
+    .viewer-canvas {
+      width:100%;
+      aspect-ratio:1 / 1;
+      display:block;
+      cursor:grab;
+    }
+    .viewer-canvas:active { cursor:grabbing; }
+    #viewerMc { background:linear-gradient(180deg, #243f72 0%, #0d1527 100%); }
+    #viewerLego { background:linear-gradient(180deg, #fbfbfd 0%, #eef1f6 100%); }
 
     /* Parts table */
-    .parts-scroll { max-height:500px; overflow-y:auto; }
+    .parts-scroll { max-height:700px; overflow-y:auto; }
     .parts-table { width:100%; border-collapse:collapse; }
     .parts-table th {
       position:sticky; top:0; background:var(--surface2);
@@ -1174,6 +1220,20 @@
     }
     @keyframes spin { to { transform:rotate(360deg); } }
     .loading-text { font-family:'DM Mono',monospace; font-size:12px; color:var(--text-muted); letter-spacing:0.1em; }
+
+    @media (max-width: 1180px) {
+      .results-inner { padding:32px 24px 72px; }
+      .results-main { grid-template-columns:1fr; }
+      .viewer-dual { grid-template-columns:1fr; }
+      .parts-scroll { max-height:none; }
+    }
+
+    @media (max-width: 720px) {
+      .results-topbar { padding:14px 20px; }
+      .results-stats { grid-template-columns:repeat(2, 1fr); }
+      .viewer-dual { padding:14px; gap:14px; }
+      .viewer-canvas { aspect-ratio: 6 / 5; }
+    }
   </style>
 </head>
 <body>
@@ -1568,12 +1628,27 @@
       <div class="results-stats" id="resultsStats"></div>
       <div class="color-bar" id="colorBar"></div>
       <div class="results-main">
-        <div class="results-panel">
+        <div class="results-panel preview-panel">
           <div class="rpanel-head">
             <span class="dot" style="background:#4ade80"></span>
-            3D Preview
+            Dual Preview
           </div>
-          <canvas id="viewer3d"></canvas>
+          <div class="viewer-dual">
+            <div class="viewer-card">
+              <div class="viewer-card-head">
+                <strong>Minecraft</strong>
+                <span>Block World</span>
+              </div>
+              <canvas id="viewerMc" class="viewer-canvas"></canvas>
+            </div>
+            <div class="viewer-card">
+              <div class="viewer-card-head">
+                <strong>LEGO</strong>
+                <span>Studio Render</span>
+              </div>
+              <canvas id="viewerLego" class="viewer-canvas"></canvas>
+            </div>
+          </div>
         </div>
         <div class="results-panel">
           <div class="rpanel-head">
