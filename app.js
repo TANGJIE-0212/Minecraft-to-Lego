@@ -14,6 +14,7 @@ const LDRAW_TO_BL = {1:7,2:6,3:39,4:5,6:8,7:9,8:10,9:62,10:36,14:3,15:1,19:2,25:
 const LEGO_COLOR_RGB = Object.fromEntries(LEGO_COLORS.map(([id,,rgb]) => [id, rgb]));
 const LEGO_COLOR_NAME = Object.fromEntries(LEGO_COLORS.map(([id,name]) => [id, name]));
 const BRICK_CATALOG = {brick:{"1x1":["3005","Brick 1x1",0.06],"1x2":["3004","Brick 1x2",0.08],"1x3":["3622","Brick 1x3",0.10],"1x4":["3010","Brick 1x4",0.10],"2x2":["3003","Brick 2x2",0.10],"2x3":["3002","Brick 2x3",0.12],"2x4":["3001","Brick 2x4",0.12]},plate:{"1x1":["3024","Plate 1x1",0.03],"1x2":["3023","Plate 1x2",0.04],"1x3":["3623","Plate 1x3",0.05],"1x4":["3710","Plate 1x4",0.05],"2x2":["3022","Plate 2x2",0.06],"2x3":["3021","Plate 2x3",0.07],"2x4":["3020","Plate 2x4",0.08]},slope:{"1x1":["54200","Slope 1x1x2/3",0.06],"1x2":["3040","Slope 45 2x1",0.08],"2x2":["3039","Slope 45 2x2",0.12],"2x4":["3037","Slope 45 2x4",0.15]}};
+const LEGO_PREVIEW_HEIGHT = { brick: 1.2, plate: 0.4, slope: 0.8 };
 const MC_LEGACY_IDS = {0:"air",1:"stone",2:"grass_block",3:"dirt",4:"cobblestone",5:"oak_planks",7:"bedrock",8:"water",9:"water",10:"lava",11:"lava",12:"sand",13:"gravel",14:"gold_ore",15:"iron_ore",16:"coal_ore",17:"oak_log",18:"oak_leaves",20:"glass",21:"lapis_ore",22:"lapis_block",24:"sandstone",35:"white_wool",41:"gold_block",42:"iron_block",43:"stone_slab",44:"stone_slab",45:"bricks",47:"bookshelf",48:"mossy_stone_bricks",49:"obsidian",53:"oak_stairs",56:"diamond_ore",57:"diamond_block",67:"cobblestone_stairs",79:"ice",80:"snow_block",82:"clay",87:"netherrack",89:"glowstone",98:"stone_bricks",108:"brick_stairs",109:"stone_brick_stairs",112:"nether_bricks",114:"nether_brick_stairs",121:"end_stone",125:"oak_planks",126:"oak_slab",128:"sandstone_stairs",129:"emerald_ore",133:"emerald_block",134:"spruce_stairs",135:"birch_stairs",136:"jungle_stairs",152:"redstone_block",155:"quartz_block",156:"quartz_stairs",159:"terracotta",170:"hay_block",172:"terracotta",174:"packed_ice",179:"red_sandstone",201:"purpur_block",203:"purpur_stairs",206:"end_stone_bricks",251:"white_concrete"};
 const COLOR_NAMES = ["white","orange","magenta","light_blue","yellow","lime","pink","gray","light_gray","cyan","purple","blue","brown","green","red","black"];
 const COLORED_BLOCK_IDS = {35:"{}_wool",95:"{}_stained_glass",159:"{}_terracotta",160:"{}_stained_glass",251:"{}_concrete"};
@@ -132,8 +133,8 @@ async function convertAndOptimize(file) {
       paletteMap.set(key, palette.length);
       palette.push(rgb);
     }
-    const h = bt === "plate" ? 1 : (bt === "slope" ? 2 : 3);
-    voxels.push([x, y * 3, z, w, h, l, paletteMap.get(key)]);
+    const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
+    voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
   }
   if (voxels.length > 60000) {
     const step = Math.floor(voxels.length / 60000) + 1;
