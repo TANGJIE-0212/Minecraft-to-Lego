@@ -524,6 +524,8 @@ function createViewer(canvas, voxels, palette, style) {
   const groups = {};
   for (const v of voxels) { const pi = v[6]; if (!groups[pi]) groups[pi] = []; groups[pi].push(v); }
   const dummy = new THREE.Object3D();
+  const studGeo = style === "lego" ? new THREE.CylinderGeometry(0.22, 0.22, 0.12, 12) : null;
+  const studRingGeo = style === "lego" ? new THREE.CylinderGeometry(0.25, 0.25, 0.02, 12) : null;
   for (const [pi, list] of Object.entries(groups)) {
     const rgb = palette[Number(pi)] || [128,128,128];
     const material = style === "lego"
@@ -539,14 +541,45 @@ function createViewer(canvas, voxels, palette, style) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const mesh = new THREE.InstancedMesh(geometry, material, list.length);
     const gap = style === "lego" ? 0.94 : 0.985;
+    const studPositions = [];
     list.forEach((v, i) => {
       const [x, y, z, w, h, l] = v;
       dummy.position.set(x + w / 2 - cx, y + h / 2 - cy, z + l / 2 - cz);
       dummy.scale.set(w * gap, h * gap, l * gap);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
+      if (style === "lego") {
+        for (let sx = 0; sx < Math.max(1, Math.round(w)); sx++) {
+          for (let sz = 0; sz < Math.max(1, Math.round(l)); sz++) {
+            studPositions.push([
+              x + sx + 0.5 - cx,
+              y + h - cy + 0.05,
+              z + sz + 0.5 - cz,
+            ]);
+          }
+        }
+      }
     });
     scene.add(mesh);
+    if (style === "lego" && studPositions.length) {
+      const color = new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255);
+      const studColor = color.clone().lerp(new THREE.Color(1, 1, 1), 0.08);
+      const studMat = new THREE.MeshStandardMaterial({ color: studColor, roughness: 0.38, metalness: 0.0 });
+      const ringMat = new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.0 });
+      const studMesh = new THREE.InstancedMesh(studGeo, studMat, studPositions.length);
+      const ringMesh = new THREE.InstancedMesh(studRingGeo, ringMat, studPositions.length);
+      studPositions.forEach(([sx, sy, sz], index) => {
+        dummy.position.set(sx, sy + 0.06, sz);
+        dummy.scale.set(1, 1, 1);
+        dummy.updateMatrix();
+        studMesh.setMatrixAt(index, dummy.matrix);
+        dummy.position.set(sx, sy, sz);
+        dummy.updateMatrix();
+        ringMesh.setMatrixAt(index, dummy.matrix);
+      });
+      scene.add(studMesh);
+      scene.add(ringMesh);
+    }
   }
   const groundY = minY - cy;
   const gridSize = Math.max(footprint * 1.8, Math.min(size * 1.15, footprint * 2.4), 12);
@@ -585,14 +618,14 @@ function createViewer(canvas, voxels, palette, style) {
     ground.position.y = groundY - 0.03;
     scene.add(ground);
   }
-  const targetY = groundY + spanY * (style === "lego" ? 0.49 : 0.48);
+  const targetY = groundY + spanY * 0.5;
   const vFov = THREE.MathUtils.degToRad(camera.fov);
   const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
-  const verticalFit = Math.max(spanY * (style === "lego" ? 0.74 : 0.68), 7) / Math.tan(vFov / 2);
+  const verticalFit = Math.max(spanY * 0.72, 7) / Math.tan(vFov / 2);
   const horizontalFit = Math.max(footprint * 1.08, 7) / Math.tan(hFov / 2);
-  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 0.9 : 0.76);
-  let theta = Math.PI * (style === "lego" ? 0.8 : 0.74);
-  let phi = Math.PI * (style === "lego" ? 0.135 : 0.16);
+  const fitRadius = Math.max(verticalFit, horizontalFit) * (style === "lego" ? 0.88 : 0.82);
+  let theta = Math.PI * 0.78;
+  let phi = Math.PI * (style === "lego" ? 0.14 : 0.155);
   let radius = fitRadius;
   function updateCam() {
     camera.position.set(
