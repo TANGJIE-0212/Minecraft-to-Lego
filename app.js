@@ -38,6 +38,7 @@ let currentXml = null;
 let currentLdrUrl = null;
 let currentXmlUrl = null;
 let _viewers = [];
+let scaleMode = "compact";
 
 function showToast(icon, msg, duration = 4000) {
   const t = document.getElementById("toast");
@@ -61,6 +62,17 @@ btnBack.addEventListener("click", () => {
   resultsOvl.classList.remove("active");
   disposeViewer();
 });
+
+const scaleToggle = document.getElementById("scaleToggle");
+if (scaleToggle) {
+  scaleToggle.addEventListener("click", (e) => {
+    const btn = e.target.closest(".scale-btn");
+    if (!btn) return;
+    scaleMode = btn.dataset.scale;
+    scaleToggle.querySelectorAll(".scale-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+  });
+}
 
 async function upload(file) {
   const ext = (file.name.split(".").pop() || "").toLowerCase();
@@ -107,6 +119,22 @@ async function convertAndOptimize(file) {
     }
     layer.set(key2(x, z), mapped);
   }
+
+  if (scaleMode === "official") {
+    // Official LEGO Minecraft scale: each MC block = 1× Brick 2×2 + 2× Plate 2×2
+    // This creates a 16mm perfect cube (2 studs × 5 plates)
+    const allBricks = [];
+    for (const [key, [cid]] of legoBlocks.entries()) {
+      const [x, y, z] = parseKey3(key);
+      // 3 sub-layers per MC block: bottom plate, middle plate, top brick
+      allBricks.push([x, y * 3,     z, 2, 2, cid, "plate"]);
+      allBricks.push([x, y * 3 + 1, z, 2, 2, cid, "plate"]);
+      allBricks.push([x, y * 3 + 2, z, 2, 2, cid, "brick"]);
+    }
+    allBricks.sort((a, b) => a[1] - b[1] || a[0] - b[0] || a[2] - b[2]);
+    return buildOutputFromBricks(allBricks, { width, height, length }, blocks.size);
+  }
+
   const allBricks = [];
   const sortedLayers = [...layers.entries()].sort((a, b) => a[0] - b[0]);
   for (const [y, layer] of sortedLayers) {
@@ -145,13 +173,22 @@ function buildOutputFromBricks(allBricks, dimensions, totalBlocks) {
       paletteMap.set(key, palette.length);
       palette.push(rgb);
     }
-    const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
-    voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
+    if (scaleMode === "official") {
+      // In official mode, y encodes sub-layers (y%3: 0=bottom plate, 1=mid plate, 2=brick)
+      // For preview, render each MC block as a single 2×2×2 cube (only on sub-layer 0)
+      if (y % 3 === 0) {
+        const mcY = Math.floor(y / 3);
+        voxels.push([x * 2, mcY * 2, z * 2, 2, 2, 2, paletteMap.get(key)]);
+      }
+    } else {
+      const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
+      voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
+    }
   }
   voxels = downsamplePreviewVoxels(voxels);
   const ldrContent = generateLdr(allBricks);
   const bricklinkXml = generateBricklinkXml(partsCounter);
-  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: totalBlocks, total_bricks: allBricks.length, unique_parts: partsCounter.size, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml };
+  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: totalBlocks, total_bricks: allBricks.length, unique_parts: partsCounter.size, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml, scale: scaleMode };
 }
 
 async function readRoot(file) {
@@ -449,8 +486,25 @@ function optimizeLayer(layerCells, width, length) {
 function generateLdr(bricks) {
   const lines = ["0 FILE brickcraft_model.ldr", "0 BrickCraft Converted Model", "0 Name: brickcraft_model.ldr", "0 Author: BrickCraft"];
   for (const [x, y, z, w, l, cid, brickType] of bricks) {
-    const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
-    lines.push(`1 ${cid} ${x * 20} ${-(y * 24)} ${z * 20} 1 0 0 0 1 0 0 0 1 ${part}`);
+    if (scaleMode === "official") {
+      // Official scale: each MC block = 2×2 footprint, 5 plates tall (brick+2 plates)
+      // y encodes sub-layers: y%3==0 bottom plate, y%3==1 mid plate, y%3==2 top brick
+      // LDraw: Y points down, part origin at top surface
+      // Per MC block (40 LDU tall): brick top=0, plate2 top=+24, plate1 top=+32, bottom=+40
+      const mcY = Math.floor(y / 3);
+      const subLayer = y % 3;
+      const xLdr = x * 40;
+      const zLdr = z * 40;
+      let yLdr;
+      if (subLayer === 2) yLdr = -(mcY * 40);           // top brick
+      else if (subLayer === 1) yLdr = -(mcY * 40) + 24;  // middle plate
+      else yLdr = -(mcY * 40) + 32;                       // bottom plate
+      const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
+      lines.push(`1 ${cid} ${xLdr} ${yLdr} ${zLdr} 1 0 0 0 1 0 0 0 1 ${part}`);
+    } else {
+      const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
+      lines.push(`1 ${cid} ${x * 20} ${-(y * 24)} ${z * 20} 1 0 0 0 1 0 0 0 1 ${part}`);
+    }
   }
   lines.push("0");
   return lines.join("\n");

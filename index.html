@@ -1268,6 +1268,29 @@
     .upload-zone input[type=file] { display: none; }
     .upload-zone.uploading { pointer-events: none; opacity: 0.6; }
 
+    /* ── Scale toggle ── */
+    .scale-toggle {
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 12px; justify-content: center;
+    }
+    .scale-label {
+      font-size: 13px; color: var(--text-muted);
+      font-family: 'DM Mono', monospace;
+    }
+    .scale-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 12px; padding: 6px 14px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text-muted);
+      border-radius: 6px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .scale-btn:hover { border-color: var(--border-bright); color: var(--text); }
+    .scale-btn.active {
+      border-color: var(--grass); color: var(--grass);
+      background: rgba(74,222,128,0.08);
+    }
+
     /* ── Results Overlay ── */
     .results-overlay {
       position: fixed; inset: 0; z-index: 500;
@@ -1598,6 +1621,11 @@
           <span class="file-tag">.schem</span>
           <span class="file-tag">.litematic</span>
         </div>
+      </div>
+      <div class="scale-toggle" id="scaleToggle">
+        <span class="scale-label">Scale:</span>
+        <button class="scale-btn active" data-scale="compact" title="1×1 brick per block, compact build">Compact</button>
+        <button class="scale-btn" data-scale="official" title="2×2 brick + 2× 2×2 plates per block, like official LEGO Minecraft sets">Official Cube</button>
       </div>
       <a href="how-to-export.html" class="how-to-link">How to get a schematic from your Minecraft world?</a>
     </div>

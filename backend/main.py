@@ -1,6 +1,6 @@
 """BrickCraft API Server – FastAPI backend."""
 import os
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from fastapi.staticfiles import StaticFiles
@@ -24,7 +24,9 @@ ALLOWED_EXT = {".schem", ".schematic", ".litematic"}
 
 
 @app.post("/api/convert")
-async def convert_file(file: UploadFile = File(...)):
+async def convert_file(file: UploadFile = File(...), scale: str = Form("compact")):
+    if scale not in ("compact", "official"):
+        scale = "compact"
     ext = os.path.splitext(file.filename or "")[1].lower()
     if ext not in ALLOWED_EXT:
         raise HTTPException(400, f"Unsupported file type '{ext}'. Accepted: {', '.join(ALLOWED_EXT)}")
@@ -36,7 +38,7 @@ async def convert_file(file: UploadFile = File(...)):
         raise HTTPException(400, "File too large (max 10 MB)")
 
     try:
-        result = converter.convert_and_optimize(file.filename, data)
+        result = converter.convert_and_optimize(file.filename, data, scale=scale)
     except ImportError as exc:
         raise HTTPException(500, str(exc))
     except Exception as exc:

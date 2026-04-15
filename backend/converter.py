@@ -521,7 +521,7 @@ _LDR_PARTS = {
     ("slope",1,1):"54200.dat",("slope",1,2):"3040.dat",("slope",2,2):"3039.dat",
 }
 
-def generate_ldr(bricks):
+def generate_ldr(bricks, scale="compact"):
     """Generate LDraw (.ldr) file content."""
     lines = [
         "0 FILE brickcraft_model.ldr",
@@ -530,7 +530,21 @@ def generate_ldr(bricks):
         "0 Author: BrickCraft",
     ]
     for x, y, z, w, l, cid, btype in bricks:
-        lx, ly, lz = x * 20, -(y * 24), z * 20
+        if scale == "official":
+            # Official scale: each MC block = 2×2 footprint, 5 plates tall
+            # y encodes sub-layers: y%3==0 bottom plate, y%3==1 mid plate, y%3==2 top brick
+            mc_y = y // 3
+            sub = y % 3
+            lx = x * 40
+            lz = z * 40
+            if sub == 2:
+                ly = -(mc_y * 40)           # top brick
+            elif sub == 1:
+                ly = -(mc_y * 40) + 24      # middle plate
+            else:
+                ly = -(mc_y * 40) + 32      # bottom plate
+        else:
+            lx, ly, lz = x * 20, -(y * 24), z * 20
         part = _LDR_PARTS.get((btype, min(w, l), max(w, l)), "3005.dat")
         lines.append(f"1 {cid} {lx} {ly} {lz} 1 0 0 0 1 0 0 0 1 {part}")
     lines.append("0")
@@ -558,8 +572,10 @@ def generate_bricklink_xml(parts_counter):
 #  Main Conversion Pipeline
 # ═══════════════════════════════════════════════════════
 
-def convert_and_optimize(filename: str, data: bytes) -> dict:
-    """Full pipeline: parse → map → optimize → output."""
+def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> dict:
+    """Full pipeline: parse → map → optimize → output.
+    scale: "compact" (1×1 brick per block) or "official" (2×2 brick + 2× 2×2 plates per block)
+    """
 
     # 1. Parse
     width, height, length, blocks = parse_file(filename, data)
@@ -573,13 +589,24 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
         if m:
             lego_blocks[pos] = m
 
-    # 3. Optimize layer by layer
+    # 3. Build brick list
     all_bricks = []   # (x, y, z, w, l, color_id, brick_type)
-    for y in range(height):
-        layer = {(bx, bz): val for (bx, by, bz), val in lego_blocks.items() if by == y}
-        if layer:
-            for (bx, bz, w, l, cid, bt) in _optimize_layer(layer, width, length):
-                all_bricks.append((bx, y, bz, w, l, cid, bt))
+
+    if scale == "official":
+        # Official LEGO Minecraft scale: each MC block = 1× Brick 2×2 + 2× Plate 2×2
+        # Creates a 16mm perfect cube (2 studs × 5 plates)
+        for (bx, by, bz), (cid, _bt) in lego_blocks.items():
+            all_bricks.append((bx, by * 3,     bz, 2, 2, cid, "plate"))
+            all_bricks.append((bx, by * 3 + 1, bz, 2, 2, cid, "plate"))
+            all_bricks.append((bx, by * 3 + 2, bz, 2, 2, cid, "brick"))
+        all_bricks.sort(key=lambda b: (b[1], b[0], b[2]))
+    else:
+        # Compact mode: optimize layer by layer
+        for y in range(height):
+            layer = {(bx, bz): val for (bx, by, bz), val in lego_blocks.items() if by == y}
+            if layer:
+                for (bx, bz, w, l, cid, bt) in _optimize_layer(layer, width, length):
+                    all_bricks.append((bx, y, bz, w, l, cid, bt))
 
     # 4. Statistics
     parts_counter = Counter()
@@ -612,8 +639,14 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
         if key not in palette_map:
             palette_map[key] = len(palette)
             palette.append(list(rgb))
-        h = 1 if bt == "plate" else (2 if bt == "slope" else 3)
-        voxels.append([x, y * 3, z, w, h, l, palette_map[key]])
+        if scale == "official":
+            # Render each MC block as a single 2×2×2 cube (only on sub-layer 0)
+            if y % 3 == 0:
+                mc_y = y // 3
+                voxels.append([x * 2, mc_y * 2, z * 2, 2, 2, 2, palette_map[key]])
+        else:
+            h = 1 if bt == "plate" else (2 if bt == "slope" else 3)
+            voxels.append([x, y * 3, z, w, h, l, palette_map[key]])
 
     # Cap preview data for very large models
     if len(voxels) > 60000:
@@ -621,7 +654,7 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
         voxels = voxels[::step]
 
     # 6. File outputs
-    ldr = generate_ldr(all_bricks)
+    ldr = generate_ldr(all_bricks, scale)
     xml = generate_bricklink_xml(parts_counter)
     sid = uuid.uuid4().hex[:8]
 
@@ -631,6 +664,7 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
         "total_blocks": len(blocks),
         "total_bricks": len(all_bricks),
         "unique_parts": len(parts_counter),
+        "scale": scale,
 
         "color_summary": color_summary,
         "brick_summary": brick_summary,
