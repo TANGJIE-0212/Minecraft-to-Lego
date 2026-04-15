@@ -7,3 +7,9 @@ __pycache__/
 *.litematic
 test_*.py
 run.py
+
+# Media & promo files
+*.mp4
+*.gif
+*.mov
+twitter_promo.md
