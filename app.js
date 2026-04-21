@@ -7,7 +7,7 @@ const LEGO_COLORS = [
 
 const AIR_BLOCKS = new Set(["air", "cave_air", "void_air", "water", "lava"]);
 const MC_BLOCK_MAP = {
-  stone:[72,"brick"], cobblestone:[8,"brick"], stone_bricks:[71,"brick"], cracked_stone_bricks:[8,"brick"], mossy_stone_bricks:[151,"brick"], smooth_stone:[7,"brick"], polished_granite:[86,"brick"], granite:[25,"brick"], diorite:[7,"brick"], polished_diorite:[15,"brick"], andesite:[72,"brick"], polished_andesite:[8,"brick"], deepslate:[72,"brick"], deepslate_bricks:[8,"brick"], cobbled_deepslate:[8,"brick"], calcite:[15,"brick"], tuff:[72,"brick"], bedrock:[26,"brick"], gravel:[8,"brick"], sand:[19,"brick"], sandstone:[19,"brick"], smooth_sandstone:[138,"brick"], red_sandstone:[25,"brick"], dirt:[86,"brick"], coarse_dirt:[28,"brick"], podzol:[28,"brick"], mud:[28,"brick"], clay:[8,"brick"], grass_block:[37,"brick"], mycelium:[85,"brick"], oak_planks:[19,"brick"], oak_log:[86,"brick"], oak_wood:[86,"brick"], stripped_oak_log:[19,"brick"], spruce_planks:[28,"brick"], spruce_log:[28,"brick"], birch_planks:[15,"brick"], birch_log:[19,"brick"], jungle_planks:[92,"brick"], jungle_log:[86,"brick"], acacia_planks:[25,"brick"], acacia_log:[28,"brick"], dark_oak_planks:[28,"brick"], dark_oak_log:[26,"brick"], mangrove_planks:[4,"brick"], cherry_planks:[29,"brick"], bamboo_planks:[14,"brick"], crimson_planks:[4,"brick"], warped_planks:[3,"brick"], white_wool:[15,"brick"], orange_wool:[36,"brick"], magenta_wool:[124,"brick"], light_blue_wool:[9,"brick"], yellow_wool:[14,"brick"], lime_wool:[37,"brick"], pink_wool:[77,"brick"], gray_wool:[72,"brick"], light_gray_wool:[7,"brick"], cyan_wool:[3,"brick"], purple_wool:[85,"brick"], blue_wool:[1,"brick"], brown_wool:[6,"brick"], green_wool:[2,"brick"], red_wool:[4,"brick"], black_wool:[26,"brick"], white_concrete:[15,"brick"], orange_concrete:[36,"brick"], magenta_concrete:[69,"brick"], light_blue_concrete:[9,"brick"], yellow_concrete:[14,"brick"], lime_concrete:[37,"brick"], pink_concrete:[77,"brick"], gray_concrete:[72,"brick"], light_gray_concrete:[7,"brick"], cyan_concrete:[3,"brick"], purple_concrete:[85,"brick"], blue_concrete:[1,"brick"], brown_concrete:[6,"brick"], green_concrete:[2,"brick"], red_concrete:[4,"brick"], black_concrete:[26,"brick"], terracotta:[86,"brick"], white_terracotta:[15,"brick"], orange_terracotta:[25,"brick"], magenta_terracotta:[124,"brick"], light_blue_terracotta:[73,"brick"], yellow_terracotta:[226,"brick"], lime_terracotta:[115,"brick"], pink_terracotta:[100,"brick"], gray_terracotta:[8,"brick"], light_gray_terracotta:[7,"brick"], cyan_terracotta:[378,"brick"], purple_terracotta:[373,"brick"], blue_terracotta:[379,"brick"], brown_terracotta:[335,"brick"], green_terracotta:[141,"brick"], red_terracotta:[335,"brick"], black_terracotta:[26,"brick"], glass:[40,"brick"], glass_pane:[40,"plate"], white_stained_glass:[40,"brick"], orange_stained_glass:[46,"brick"], light_blue_stained_glass:[43,"brick"], yellow_stained_glass:[44,"brick"], lime_stained_glass:[47,"brick"], cyan_stained_glass:[43,"brick"], blue_stained_glass:[45,"brick"], red_stained_glass:[41,"brick"], coal_ore:[26,"brick"], iron_ore:[86,"brick"], copper_ore:[25,"brick"], gold_ore:[14,"brick"], redstone_ore:[4,"brick"], emerald_ore:[2,"brick"], lapis_ore:[1,"brick"], diamond_ore:[9,"brick"], iron_block:[7,"brick"], gold_block:[14,"brick"], diamond_block:[9,"brick"], emerald_block:[2,"brick"], lapis_block:[1,"brick"], redstone_block:[4,"brick"], copper_block:[25,"brick"], netherite_block:[26,"brick"], netherrack:[4,"brick"], nether_bricks:[26,"brick"], red_nether_bricks:[4,"brick"], soul_sand:[28,"brick"], basalt:[72,"brick"], blackstone:[26,"brick"], quartz_block:[15,"brick"], smooth_quartz:[15,"brick"], glowstone:[14,"brick"], shroomlight:[14,"brick"], magma_block:[4,"brick"], end_stone:[226,"brick"], end_stone_bricks:[226,"brick"], purpur_block:[112,"brick"], obsidian:[26,"brick"], crying_obsidian:[85,"brick"], bricks:[4,"brick"], bookshelf:[19,"brick"], prismarine:[3,"brick"], prismarine_bricks:[9,"brick"], dark_prismarine:[27,"brick"], sea_lantern:[40,"brick"], hay_block:[14,"brick"], honeycomb_block:[36,"brick"], amethyst_block:[85,"brick"], snow_block:[15,"brick"], ice:[9,"brick"], packed_ice:[9,"brick"], blue_ice:[1,"brick"], oak_stairs:[19,"slope"], spruce_stairs:[28,"slope"], birch_stairs:[15,"slope"], jungle_stairs:[92,"slope"], acacia_stairs:[25,"slope"], dark_oak_stairs:[28,"slope"], stone_stairs:[72,"slope"], cobblestone_stairs:[8,"slope"], stone_brick_stairs:[71,"slope"], sandstone_stairs:[19,"slope"], quartz_stairs:[15,"slope"], brick_stairs:[4,"slope"], nether_brick_stairs:[26,"slope"], purpur_stairs:[112,"slope"], oak_slab:[19,"plate"], spruce_slab:[28,"plate"], birch_slab:[15,"plate"], stone_slab:[72,"plate"], cobblestone_slab:[8,"plate"], stone_brick_slab:[71,"plate"], sandstone_slab:[19,"plate"], quartz_slab:[15,"plate"], brick_slab:[4,"plate"], oak_leaves:[37,"plate"], spruce_leaves:[2,"plate"], birch_leaves:[10,"plate"], jungle_leaves:[2,"plate"], acacia_leaves:[37,"plate"], dark_oak_leaves:[2,"plate"], mangrove_leaves:[2,"plate"], cherry_leaves:[29,"plate"],
+  stone:[72,"brick"], cobblestone:[8,"brick"], stone_bricks:[71,"brick"], cracked_stone_bricks:[8,"brick"], mossy_stone_bricks:[151,"brick"], smooth_stone:[7,"brick"], polished_granite:[86,"brick"], granite:[25,"brick"], diorite:[7,"brick"], polished_diorite:[15,"brick"], andesite:[72,"brick"], polished_andesite:[8,"brick"], deepslate:[72,"brick"], deepslate_bricks:[8,"brick"], cobbled_deepslate:[8,"brick"], calcite:[15,"brick"], tuff:[72,"brick"], bedrock:[26,"brick"], gravel:[8,"brick"], sand:[19,"brick"], sandstone:[19,"brick"], smooth_sandstone:[138,"brick"], red_sandstone:[25,"brick"], dirt:[86,"brick"], coarse_dirt:[28,"brick"], podzol:[28,"brick"], mud:[28,"brick"], clay:[8,"brick"], grass_block:[37,"brick"], mycelium:[85,"brick"], oak_planks:[19,"brick"], oak_log:[86,"brick"], oak_wood:[86,"brick"], stripped_oak_log:[19,"brick"], spruce_planks:[28,"brick"], spruce_log:[28,"brick"], birch_planks:[15,"brick"], birch_log:[19,"brick"], jungle_planks:[92,"brick"], jungle_log:[86,"brick"], acacia_planks:[25,"brick"], acacia_log:[28,"brick"], dark_oak_planks:[28,"brick"], dark_oak_log:[26,"brick"], mangrove_planks:[4,"brick"], cherry_planks:[29,"brick"], bamboo_planks:[14,"brick"], crimson_planks:[4,"brick"], warped_planks:[3,"brick"], white_wool:[15,"brick"], orange_wool:[36,"brick"], magenta_wool:[124,"brick"], light_blue_wool:[9,"brick"], yellow_wool:[14,"brick"], lime_wool:[37,"brick"], pink_wool:[77,"brick"], gray_wool:[72,"brick"], light_gray_wool:[7,"brick"], cyan_wool:[3,"brick"], purple_wool:[85,"brick"], blue_wool:[1,"brick"], brown_wool:[6,"brick"], green_wool:[2,"brick"], red_wool:[4,"brick"], black_wool:[26,"brick"], white_concrete:[15,"brick"], orange_concrete:[36,"brick"], magenta_concrete:[69,"brick"], light_blue_concrete:[9,"brick"], yellow_concrete:[14,"brick"], lime_concrete:[37,"brick"], pink_concrete:[77,"brick"], gray_concrete:[72,"brick"], light_gray_concrete:[7,"brick"], cyan_concrete:[3,"brick"], purple_concrete:[85,"brick"], blue_concrete:[1,"brick"], brown_concrete:[6,"brick"], green_concrete:[2,"brick"], red_concrete:[4,"brick"], black_concrete:[26,"brick"], terracotta:[86,"brick"], white_terracotta:[15,"brick"], orange_terracotta:[25,"brick"], magenta_terracotta:[124,"brick"], light_blue_terracotta:[73,"brick"], yellow_terracotta:[226,"brick"], lime_terracotta:[115,"brick"], pink_terracotta:[100,"brick"], gray_terracotta:[8,"brick"], light_gray_terracotta:[7,"brick"], cyan_terracotta:[378,"brick"], purple_terracotta:[373,"brick"], blue_terracotta:[379,"brick"], brown_terracotta:[335,"brick"], green_terracotta:[141,"brick"], red_terracotta:[335,"brick"], black_terracotta:[26,"brick"], glass:[40,"brick"], glass_pane:[40,"plate"], white_stained_glass:[40,"brick"], orange_stained_glass:[46,"brick"], light_blue_stained_glass:[43,"brick"], yellow_stained_glass:[44,"brick"], lime_stained_glass:[47,"brick"], cyan_stained_glass:[43,"brick"], blue_stained_glass:[45,"brick"], red_stained_glass:[41,"brick"], coal_ore:[26,"brick"], iron_ore:[86,"brick"], copper_ore:[25,"brick"], gold_ore:[14,"brick"], redstone_ore:[4,"brick"], emerald_ore:[2,"brick"], lapis_ore:[1,"brick"], diamond_ore:[9,"brick"], iron_block:[7,"brick"], gold_block:[14,"brick"], diamond_block:[9,"brick"], emerald_block:[2,"brick"], lapis_block:[1,"brick"], redstone_block:[4,"brick"], copper_block:[25,"brick"], netherite_block:[26,"brick"], netherrack:[4,"brick"], nether_bricks:[26,"brick"], red_nether_bricks:[4,"brick"], soul_sand:[28,"brick"], basalt:[72,"brick"], blackstone:[26,"brick"], quartz_block:[15,"brick"], smooth_quartz:[15,"brick"], glowstone:[14,"brick"], shroomlight:[14,"brick"], magma_block:[4,"brick"], end_stone:[226,"brick"], end_stone_bricks:[226,"brick"], purpur_block:[112,"brick"], obsidian:[26,"brick"], crying_obsidian:[85,"brick"], bricks:[4,"brick"], bookshelf:[19,"brick"], prismarine:[3,"brick"], prismarine_bricks:[9,"brick"], dark_prismarine:[27,"brick"], sea_lantern:[40,"brick"], hay_block:[14,"brick"], honeycomb_block:[36,"brick"], amethyst_block:[85,"brick"], snow_block:[15,"brick"], ice:[9,"brick"], packed_ice:[9,"brick"], blue_ice:[1,"brick"], oak_stairs:[19,"slope"], spruce_stairs:[28,"slope"], birch_stairs:[15,"slope"], jungle_stairs:[92,"slope"], acacia_stairs:[25,"slope"], dark_oak_stairs:[28,"slope"], stone_stairs:[72,"slope"], cobblestone_stairs:[8,"slope"], stone_brick_stairs:[71,"slope"], sandstone_stairs:[19,"slope"], quartz_stairs:[15,"slope"], brick_stairs:[4,"slope"], nether_brick_stairs:[26,"slope"], purpur_stairs:[112,"slope"], oak_slab:[19,"plate"], spruce_slab:[28,"plate"], birch_slab:[15,"plate"], stone_slab:[72,"plate"], cobblestone_slab:[8,"plate"], stone_brick_slab:[71,"plate"], sandstone_slab:[19,"plate"], quartz_slab:[15,"plate"], brick_slab:[4,"plate"], jungle_slab:[92,"plate"], acacia_slab:[25,"plate"], dark_oak_slab:[28,"plate"], mangrove_slab:[4,"plate"], cherry_slab:[29,"plate"], bamboo_slab:[14,"plate"], crimson_slab:[4,"plate"], warped_slab:[3,"plate"], smooth_stone_slab:[7,"plate"], smooth_sandstone_slab:[138,"plate"], red_sandstone_slab:[25,"plate"], nether_brick_slab:[26,"plate"], purpur_slab:[112,"plate"], prismarine_slab:[3,"plate"], prismarine_brick_slab:[9,"plate"], dark_prismarine_slab:[27,"plate"], deepslate_brick_slab:[8,"plate"], cobbled_deepslate_slab:[8,"plate"], polished_deepslate_slab:[72,"plate"], blackstone_slab:[26,"plate"], polished_blackstone_slab:[26,"plate"], polished_blackstone_brick_slab:[26,"plate"], end_stone_brick_slab:[226,"plate"], mossy_stone_brick_slab:[151,"plate"], mossy_cobblestone_slab:[151,"plate"], andesite_slab:[72,"plate"], granite_slab:[25,"plate"], diorite_slab:[7,"plate"], polished_andesite_slab:[8,"plate"], polished_granite_slab:[86,"plate"], polished_diorite_slab:[15,"plate"], red_nether_brick_slab:[4,"plate"], jungle_stairs:[92,"slope"], acacia_stairs:[25,"slope"], dark_oak_stairs:[28,"slope"], mangrove_stairs:[4,"slope"], cherry_stairs:[29,"slope"], bamboo_stairs:[14,"slope"], crimson_stairs:[4,"slope"], warped_stairs:[3,"slope"], smooth_sandstone_stairs:[138,"slope"], red_sandstone_stairs:[25,"slope"], prismarine_stairs:[3,"slope"], prismarine_brick_stairs:[9,"slope"], dark_prismarine_stairs:[27,"slope"], deepslate_brick_stairs:[8,"slope"], cobbled_deepslate_stairs:[8,"slope"], polished_deepslate_stairs:[72,"slope"], blackstone_stairs:[26,"slope"], polished_blackstone_stairs:[26,"slope"], polished_blackstone_brick_stairs:[26,"slope"], end_stone_brick_stairs:[226,"slope"], mossy_stone_brick_stairs:[151,"slope"], mossy_cobblestone_stairs:[151,"slope"], andesite_stairs:[72,"slope"], granite_stairs:[25,"slope"], diorite_stairs:[7,"slope"], polished_andesite_stairs:[8,"slope"], polished_granite_stairs:[86,"slope"], polished_diorite_stairs:[15,"slope"], red_nether_brick_stairs:[4,"slope"], oak_leaves:[37,"plate"], spruce_leaves:[2,"plate"], birch_leaves:[10,"plate"], jungle_leaves:[2,"plate"], acacia_leaves:[37,"plate"], dark_oak_leaves:[2,"plate"], mangrove_leaves:[2,"plate"], cherry_leaves:[29,"plate"],
 };
 
 const LDRAW_TO_BL = {1:7,2:6,3:39,4:5,6:8,7:9,8:10,9:62,10:36,14:3,15:1,19:2,25:91,26:11,27:80,28:120,29:27,36:4,37:34,38:68,39:49,40:12,41:17,43:15,44:19,45:14,46:98,47:20,69:71,70:59,71:86,72:85,73:42,74:37,77:56,85:89,86:91,92:28,100:26,110:43,112:73,115:76,118:152,124:104,135:55,138:69,140:63,141:80,151:48,191:110,216:27,226:103,272:63,288:80,297:115,308:120,320:59,321:153,322:156,323:152,324:154,325:157,330:155,335:58,351:23,353:220,366:68,373:54,378:48,379:55};
@@ -99,6 +99,30 @@ async function upload(file) {
   }
 }
 
+// Stair step helper for official scale mode
+// Generates 1×2 brick sub-units for the raised portion of a stair
+// In a 2×2 stud footprint, the "high side" gets 3 extra plate layers
+function getStairStepBricks(x, yBase, z, facing, cid, inverted) {
+  const bricks = [];
+  // For a 2×2 footprint, we place 1×2 plates on the high side for 3 layers
+  // facing = direction the stair ascends toward (the full-height side)
+  for (let layer = 0; layer < 3; layer++) {
+    const sy = yBase + layer;
+    if (facing === "north") {
+      // High side is north (lower z)
+      bricks.push([x, sy, z, 2, 1, cid, "plate"]);
+    } else if (facing === "south") {
+      bricks.push([x, sy, z + 1, 2, 1, cid, "plate"]);
+    } else if (facing === "west") {
+      bricks.push([x, sy, z, 1, 2, cid, "plate"]);
+    } else {
+      // east (default)
+      bricks.push([x + 1, sy, z, 1, 2, cid, "plate"]);
+    }
+  }
+  return bricks;
+}
+
 async function convertAndOptimize(file) {
   const root = await readRoot(file);
   const { width, height, length, blocks } = parseFile(file.name, root);
@@ -123,13 +147,59 @@ async function convertAndOptimize(file) {
   if (scaleMode === "official") {
     // Official LEGO Minecraft scale: each MC block = 1× Brick 2×2 + 2× Plate 2×2
     // This creates a 16mm perfect cube (2 studs × 5 plates)
+    // Slabs = half height (2 plates), Stairs = stepped shape
     const allBricks = [];
-    for (const [key, [cid]] of legoBlocks.entries()) {
+    for (const [key, [cid, btype]] of legoBlocks.entries()) {
       const [x, y, z] = parseKey3(key);
-      // 3 sub-layers per MC block: bottom plate, middle plate, top brick
-      allBricks.push([x, y * 3,     z, 2, 2, cid, "plate"]);
-      allBricks.push([x, y * 3 + 1, z, 2, 2, cid, "plate"]);
-      allBricks.push([x, y * 3 + 2, z, 2, 2, cid, "brick"]);
+      const rawName = blocks.get(key) || "";
+      const baseName = normalizeBlockName(rawName);
+      const state = parseBlockState(rawName);
+
+      if (btype === "plate" && baseName.endsWith("_slab")) {
+        // Slab: 2 plates tall (half a cube). type=double → full block
+        if (state.type === "double") {
+          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 2, z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "brick"]);
+        } else if (state.half === "top") {
+          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "plate"]);
+        } else {
+          // bottom (default)
+          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
+        }
+      } else if (btype === "slope" && baseName.endsWith("_stairs")) {
+        // Stairs: bottom half is 2 plates full width, top half is 1×2 bricks on the high side
+        // facing determines which side is high
+        const facing = state.facing || "north";
+        const half = state.half || "bottom";
+        // Bottom 2 plates always full
+        if (half === "top") {
+          // Upside-down stair: top 2 plates full, bottom stepped
+          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "plate"]);
+          // Bottom step: high side gets extra plates
+          const stepBricks = getStairStepBricks(x, y * 5, z, facing, cid, true);
+          allBricks.push(...stepBricks);
+        } else {
+          // Normal stair: bottom 2 plates full, top stepped
+          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
+          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
+          // Top step
+          const stepBricks = getStairStepBricks(x, y * 5 + 2, z, facing, cid, false);
+          allBricks.push(...stepBricks);
+        }
+      } else {
+        // Full block: 5 sub-layers (3 plates + 1 brick equivalent)
+        allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
+        allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
+        allBricks.push([x, y * 5 + 2, z, 2, 2, cid, "plate"]);
+        allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
+        allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "brick"]);
+      }
     }
     allBricks.sort((a, b) => a[1] - b[1] || a[0] - b[0] || a[2] - b[2]);
     return buildOutputFromBricks(allBricks, { width, height, length }, blocks.size);
@@ -174,10 +244,10 @@ function buildOutputFromBricks(allBricks, dimensions, totalBlocks) {
       palette.push(rgb);
     }
     if (scaleMode === "official") {
-      // In official mode, y encodes sub-layers (y%3: 0=bottom plate, 1=mid plate, 2=brick)
+      // In official mode, y encodes sub-layers (5 per MC block)
       // For preview, render each MC block as a single 2×2×2 cube (only on sub-layer 0)
-      if (y % 3 === 0) {
-        const mcY = Math.floor(y / 3);
+      if (y % 5 === 0) {
+        const mcY = Math.floor(y / 5);
         voxels.push([x * 2, mcY * 2, z * 2, 2, 2, 2, paletteMap.get(key)]);
       }
     } else {
@@ -414,6 +484,20 @@ function normalizeBlockName(name) {
   return value;
 }
 
+function parseBlockState(name) {
+  const str = String(name).toLowerCase().trim();
+  const props = {};
+  const bracketIdx = str.indexOf("[");
+  if (bracketIdx === -1) return props;
+  const end = str.indexOf("]", bracketIdx);
+  const inner = str.slice(bracketIdx + 1, end === -1 ? undefined : end);
+  for (const pair of inner.split(",")) {
+    const [k, v] = pair.split("=");
+    if (k && v) props[k.trim()] = v.trim();
+  }
+  return props;
+}
+
 function colorDistSq(c1, c2) {
   const dr = c1[0] - c2[0];
   const dg = c1[1] - c2[1];
@@ -487,18 +571,14 @@ function generateLdr(bricks) {
   const lines = ["0 FILE brickcraft_model.ldr", "0 BrickCraft Converted Model", "0 Name: brickcraft_model.ldr", "0 Author: BrickCraft"];
   for (const [x, y, z, w, l, cid, brickType] of bricks) {
     if (scaleMode === "official") {
-      // Official scale: each MC block = 2×2 footprint, 5 plates tall (brick+2 plates)
-      // y encodes sub-layers: y%3==0 bottom plate, y%3==1 mid plate, y%3==2 top brick
-      // LDraw: Y points down, part origin at top surface
-      // Per MC block (40 LDU tall): brick top=0, plate2 top=+24, plate1 top=+32, bottom=+40
-      const mcY = Math.floor(y / 3);
-      const subLayer = y % 3;
+      // Official scale: each MC block = 2×2 footprint, 5 plates tall (40 LDU)
+      // y encodes sub-layers: 5 per MC block, each plate = 8 LDU
+      const mcY = Math.floor(y / 5);
+      const subLayer = y % 5;
       const xLdr = x * 40;
       const zLdr = z * 40;
-      let yLdr;
-      if (subLayer === 2) yLdr = -(mcY * 40);           // top brick
-      else if (subLayer === 1) yLdr = -(mcY * 40) + 24;  // middle plate
-      else yLdr = -(mcY * 40) + 32;                       // bottom plate
+      // LDraw Y points down; sub-layer 4 is top, 0 is bottom
+      const yLdr = -(mcY * 40) + (4 - subLayer) * 8;
       const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
       lines.push(`1 ${cid} ${xLdr} ${yLdr} ${zLdr} 1 0 0 0 1 0 0 0 1 ${part}`);
     } else {

@@ -113,6 +113,33 @@ MC_BLOCK_MAP = {
     "stone_slab":(72,"plate"),"cobblestone_slab":(8,"plate"),
     "stone_brick_slab":(71,"plate"),"sandstone_slab":(19,"plate"),
     "quartz_slab":(15,"plate"),"brick_slab":(4,"plate"),
+    "jungle_slab":(92,"plate"),"acacia_slab":(25,"plate"),"dark_oak_slab":(28,"plate"),
+    "mangrove_slab":(4,"plate"),"cherry_slab":(29,"plate"),"bamboo_slab":(14,"plate"),
+    "crimson_slab":(4,"plate"),"warped_slab":(3,"plate"),
+    "smooth_stone_slab":(7,"plate"),"smooth_sandstone_slab":(138,"plate"),
+    "red_sandstone_slab":(25,"plate"),"nether_brick_slab":(26,"plate"),
+    "purpur_slab":(112,"plate"),"prismarine_slab":(3,"plate"),
+    "prismarine_brick_slab":(9,"plate"),"dark_prismarine_slab":(27,"plate"),
+    "deepslate_brick_slab":(8,"plate"),"cobbled_deepslate_slab":(8,"plate"),
+    "polished_deepslate_slab":(72,"plate"),"blackstone_slab":(26,"plate"),
+    "polished_blackstone_slab":(26,"plate"),"polished_blackstone_brick_slab":(26,"plate"),
+    "end_stone_brick_slab":(226,"plate"),"mossy_stone_brick_slab":(151,"plate"),
+    "mossy_cobblestone_slab":(151,"plate"),"andesite_slab":(72,"plate"),
+    "granite_slab":(25,"plate"),"diorite_slab":(7,"plate"),
+    "polished_andesite_slab":(8,"plate"),"polished_granite_slab":(86,"plate"),
+    "polished_diorite_slab":(15,"plate"),"red_nether_brick_slab":(4,"plate"),
+    "mangrove_stairs":(4,"slope"),"cherry_stairs":(29,"slope"),"bamboo_stairs":(14,"slope"),
+    "crimson_stairs":(4,"slope"),"warped_stairs":(3,"slope"),
+    "smooth_sandstone_stairs":(138,"slope"),"red_sandstone_stairs":(25,"slope"),
+    "prismarine_stairs":(3,"slope"),"prismarine_brick_stairs":(9,"slope"),
+    "dark_prismarine_stairs":(27,"slope"),"deepslate_brick_stairs":(8,"slope"),
+    "cobbled_deepslate_stairs":(8,"slope"),"polished_deepslate_stairs":(72,"slope"),
+    "blackstone_stairs":(26,"slope"),"polished_blackstone_stairs":(26,"slope"),
+    "polished_blackstone_brick_stairs":(26,"slope"),"end_stone_brick_stairs":(226,"slope"),
+    "mossy_stone_brick_stairs":(151,"slope"),"mossy_cobblestone_stairs":(151,"slope"),
+    "andesite_stairs":(72,"slope"),"granite_stairs":(25,"slope"),"diorite_stairs":(7,"slope"),
+    "polished_andesite_stairs":(8,"slope"),"polished_granite_stairs":(86,"slope"),
+    "polished_diorite_stairs":(15,"slope"),"red_nether_brick_stairs":(4,"slope"),
     "oak_leaves":(37,"plate"),"spruce_leaves":(2,"plate"),"birch_leaves":(10,"plate"),
     "jungle_leaves":(2,"plate"),"acacia_leaves":(37,"plate"),"dark_oak_leaves":(2,"plate"),
     "mangrove_leaves":(2,"plate"),"cherry_leaves":(29,"plate"),
@@ -416,6 +443,22 @@ def normalize_block_name(name: str) -> str:
     return name
 
 
+def parse_block_state(name: str) -> dict:
+    """Extract block state properties from a block name like 'oak_stairs[facing=east,half=bottom]'."""
+    name = name.lower().strip()
+    props = {}
+    bracket_idx = name.find('[')
+    if bracket_idx == -1:
+        return props
+    end = name.find(']', bracket_idx)
+    inner = name[bracket_idx + 1: end if end != -1 else None]
+    for pair in inner.split(','):
+        parts = pair.split('=', 1)
+        if len(parts) == 2:
+            props[parts[0].strip()] = parts[1].strip()
+    return props
+
+
 def _color_dist_sq(c1, c2):
     dr, dg, db = c1[0] - c2[0], c1[1] - c2[1], c1[2] - c2[2]
     return 2 * dr * dr + 4 * dg * dg + 3 * db * db
@@ -456,6 +499,22 @@ def map_block_to_lego(block_name: str):
 # ═══════════════════════════════════════════════════════
 #  Brick Optimization – Greedy Layer Merge
 # ═══════════════════════════════════════════════════════
+
+def _get_stair_step_bricks(x, y_base, z, facing, cid):
+    """Generate 1×2 plate sub-units for the raised portion of a stair."""
+    bricks = []
+    for layer in range(3):
+        sy = y_base + layer
+        if facing == "north":
+            bricks.append((x, sy, z, 2, 1, cid, "plate"))
+        elif facing == "south":
+            bricks.append((x, sy, z + 1, 2, 1, cid, "plate"))
+        elif facing == "west":
+            bricks.append((x, sy, z, 1, 2, cid, "plate"))
+        else:  # east
+            bricks.append((x + 1, sy, z, 1, 2, cid, "plate"))
+    return bricks
+
 
 MERGE_SIZES = [(2, 4), (2, 3), (2, 2), (1, 4), (1, 3), (1, 2), (1, 1)]
 
@@ -531,18 +590,12 @@ def generate_ldr(bricks, scale="compact"):
     ]
     for x, y, z, w, l, cid, btype in bricks:
         if scale == "official":
-            # Official scale: each MC block = 2×2 footprint, 5 plates tall
-            # y encodes sub-layers: y%3==0 bottom plate, y%3==1 mid plate, y%3==2 top brick
-            mc_y = y // 3
-            sub = y % 3
+            # Official scale: 5 sub-layers per MC block, each plate = 8 LDU
+            mc_y = y // 5
+            sub = y % 5
             lx = x * 40
             lz = z * 40
-            if sub == 2:
-                ly = -(mc_y * 40)           # top brick
-            elif sub == 1:
-                ly = -(mc_y * 40) + 24      # middle plate
-            else:
-                ly = -(mc_y * 40) + 32      # bottom plate
+            ly = -(mc_y * 40) + (4 - sub) * 8
         else:
             lx, ly, lz = x * 20, -(y * 24), z * 20
         part = _LDR_PARTS.get((btype, min(w, l), max(w, l)), "3005.dat")
@@ -593,12 +646,39 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
     all_bricks = []   # (x, y, z, w, l, color_id, brick_type)
 
     if scale == "official":
-        # Official LEGO Minecraft scale: each MC block = 1× Brick 2×2 + 2× Plate 2×2
-        # Creates a 16mm perfect cube (2 studs × 5 plates)
-        for (bx, by, bz), (cid, _bt) in lego_blocks.items():
-            all_bricks.append((bx, by * 3,     bz, 2, 2, cid, "plate"))
-            all_bricks.append((bx, by * 3 + 1, bz, 2, 2, cid, "plate"))
-            all_bricks.append((bx, by * 3 + 2, bz, 2, 2, cid, "brick"))
+        # Official LEGO Minecraft scale: each MC block = 5 plates tall (2×2 footprint)
+        # Slabs = 2 plates, Stairs = stepped shape
+        for (bx, by, bz), (cid, btype) in lego_blocks.items():
+            raw_name = blocks.get((bx, by, bz), "")
+            base_name = normalize_block_name(raw_name)
+            state = parse_block_state(raw_name)
+
+            if btype == "plate" and base_name.endswith("_slab"):
+                if state.get("type") == "double":
+                    for i in range(4):
+                        all_bricks.append((bx, by * 5 + i, bz, 2, 2, cid, "plate"))
+                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "brick"))
+                elif state.get("half") == "top":
+                    all_bricks.append((bx, by * 5 + 3, bz, 2, 2, cid, "plate"))
+                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "plate"))
+                else:
+                    all_bricks.append((bx, by * 5,     bz, 2, 2, cid, "plate"))
+                    all_bricks.append((bx, by * 5 + 1, bz, 2, 2, cid, "plate"))
+            elif btype == "slope" and base_name.endswith("_stairs"):
+                facing = state.get("facing", "north")
+                half = state.get("half", "bottom")
+                if half == "top":
+                    all_bricks.append((bx, by * 5 + 3, bz, 2, 2, cid, "plate"))
+                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "plate"))
+                    all_bricks.extend(_get_stair_step_bricks(bx, by * 5, bz, facing, cid))
+                else:
+                    all_bricks.append((bx, by * 5,     bz, 2, 2, cid, "plate"))
+                    all_bricks.append((bx, by * 5 + 1, bz, 2, 2, cid, "plate"))
+                    all_bricks.extend(_get_stair_step_bricks(bx, by * 5 + 2, bz, facing, cid))
+            else:
+                for i in range(4):
+                    all_bricks.append((bx, by * 5 + i, bz, 2, 2, cid, "plate"))
+                all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "brick"))
         all_bricks.sort(key=lambda b: (b[1], b[0], b[2]))
     else:
         # Compact mode: optimize layer by layer
@@ -641,8 +721,8 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
             palette.append(list(rgb))
         if scale == "official":
             # Render each MC block as a single 2×2×2 cube (only on sub-layer 0)
-            if y % 3 == 0:
-                mc_y = y // 3
+            if y % 5 == 0:
+                mc_y = y // 5
                 voxels.append([x * 2, mc_y * 2, z * 2, 2, 2, 2, palette_map[key]])
         else:
             h = 1 if bt == "plate" else (2 if bt == "slope" else 3)
