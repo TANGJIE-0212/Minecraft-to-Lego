@@ -1268,29 +1268,6 @@
     .upload-zone input[type=file] { display: none; }
     .upload-zone.uploading { pointer-events: none; opacity: 0.6; }
 
-    /* ── Scale toggle ── */
-    .scale-toggle {
-      display: flex; align-items: center; gap: 8px;
-      margin-top: 12px; justify-content: center;
-    }
-    .scale-label {
-      font-size: 13px; color: var(--text-muted);
-      font-family: 'DM Mono', monospace;
-    }
-    .scale-btn {
-      font-family: 'DM Mono', monospace;
-      font-size: 12px; padding: 6px 14px;
-      border: 1px solid var(--border);
-      background: transparent; color: var(--text-muted);
-      border-radius: 6px; cursor: pointer;
-      transition: all 0.2s;
-    }
-    .scale-btn:hover { border-color: var(--border-bright); color: var(--text); }
-    .scale-btn.active {
-      border-color: var(--grass); color: var(--grass);
-      background: rgba(74,222,128,0.08);
-    }
-
     /* ── Results Overlay ── */
     .results-overlay {
       position: fixed; inset: 0; z-index: 500;
@@ -1567,40 +1544,36 @@
         <div class="step-details-visual">
           <div class="showcase-stats">
             <div class="showcase-stat">
-              <span class="showcase-stat-val">64</span>
+              <span class="showcase-stat-val">285</span>
               <span class="showcase-stat-label">Bricks</span>
             </div>
             <div class="showcase-stat">
-              <span class="showcase-stat-val">12</span>
+              <span class="showcase-stat-val">8</span>
               <span class="showcase-stat-label">Colors</span>
             </div>
             <div class="showcase-stat">
-              <span class="showcase-stat-val">8×8×1</span>
+              <span class="showcase-stat-val">20×22×18</span>
               <span class="showcase-stat-label">Size</span>
             </div>
           </div>
           <div class="showcase-colors">
-            <span class="showcase-color-chip" style="background:#d4a76a"></span>
-            <span class="showcase-color-chip" style="background:#ef4444"></span>
-            <span class="showcase-color-chip" style="background:#dc2626"></span>
-            <span class="showcase-color-chip" style="background:#c09660"></span>
-            <span class="showcase-color-chip" style="background:#60a5fa"></span>
-            <span class="showcase-color-chip" style="background:#93c5fd"></span>
-            <span class="showcase-color-chip" style="background:#9ca3af"></span>
-            <span class="showcase-color-chip" style="background:#92400e"></span>
-            <span class="showcase-color-chip" style="background:#a16207"></span>
-            <span class="showcase-color-chip" style="background:#4ade80"></span>
-            <span class="showcase-color-chip" style="background:#22c55e"></span>
-            <span class="showcase-color-chip" style="background:#78716c"></span>
+            <span class="showcase-color-chip" style="background:#212121"></span>
+            <span class="showcase-color-chip" style="background:#c4281c"></span>
+            <span class="showcase-color-chip" style="background:#ffffff"></span>
+            <span class="showcase-color-chip" style="background:#afb5c7"></span>
+            <span class="showcase-color-chip" style="background:#7e6037"></span>
+            <span class="showcase-color-chip" style="background:#f5cd30"></span>
+            <span class="showcase-color-chip" style="background:#e4cd9e"></span>
+            <span class="showcase-color-chip" style="background:#789082"></span>
           </div>
           <div class="showcase-parts-preview">
             <table>
               <tr><th>Part</th><th>Color</th><th>Qty</th></tr>
-              <tr><td>Plate 1×1</td><td>Wood Tan</td><td>20</td></tr>
-              <tr><td>Plate 1×1</td><td>Red</td><td>8</td></tr>
-              <tr><td>Plate 1×1</td><td>Dark Gray</td><td>8</td></tr>
-              <tr><td>Plate 1×1</td><td>Stone Gray</td><td>6</td></tr>
-              <tr><td>Plate 1×1</td><td>Medium Blue</td><td>4</td></tr>
+              <tr><td>Brick 1×1</td><td>Red</td><td>57</td></tr>
+              <tr><td>Brick 1×8</td><td>Black</td><td>32</td></tr>
+              <tr><td>Brick 1×1</td><td>Black</td><td>31</td></tr>
+              <tr><td>Brick 1×3</td><td>White</td><td>20</td></tr>
+              <tr><td>Brick 2×10</td><td>Light Bluish Gray</td><td>15</td></tr>
             </table>
           </div>
         </div>
@@ -1621,11 +1594,6 @@
           <span class="file-tag">.schem</span>
           <span class="file-tag">.litematic</span>
         </div>
-      </div>
-      <div class="scale-toggle" id="scaleToggle">
-        <span class="scale-label">Scale:</span>
-        <button class="scale-btn active" data-scale="compact" title="1×1 brick per block, compact build">Compact</button>
-        <button class="scale-btn" data-scale="official" title="2×2 brick + 2× 2×2 plates per block, like official LEGO Minecraft sets">Official Cube</button>
       </div>
       <a href="how-to-export.html" class="how-to-link">How to get a schematic from your Minecraft world?</a>
     </div>

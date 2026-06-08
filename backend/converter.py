@@ -169,18 +169,23 @@ BRICK_CATALOG = {
     "brick": {
         (1,1):("3005","Brick 1x1"),(1,2):("3004","Brick 1x2"),
         (1,3):("3622","Brick 1x3"),(1,4):("3010","Brick 1x4"),
+        (1,6):("3009","Brick 1x6"),(1,8):("3008","Brick 1x8"),
         (2,2):("3003","Brick 2x2"),(2,3):("3002","Brick 2x3"),
-        (2,4):("3001","Brick 2x4"),
+        (2,4):("3001","Brick 2x4"),(2,6):("2456","Brick 2x6"),
+        (2,8):("3007","Brick 2x8"),(2,10):("3006","Brick 2x10"),
     },
     "plate": {
         (1,1):("3024","Plate 1x1"),(1,2):("3023","Plate 1x2"),
         (1,3):("3623","Plate 1x3"),(1,4):("3710","Plate 1x4"),
+        (1,6):("3666","Plate 1x6"),(1,8):("3460","Plate 1x8"),
         (2,2):("3022","Plate 2x2"),(2,3):("3021","Plate 2x3"),
-        (2,4):("3020","Plate 2x4"),
+        (2,4):("3020","Plate 2x4"),(2,6):("3795","Plate 2x6"),
+        (2,8):("3034","Plate 2x8"),(2,10):("3832","Plate 2x10"),
     },
     "slope": {
         (1,1):("54200","Slope 1x1x2/3"),(1,2):("3040","Slope 45 2x1"),
-        (2,2):("3039","Slope 45 2x2"),(2,4):("3037","Slope 45 2x4"),
+        (2,2):("3039","Slope 45 2x2"),(2,3):("3038","Slope 45 2x3"),
+        (2,4):("3037","Slope 45 2x4"),
     },
 }
 
@@ -500,27 +505,24 @@ def map_block_to_lego(block_name: str):
 #  Brick Optimization – Greedy Layer Merge
 # ═══════════════════════════════════════════════════════
 
-def _get_stair_step_bricks(x, y_base, z, facing, cid):
-    """Generate 1×2 plate sub-units for the raised portion of a stair."""
-    bricks = []
-    for layer in range(3):
-        sy = y_base + layer
-        if facing == "north":
-            bricks.append((x, sy, z, 2, 1, cid, "plate"))
-        elif facing == "south":
-            bricks.append((x, sy, z + 1, 2, 1, cid, "plate"))
-        elif facing == "west":
-            bricks.append((x, sy, z, 1, 2, cid, "plate"))
-        else:  # east
-            bricks.append((x + 1, sy, z, 1, 2, cid, "plate"))
-    return bricks
+# Per-type merge sizes (largest first). Structural pieces (brick/plate) use
+# common, easy-to-buy LEGO sizes up to 2x10; slopes only use real slope parts.
+# Wider (2-stud) pieces are preferred before long 1-stud pieces for stability.
+MERGE_SIZES_BY_TYPE = {
+    "brick": [(2,10),(2,8),(2,6),(2,4),(2,3),(2,2),(1,8),(1,6),(1,4),(1,3),(1,2),(1,1)],
+    "plate": [(2,10),(2,8),(2,6),(2,4),(2,3),(2,2),(1,8),(1,6),(1,4),(1,3),(1,2),(1,1)],
+    "slope": [(2,4),(2,3),(2,2),(1,2),(1,1)],
+}
 
+# Brick-bond stagger: on offset layers, cap the x-length of the first brick in
+# each horizontal run so vertical seams don't stack across layers (running bond).
+STAGGER_CAP = 3
 
-MERGE_SIZES = [(2, 4), (2, 3), (2, 2), (1, 4), (1, 3), (1, 2), (1, 1)]
-
-def _optimize_layer(layer_cells, width, length):
+def _optimize_layer(layer_cells, width, length, phase=0):
     """Merge same-color adjacent cells into larger bricks on one Y layer.
     layer_cells: {(x,z): (color_id, brick_type)}
+    phase: 0 or 1; on phase 1 the first brick of each horizontal run is shortened
+           to offset vertical seams from the adjacent layers (brick bond).
     Returns [(x, z, w, l, color_id, brick_type), ...]
     """
     used   = set()
@@ -532,11 +534,23 @@ def _optimize_layer(layer_cells, width, length):
         cid, btype = layer_cells[(x, z)]
         placed = False
 
-        for mw, ml in MERGE_SIZES:
+        # Start of a run = no same-group cell directly before it on that axis.
+        # On offset layers, cap the first brick on whichever axis starts a run so
+        # vertical seams along that wall are offset from the adjacent layers.
+        run_start_x = layer_cells.get((x - 1, z)) != (cid, btype)
+        run_start_z = layer_cells.get((x, z - 1)) != (cid, btype)
+        cap_w = STAGGER_CAP if (phase and run_start_x) else None
+        cap_l = STAGGER_CAP if (phase and run_start_z) else None
+
+        for mw, ml in MERGE_SIZES_BY_TYPE.get(btype, MERGE_SIZES_BY_TYPE["brick"]):
             if mw == 1 and ml == 1:
                 break
             orientations = [(mw, ml)] if mw == ml else [(mw, ml), (ml, mw)]
             for w, l in orientations:
+                if cap_w is not None and w > cap_w:
+                    continue
+                if cap_l is not None and l > cap_l:
+                    continue
                 if x + w > width or z + l > length:
                     continue
                 ok = True
@@ -572,15 +586,18 @@ def _optimize_layer(layer_cells, width, length):
 
 _LDR_PARTS = {
     ("brick",1,1):"3005.dat",("brick",1,2):"3004.dat",("brick",1,3):"3622.dat",
-    ("brick",1,4):"3010.dat",("brick",2,2):"3003.dat",("brick",2,3):"3002.dat",
-    ("brick",2,4):"3001.dat",
+    ("brick",1,4):"3010.dat",("brick",1,6):"3009.dat",("brick",1,8):"3008.dat",
+    ("brick",2,2):"3003.dat",("brick",2,3):"3002.dat",("brick",2,4):"3001.dat",
+    ("brick",2,6):"2456.dat",("brick",2,8):"3007.dat",("brick",2,10):"3006.dat",
     ("plate",1,1):"3024.dat",("plate",1,2):"3023.dat",("plate",1,3):"3623.dat",
-    ("plate",1,4):"3710.dat",("plate",2,2):"3022.dat",("plate",2,3):"3021.dat",
-    ("plate",2,4):"3020.dat",
-    ("slope",1,1):"54200.dat",("slope",1,2):"3040.dat",("slope",2,2):"3039.dat",
+    ("plate",1,4):"3710.dat",("plate",1,6):"3666.dat",("plate",1,8):"3460.dat",
+    ("plate",2,2):"3022.dat",("plate",2,3):"3021.dat",("plate",2,4):"3020.dat",
+    ("plate",2,6):"3795.dat",("plate",2,8):"3034.dat",("plate",2,10):"3832.dat",
+    ("slope",1,1):"54200.dat",("slope",1,2):"3040.dat",
+    ("slope",2,2):"3039.dat",("slope",2,3):"3038.dat",("slope",2,4):"3037.dat",
 }
 
-def generate_ldr(bricks, scale="compact"):
+def generate_ldr(bricks):
     """Generate LDraw (.ldr) file content."""
     lines = [
         "0 FILE brickcraft_model.ldr",
@@ -589,15 +606,7 @@ def generate_ldr(bricks, scale="compact"):
         "0 Author: BrickCraft",
     ]
     for x, y, z, w, l, cid, btype in bricks:
-        if scale == "official":
-            # Official scale: 5 sub-layers per MC block, each plate = 8 LDU
-            mc_y = y // 5
-            sub = y % 5
-            lx = x * 40
-            lz = z * 40
-            ly = -(mc_y * 40) + (4 - sub) * 8
-        else:
-            lx, ly, lz = x * 20, -(y * 24), z * 20
+        lx, ly, lz = x * 20, -(y * 24), z * 20
         part = _LDR_PARTS.get((btype, min(w, l), max(w, l)), "3005.dat")
         lines.append(f"1 {cid} {lx} {ly} {lz} 1 0 0 0 1 0 0 0 1 {part}")
     lines.append("0")
@@ -625,9 +634,10 @@ def generate_bricklink_xml(parts_counter):
 #  Main Conversion Pipeline
 # ═══════════════════════════════════════════════════════
 
-def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> dict:
+def convert_and_optimize(filename: str, data: bytes) -> dict:
     """Full pipeline: parse → map → optimize → output.
-    scale: "compact" (1×1 brick per block) or "official" (2×2 brick + 2× 2×2 plates per block)
+    Each MC block becomes one 1×1 LEGO cell, then same-color cells are merged
+    into larger, commonly-stocked bricks/plates with brick-bond seam staggering.
     """
 
     # 1. Parse
@@ -645,48 +655,12 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
     # 3. Build brick list
     all_bricks = []   # (x, y, z, w, l, color_id, brick_type)
 
-    if scale == "official":
-        # Official LEGO Minecraft scale: each MC block = 5 plates tall (2×2 footprint)
-        # Slabs = 2 plates, Stairs = stepped shape
-        for (bx, by, bz), (cid, btype) in lego_blocks.items():
-            raw_name = blocks.get((bx, by, bz), "")
-            base_name = normalize_block_name(raw_name)
-            state = parse_block_state(raw_name)
-
-            if btype == "plate" and base_name.endswith("_slab"):
-                if state.get("type") == "double":
-                    for i in range(4):
-                        all_bricks.append((bx, by * 5 + i, bz, 2, 2, cid, "plate"))
-                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "brick"))
-                elif state.get("half") == "top":
-                    all_bricks.append((bx, by * 5 + 3, bz, 2, 2, cid, "plate"))
-                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "plate"))
-                else:
-                    all_bricks.append((bx, by * 5,     bz, 2, 2, cid, "plate"))
-                    all_bricks.append((bx, by * 5 + 1, bz, 2, 2, cid, "plate"))
-            elif btype == "slope" and base_name.endswith("_stairs"):
-                facing = state.get("facing", "north")
-                half = state.get("half", "bottom")
-                if half == "top":
-                    all_bricks.append((bx, by * 5 + 3, bz, 2, 2, cid, "plate"))
-                    all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "plate"))
-                    all_bricks.extend(_get_stair_step_bricks(bx, by * 5, bz, facing, cid))
-                else:
-                    all_bricks.append((bx, by * 5,     bz, 2, 2, cid, "plate"))
-                    all_bricks.append((bx, by * 5 + 1, bz, 2, 2, cid, "plate"))
-                    all_bricks.extend(_get_stair_step_bricks(bx, by * 5 + 2, bz, facing, cid))
-            else:
-                for i in range(4):
-                    all_bricks.append((bx, by * 5 + i, bz, 2, 2, cid, "plate"))
-                all_bricks.append((bx, by * 5 + 4, bz, 2, 2, cid, "brick"))
-        all_bricks.sort(key=lambda b: (b[1], b[0], b[2]))
-    else:
-        # Compact mode: optimize layer by layer
-        for y in range(height):
-            layer = {(bx, bz): val for (bx, by, bz), val in lego_blocks.items() if by == y}
-            if layer:
-                for (bx, bz, w, l, cid, bt) in _optimize_layer(layer, width, length):
-                    all_bricks.append((bx, y, bz, w, l, cid, bt))
+    # Optimize layer by layer with brick-bond staggering
+    for y in range(height):
+        layer = {(bx, bz): val for (bx, by, bz), val in lego_blocks.items() if by == y}
+        if layer:
+            for (bx, bz, w, l, cid, bt) in _optimize_layer(layer, width, length, phase=y % 2):
+                all_bricks.append((bx, y, bz, w, l, cid, bt))
 
     # 4. Statistics
     parts_counter = Counter()
@@ -719,14 +693,8 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
         if key not in palette_map:
             palette_map[key] = len(palette)
             palette.append(list(rgb))
-        if scale == "official":
-            # Render each MC block as a single 2×2×2 cube (only on sub-layer 0)
-            if y % 5 == 0:
-                mc_y = y // 5
-                voxels.append([x * 2, mc_y * 2, z * 2, 2, 2, 2, palette_map[key]])
-        else:
-            h = 1 if bt == "plate" else (2 if bt == "slope" else 3)
-            voxels.append([x, y * 3, z, w, h, l, palette_map[key]])
+        h = 1 if bt == "plate" else (2 if bt == "slope" else 3)
+        voxels.append([x, y * 3, z, w, h, l, palette_map[key]])
 
     # Cap preview data for very large models
     if len(voxels) > 60000:
@@ -734,7 +702,7 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
         voxels = voxels[::step]
 
     # 6. File outputs
-    ldr = generate_ldr(all_bricks, scale)
+    ldr = generate_ldr(all_bricks)
     xml = generate_bricklink_xml(parts_counter)
     sid = uuid.uuid4().hex[:8]
 
@@ -744,7 +712,6 @@ def convert_and_optimize(filename: str, data: bytes, scale: str = "compact") -> 
         "total_blocks": len(blocks),
         "total_bricks": len(all_bricks),
         "unique_parts": len(parts_counter),
-        "scale": scale,
 
         "color_summary": color_summary,
         "brick_summary": brick_summary,

@@ -13,14 +13,21 @@ const MC_BLOCK_MAP = {
 const LDRAW_TO_BL = {1:7,2:6,3:39,4:5,6:8,7:9,8:10,9:62,10:36,14:3,15:1,19:2,25:91,26:11,27:80,28:120,29:27,36:4,37:34,38:68,39:49,40:12,41:17,43:15,44:19,45:14,46:98,47:20,69:71,70:59,71:86,72:85,73:42,74:37,77:56,85:89,86:91,92:28,100:26,110:43,112:73,115:76,118:152,124:104,135:55,138:69,140:63,141:80,151:48,191:110,216:27,226:103,272:63,288:80,297:115,308:120,320:59,321:153,322:156,323:152,324:154,325:157,330:155,335:58,351:23,353:220,366:68,373:54,378:48,379:55};
 const LEGO_COLOR_RGB = Object.fromEntries(LEGO_COLORS.map(([id,,rgb]) => [id, rgb]));
 const LEGO_COLOR_NAME = Object.fromEntries(LEGO_COLORS.map(([id,name]) => [id, name]));
-const BRICK_CATALOG = {brick:{"1x1":["3005","Brick 1x1"],"1x2":["3004","Brick 1x2"],"1x3":["3622","Brick 1x3"],"1x4":["3010","Brick 1x4"],"2x2":["3003","Brick 2x2"],"2x3":["3002","Brick 2x3"],"2x4":["3001","Brick 2x4"]},plate:{"1x1":["3024","Plate 1x1"],"1x2":["3023","Plate 1x2"],"1x3":["3623","Plate 1x3"],"1x4":["3710","Plate 1x4"],"2x2":["3022","Plate 2x2"],"2x3":["3021","Plate 2x3"],"2x4":["3020","Plate 2x4"]},slope:{"1x1":["54200","Slope 1x1x2/3"],"1x2":["3040","Slope 45 2x1"],"2x2":["3039","Slope 45 2x2"],"2x4":["3037","Slope 45 2x4"]}};
+const BRICK_CATALOG = {brick:{"1x1":["3005","Brick 1x1"],"1x2":["3004","Brick 1x2"],"1x3":["3622","Brick 1x3"],"1x4":["3010","Brick 1x4"],"1x6":["3009","Brick 1x6"],"1x8":["3008","Brick 1x8"],"2x2":["3003","Brick 2x2"],"2x3":["3002","Brick 2x3"],"2x4":["3001","Brick 2x4"],"2x6":["2456","Brick 2x6"],"2x8":["3007","Brick 2x8"],"2x10":["3006","Brick 2x10"]},plate:{"1x1":["3024","Plate 1x1"],"1x2":["3023","Plate 1x2"],"1x3":["3623","Plate 1x3"],"1x4":["3710","Plate 1x4"],"1x6":["3666","Plate 1x6"],"1x8":["3460","Plate 1x8"],"2x2":["3022","Plate 2x2"],"2x3":["3021","Plate 2x3"],"2x4":["3020","Plate 2x4"],"2x6":["3795","Plate 2x6"],"2x8":["3034","Plate 2x8"],"2x10":["3832","Plate 2x10"]},slope:{"1x1":["54200","Slope 1x1x2/3"],"1x2":["3040","Slope 45 2x1"],"2x2":["3039","Slope 45 2x2"],"2x3":["3038","Slope 45 2x3"],"2x4":["3037","Slope 45 2x4"]}};
 const LEGO_PREVIEW_HEIGHT = { brick: 1.2, plate: 0.4, slope: 0.8 };
 const MC_LEGACY_IDS = {0:"air",1:"stone",2:"grass_block",3:"dirt",4:"cobblestone",5:"oak_planks",7:"bedrock",8:"water",9:"water",10:"lava",11:"lava",12:"sand",13:"gravel",14:"gold_ore",15:"iron_ore",16:"coal_ore",17:"oak_log",18:"oak_leaves",20:"glass",21:"lapis_ore",22:"lapis_block",24:"sandstone",35:"white_wool",41:"gold_block",42:"iron_block",43:"stone_slab",44:"stone_slab",45:"bricks",47:"bookshelf",48:"mossy_stone_bricks",49:"obsidian",53:"oak_stairs",56:"diamond_ore",57:"diamond_block",67:"cobblestone_stairs",79:"ice",80:"snow_block",82:"clay",87:"netherrack",89:"glowstone",98:"stone_bricks",108:"brick_stairs",109:"stone_brick_stairs",112:"nether_bricks",114:"nether_brick_stairs",121:"end_stone",125:"oak_planks",126:"oak_slab",128:"sandstone_stairs",129:"emerald_ore",133:"emerald_block",134:"spruce_stairs",135:"birch_stairs",136:"jungle_stairs",152:"redstone_block",155:"quartz_block",156:"quartz_stairs",159:"terracotta",170:"hay_block",172:"terracotta",174:"packed_ice",179:"red_sandstone",201:"purpur_block",203:"purpur_stairs",206:"end_stone_bricks",251:"white_concrete"};
 const COLOR_NAMES = ["white","orange","magenta","light_blue","yellow","lime","pink","gray","light_gray","cyan","purple","blue","brown","green","red","black"];
 const COLORED_BLOCK_IDS = {35:"{}_wool",95:"{}_stained_glass",159:"{}_terracotta",160:"{}_stained_glass",251:"{}_concrete"};
 const MC_BLOCK_RGB = {stone:[125,125,125],cobblestone:[127,127,127],dirt:[134,96,67],grass_block:[127,178,56],sand:[219,207,163],gravel:[136,126,126],oak_planks:[162,130,78],spruce_planks:[114,84,48],birch_planks:[192,175,121],oak_log:[109,85,50],stone_bricks:[122,122,122],bricks:[151,97,83],obsidian:[20,18,29],netherrack:[97,38,38],quartz_block:[235,229,222],iron_block:[220,220,220],gold_block:[249,236,79],diamond_block:[98,219,214],emerald_block:[0,166,53],lapis_block:[31,67,140],redstone_block:[171,27,6],snow_block:[249,255,254],ice:[145,190,230],clay:[161,166,179],bedrock:[85,85,85],sandstone:[216,202,155]};
-const MERGE_SIZES = [[2,4],[2,3],[2,2],[1,4],[1,3],[1,2],[1,1]];
-const LDR_PARTS = {"brick:1x1":"3005.dat","brick:1x2":"3004.dat","brick:1x3":"3622.dat","brick:1x4":"3010.dat","brick:2x2":"3003.dat","brick:2x3":"3002.dat","brick:2x4":"3001.dat","plate:1x1":"3024.dat","plate:1x2":"3023.dat","plate:1x3":"3623.dat","plate:1x4":"3710.dat","plate:2x2":"3022.dat","plate:2x3":"3021.dat","plate:2x4":"3020.dat","slope:1x1":"54200.dat","slope:1x2":"3040.dat","slope:2x2":"3039.dat"};
+const MERGE_SIZES_BY_TYPE = {
+  brick: [[2,10],[2,8],[2,6],[2,4],[2,3],[2,2],[1,8],[1,6],[1,4],[1,3],[1,2],[1,1]],
+  plate: [[2,10],[2,8],[2,6],[2,4],[2,3],[2,2],[1,8],[1,6],[1,4],[1,3],[1,2],[1,1]],
+  slope: [[2,4],[2,3],[2,2],[1,2],[1,1]],
+};
+// Brick-bond stagger: on offset layers, cap the x-length of the first brick in
+// each horizontal run so vertical seams don't stack across layers (running bond).
+const STAGGER_CAP = 3;
+const LDR_PARTS = {"brick:1x1":"3005.dat","brick:1x2":"3004.dat","brick:1x3":"3622.dat","brick:1x4":"3010.dat","brick:1x6":"3009.dat","brick:1x8":"3008.dat","brick:2x2":"3003.dat","brick:2x3":"3002.dat","brick:2x4":"3001.dat","brick:2x6":"2456.dat","brick:2x8":"3007.dat","brick:2x10":"3006.dat","plate:1x1":"3024.dat","plate:1x2":"3023.dat","plate:1x3":"3623.dat","plate:1x4":"3710.dat","plate:1x6":"3666.dat","plate:1x8":"3460.dat","plate:2x2":"3022.dat","plate:2x3":"3021.dat","plate:2x4":"3020.dat","plate:2x6":"3795.dat","plate:2x8":"3034.dat","plate:2x10":"3832.dat","slope:1x1":"54200.dat","slope:1x2":"3040.dat","slope:2x2":"3039.dat","slope:2x3":"3038.dat","slope:2x4":"3037.dat"};
 
 const uploadZone = document.getElementById("uploadZone");
 const fileInput = document.getElementById("fileInput");
@@ -38,7 +45,6 @@ let currentXml = null;
 let currentLdrUrl = null;
 let currentXmlUrl = null;
 let _viewers = [];
-let scaleMode = "compact";
 
 function showToast(icon, msg, duration = 4000) {
   const t = document.getElementById("toast");
@@ -62,17 +68,6 @@ btnBack.addEventListener("click", () => {
   resultsOvl.classList.remove("active");
   disposeViewer();
 });
-
-const scaleToggle = document.getElementById("scaleToggle");
-if (scaleToggle) {
-  scaleToggle.addEventListener("click", (e) => {
-    const btn = e.target.closest(".scale-btn");
-    if (!btn) return;
-    scaleMode = btn.dataset.scale;
-    scaleToggle.querySelectorAll(".scale-btn").forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-  });
-}
 
 async function upload(file) {
   const ext = (file.name.split(".").pop() || "").toLowerCase();
@@ -99,30 +94,6 @@ async function upload(file) {
   }
 }
 
-// Stair step helper for official scale mode
-// Generates 1×2 brick sub-units for the raised portion of a stair
-// In a 2×2 stud footprint, the "high side" gets 3 extra plate layers
-function getStairStepBricks(x, yBase, z, facing, cid, inverted) {
-  const bricks = [];
-  // For a 2×2 footprint, we place 1×2 plates on the high side for 3 layers
-  // facing = direction the stair ascends toward (the full-height side)
-  for (let layer = 0; layer < 3; layer++) {
-    const sy = yBase + layer;
-    if (facing === "north") {
-      // High side is north (lower z)
-      bricks.push([x, sy, z, 2, 1, cid, "plate"]);
-    } else if (facing === "south") {
-      bricks.push([x, sy, z + 1, 2, 1, cid, "plate"]);
-    } else if (facing === "west") {
-      bricks.push([x, sy, z, 1, 2, cid, "plate"]);
-    } else {
-      // east (default)
-      bricks.push([x + 1, sy, z, 1, 2, cid, "plate"]);
-    }
-  }
-  return bricks;
-}
-
 async function convertAndOptimize(file) {
   const root = await readRoot(file);
   const { width, height, length, blocks } = parseFile(file.name, root);
@@ -144,71 +115,10 @@ async function convertAndOptimize(file) {
     layer.set(key2(x, z), mapped);
   }
 
-  if (scaleMode === "official") {
-    // Official LEGO Minecraft scale: each MC block = 1× Brick 2×2 + 2× Plate 2×2
-    // This creates a 16mm perfect cube (2 studs × 5 plates)
-    // Slabs = half height (2 plates), Stairs = stepped shape
-    const allBricks = [];
-    for (const [key, [cid, btype]] of legoBlocks.entries()) {
-      const [x, y, z] = parseKey3(key);
-      const rawName = blocks.get(key) || "";
-      const baseName = normalizeBlockName(rawName);
-      const state = parseBlockState(rawName);
-
-      if (btype === "plate" && baseName.endsWith("_slab")) {
-        // Slab: 2 plates tall (half a cube). type=double → full block
-        if (state.type === "double") {
-          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 2, z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "brick"]);
-        } else if (state.half === "top") {
-          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "plate"]);
-        } else {
-          // bottom (default)
-          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
-        }
-      } else if (btype === "slope" && baseName.endsWith("_stairs")) {
-        // Stairs: bottom half is 2 plates full width, top half is 1×2 bricks on the high side
-        // facing determines which side is high
-        const facing = state.facing || "north";
-        const half = state.half || "bottom";
-        // Bottom 2 plates always full
-        if (half === "top") {
-          // Upside-down stair: top 2 plates full, bottom stepped
-          allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "plate"]);
-          // Bottom step: high side gets extra plates
-          const stepBricks = getStairStepBricks(x, y * 5, z, facing, cid, true);
-          allBricks.push(...stepBricks);
-        } else {
-          // Normal stair: bottom 2 plates full, top stepped
-          allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
-          allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
-          // Top step
-          const stepBricks = getStairStepBricks(x, y * 5 + 2, z, facing, cid, false);
-          allBricks.push(...stepBricks);
-        }
-      } else {
-        // Full block: 5 sub-layers (3 plates + 1 brick equivalent)
-        allBricks.push([x, y * 5,     z, 2, 2, cid, "plate"]);
-        allBricks.push([x, y * 5 + 1, z, 2, 2, cid, "plate"]);
-        allBricks.push([x, y * 5 + 2, z, 2, 2, cid, "plate"]);
-        allBricks.push([x, y * 5 + 3, z, 2, 2, cid, "plate"]);
-        allBricks.push([x, y * 5 + 4, z, 2, 2, cid, "brick"]);
-      }
-    }
-    allBricks.sort((a, b) => a[1] - b[1] || a[0] - b[0] || a[2] - b[2]);
-    return buildOutputFromBricks(allBricks, { width, height, length }, blocks.size);
-  }
-
   const allBricks = [];
   const sortedLayers = [...layers.entries()].sort((a, b) => a[0] - b[0]);
   for (const [y, layer] of sortedLayers) {
-    for (const brick of optimizeLayer(layer, width, length)) {
+    for (const brick of optimizeLayer(layer, width, length, y % 2)) {
       allBricks.push([brick[0], y, brick[1], brick[2], brick[3], brick[4], brick[5]]);
     }
   }
@@ -243,22 +153,13 @@ function buildOutputFromBricks(allBricks, dimensions, totalBlocks) {
       paletteMap.set(key, palette.length);
       palette.push(rgb);
     }
-    if (scaleMode === "official") {
-      // In official mode, y encodes sub-layers (5 per MC block)
-      // For preview, render each MC block as a single 2×2×2 cube (only on sub-layer 0)
-      if (y % 5 === 0) {
-        const mcY = Math.floor(y / 5);
-        voxels.push([x * 2, mcY * 2, z * 2, 2, 2, 2, paletteMap.get(key)]);
-      }
-    } else {
-      const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
-      voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
-    }
+    const h = LEGO_PREVIEW_HEIGHT[bt] || LEGO_PREVIEW_HEIGHT.brick;
+    voxels.push([x, y * LEGO_PREVIEW_HEIGHT.brick, z, w, h, l, paletteMap.get(key)]);
   }
   voxels = downsamplePreviewVoxels(voxels);
   const ldrContent = generateLdr(allBricks);
   const bricklinkXml = generateBricklinkXml(partsCounter);
-  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: totalBlocks, total_bricks: allBricks.length, unique_parts: partsCounter.size, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml, scale: scaleMode };
+  return { session_id: createSessionId(), dimensions: { width, height, length }, total_blocks: totalBlocks, total_bricks: allBricks.length, unique_parts: partsCounter.size, color_summary: colorSummary, brick_summary: brickSummary, voxels, palette, ldr_content: ldrContent, bricklink_xml: bricklinkXml };
 }
 
 async function readRoot(file) {
@@ -531,7 +432,7 @@ function mapBlockToLego(blockName) {
   return [71, "brick"];
 }
 
-function optimizeLayer(layerCells, width, length) {
+function optimizeLayer(layerCells, width, length, phase = 0) {
   const used = new Set();
   const bricks = [];
   const sortedKeys = [...layerCells.keys()].sort((a, b) => { const [ax, az] = parseKey2(a); const [bx, bz] = parseKey2(b); return ax - bx || az - bz; });
@@ -540,10 +441,19 @@ function optimizeLayer(layerCells, width, length) {
     const [x, z] = parseKey2(key);
     const [cid, brickType] = layerCells.get(key);
     let placed = false;
-    for (const [mw, ml] of MERGE_SIZES) {
+    const leftVal = layerCells.get(key2(x - 1, z));
+    const upVal = layerCells.get(key2(x, z - 1));
+    const runStartX = !leftVal || leftVal[0] !== cid || leftVal[1] !== brickType;
+    const runStartZ = !upVal || upVal[0] !== cid || upVal[1] !== brickType;
+    const capW = (phase && runStartX) ? STAGGER_CAP : null;
+    const capL = (phase && runStartZ) ? STAGGER_CAP : null;
+    const mergeSizes = MERGE_SIZES_BY_TYPE[brickType] || MERGE_SIZES_BY_TYPE.brick;
+    for (const [mw, ml] of mergeSizes) {
       if (mw === 1 && ml === 1) break;
       const orientations = mw === ml ? [[mw, ml]] : [[mw, ml], [ml, mw]];
       for (const [w, l] of orientations) {
+        if (capW !== null && w > capW) continue;
+        if (capL !== null && l > capL) continue;
         if (x + w > width || z + l > length) continue;
         let ok = true;
         for (let dx = 0; dx < w && ok; dx++) {
@@ -570,21 +480,8 @@ function optimizeLayer(layerCells, width, length) {
 function generateLdr(bricks) {
   const lines = ["0 FILE brickcraft_model.ldr", "0 BrickCraft Converted Model", "0 Name: brickcraft_model.ldr", "0 Author: BrickCraft"];
   for (const [x, y, z, w, l, cid, brickType] of bricks) {
-    if (scaleMode === "official") {
-      // Official scale: each MC block = 2×2 footprint, 5 plates tall (40 LDU)
-      // y encodes sub-layers: 5 per MC block, each plate = 8 LDU
-      const mcY = Math.floor(y / 5);
-      const subLayer = y % 5;
-      const xLdr = x * 40;
-      const zLdr = z * 40;
-      // LDraw Y points down; sub-layer 4 is top, 0 is bottom
-      const yLdr = -(mcY * 40) + (4 - subLayer) * 8;
-      const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
-      lines.push(`1 ${cid} ${xLdr} ${yLdr} ${zLdr} 1 0 0 0 1 0 0 0 1 ${part}`);
-    } else {
-      const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
-      lines.push(`1 ${cid} ${x * 20} ${-(y * 24)} ${z * 20} 1 0 0 0 1 0 0 0 1 ${part}`);
-    }
+    const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
+    lines.push(`1 ${cid} ${x * 20} ${-(y * 24)} ${z * 20} 1 0 0 0 1 0 0 0 1 ${part}`);
   }
   lines.push("0");
   return lines.join("\n");
