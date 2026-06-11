@@ -16,32 +16,37 @@
 ## 1) Eurobricks — Digital LEGO: Tools, Techniques, and Projects
 Post at: https://www.eurobricks.com/forum/forums/forum/128-lego-digital-designer-and-other-digital-tools/
 
+> ⚠️ **READ FIRST — Eurobricks rules (verified):**
+> - Site Guidelines explicitly say: *"don't use Eurobricks as a billboard… you may post links to your site in your **signature**, but **don't join just to advertise your site**."* A brand‑new account whose first post is "use my tool" risks deletion/ban.
+> - **Compliant approach:** make the post about the **build technique + a shareable file**, not the product. The section *encourages sharing digital files (.ldr/.mpd…)* — so **attach an `.ldr`** exported from DayToy. Put your site link in your **forum signature**, mention it once in passing at most.
+> - **Warm up the account first** (reply to a few existing threads over a couple of days before posting).
+> - **Search the [Section Index](https://www.eurobricks.com/forum/index.php?showtopic=69726)** for an existing "Minecraft to LEGO" thread before creating a new one.
+> - **Images ≤ 1024×768** (≤800×600 preferred, <1MB, no BMP). Crop empty borders.
+> - Set up signature: Account → Signature. Suggested line: `DayToy — Minecraft → LEGO converter: [your-site-url]`
+
 **Title:**
-Free tool: turn a Minecraft schematic into a BrickLink parts list (browser‑based, no signup)
+A technique for converting Minecraft builds into buildable LEGO (running bond + real brick sizes) — .ldr attached
 
 **Body:**
 Hi all,
 
-I built a small free tool called **DayToy** that converts a Minecraft build into a real LEGO shopping list. Thought this community would be the right place to share it.
+I've been experimenting with converting Minecraft structures into LEGO models and wanted to share the approach and a result file with this section, since it's a digital‑design problem.
 
-You upload a `.schematic`, `.schem`, or `.litematic` file and it gives you:
-- A **BrickLink Wanted List (XML)** you can upload straight to BrickLink to order the parts
-- An **LDR file** to open in Studio / LDraw
-- A live **3D preview** and a full **parts + color breakdown**
+The interesting part isn't the voxel→stud mapping (that's straightforward) — it's making the output **actually buildable**:
+- **Real, stocked brick sizes instead of a wall of 1×1s.** Same‑color regions on each layer get merged greedily into commonly available bricks/plates (1×6, 1×8, 2×6, 2×8, 2×10), which cuts part count and cost dramatically.
+- **Running bond / staggered seams.** Each layer is offset so vertical joints don't stack across courses — the same reason real brick walls are laid in a bond. It trades a small increase in part count for a much sturdier model.
 
-A couple of things I focused on because the first version felt unrealistic:
-- It no longer spits out a pile of 1×1s. The optimizer merges same‑color regions into **commonly stocked bricks** (1×6, 1×8, 2×6, 2×8, 2×10), so the list is cheaper and easier to actually source.
-- It **staggers the seams between layers (running bond)** so walls don't share continuous vertical joints and the model is more structurally sound.
+Example: a Japanese temple build (20×22×18) goes from **1,565 voxels → 285 bricks across 8 colors**. I've attached the **`.ldr`** so you can open it in Studio/LDraw and look at the brickwork.
 
-Everything runs **locally in your browser** — no account, no upload to a server, nothing stored.
+I'd genuinely value this section's feedback on two things:
+1. The **block → LEGO color** mapping (200+ blocks mapped, surely some are off).
+2. The **part‑selection / bond** logic — anything you'd do differently for strength or sourcing?
 
-Link: [your-site-url]
-
-Would love feedback from this crowd, especially on the block→color mapping and the part selection. If there's a brick size or color you'd want prioritized, tell me and I'll add it.
+(Tool details + link are in my signature for anyone curious; happy to share specifics, but I'm mainly here for technique feedback.)
 
 Thanks!
 
-**Posting tips:** read the subforum's pinned rules first; reply to a few existing threads before posting so you're not a brand‑new account dropping a link. Attach 1–2 before/after images.
+**Attachments to include:** the exported `.ldr` file + 1–2 before/after images **resized to ≤1024×768**.
 
 ---
 
@@ -65,23 +70,48 @@ I made a free tool that turns your Minecraft builds into a real LEGO shopping li
 
 ---
 
-## 3) Planet Minecraft (Blog / Project post)
+## 3) BrickLink — ⛔ DO NOT post promo here
+
+> ⚠️ **Verified from BrickLink House Rules — promotion is explicitly banned:**
+> - *"Don't advertise or promote. Our platforms aren't for advertising any product or service sold outside of BrickLink."*
+> - *"Don't promote competitors. Don't actively promote or link to competitor websites, including third‑party websites offering items that can be sold on BrickLink."*
+> - Rules apply to the Forum, Studio Forum, **Studio Gallery comments**, and their social channels.
+>
+> **What this means:** Do **NOT** post DayToy links or mention the tool on BrickLink's forum or gallery. Posting your tool there risks removal/ban. (This is why the earlier "share in Studio Gallery" idea is unsafe if it links the tool.)
+>
+> **The only safe use of BrickLink:** as the **order destination** your tool already integrates with (Wanted List upload). That's allowed because the user does it themselves on their own account.
+>
+> **Optional (no promo):** You may share a *build itself* in the Studio Gallery as a creation **without** mentioning or linking DayToy — purely as a portfolio piece. Don't put the tool name/link in the title, description, or comments.
+
+---
+
+## 4) Planet Minecraft (Blog / Project post)
 Post at: https://www.planetminecraft.com/ (Blogs or Projects)
 
+> ⚠️ **Couldn't fully load PMC's Terms of Use (ad redirects) — verify yourself once logged in.** General safe practice:
+> - Frame it as a **genuine tutorial that gives value**, not an ad ("how to turn your build into real LEGO"), with the tool as one step.
+> - Don't make a brand‑new account whose only post is a link. Add some activity first.
+> - Check PMC's rules on external links / self‑promotion in your account area before posting.
+> - PMC Discord (alternative, often friendlier for sharing tools): https://discord.gg/QQSWwyg
+
 **Title:**
-I made a free tool that turns your Minecraft builds into real LEGO (BrickLink list + 3D preview)
+How to turn your Minecraft build into real LEGO (a free tool + the technique)
 
 **Body:**
-If you've ever wanted to hold one of your builds in real life — I made a free web tool for exactly that.
+If you've ever wanted to hold one of your builds in real life, here's how I do it — and a free tool that automates the tedious part.
 
-Export your build as `.schematic` / `.schem` / `.litematic` (WorldEdit, Litematica, MCEdit all work), drop it into **DayToy**, and you get:
-- A **BrickLink Wanted List** to order the exact parts
-- A **3D LEGO preview**
-- A full **parts + color list**
+**The workflow:**
+1. Export your build as `.schematic` / `.schem` / `.litematic` (WorldEdit, Litematica, and MCEdit all work).
+2. Drop it into the converter. You get a **3D LEGO preview**, a full **parts + color list**, and a **BrickLink Wanted List** you can upload to order the exact parts.
+3. Build it.
 
-It maps 200+ blocks to LEGO colors and optimizes the build with real, buyable brick sizes (not a wall of 1×1s), with staggered seams so it's sturdier. No signup, runs in your browser, nothing is uploaded.
+**Why the output is actually buildable (the part most converters get wrong):**
+- It uses **real, buyable brick sizes** (1×6, 1×8, 2×6, 2×8, 2×10) instead of a wall of 1×1s — far cheaper to source.
+- It **staggers the seams between layers** (running bond), so it's structurally sound and won't fall apart.
 
-Try it: [your-site-url]
+It maps 200+ blocks to LEGO colors, needs no signup, and runs locally in your browser.
+
+Tool: [your-site-url]
 
 Tell me what builds you convert — and if a block maps to the wrong color, let me know and I'll fix it.
 
