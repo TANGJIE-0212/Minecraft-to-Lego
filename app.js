@@ -6,6 +6,14 @@ const LEGO_COLORS = [
 ];
 
 const AIR_BLOCKS = new Set(["air", "cave_air", "void_air", "water", "lava"]);
+const ROTATION_MATRICES = [
+  [1,0,0, 0,1,0, 0,0,1],
+  [0,0,1, 0,1,0, -1,0,0],
+  [-1,0,0, 0,1,0, 0,0,-1],
+  [0,0,-1, 0,1,0, 1,0,0],
+];
+const STAIR_FACING_ROT = { north: 0, west: 1, south: 2, east: 3 };
+const LEGACY_STAIR_FACING = ["east", "west", "south", "north"];
 const MC_BLOCK_MAP = {
   stone:[72,"brick"], cobblestone:[8,"brick"], stone_bricks:[71,"brick"], cracked_stone_bricks:[8,"brick"], mossy_stone_bricks:[151,"brick"], smooth_stone:[7,"brick"], polished_granite:[86,"brick"], granite:[25,"brick"], diorite:[7,"brick"], polished_diorite:[15,"brick"], andesite:[72,"brick"], polished_andesite:[8,"brick"], deepslate:[72,"brick"], deepslate_bricks:[8,"brick"], cobbled_deepslate:[8,"brick"], calcite:[15,"brick"], tuff:[72,"brick"], bedrock:[26,"brick"], gravel:[8,"brick"], sand:[19,"brick"], sandstone:[19,"brick"], smooth_sandstone:[138,"brick"], red_sandstone:[25,"brick"], dirt:[86,"brick"], coarse_dirt:[28,"brick"], podzol:[28,"brick"], mud:[28,"brick"], clay:[8,"brick"], grass_block:[37,"brick"], mycelium:[85,"brick"], oak_planks:[19,"brick"], oak_log:[86,"brick"], oak_wood:[86,"brick"], stripped_oak_log:[19,"brick"], spruce_planks:[28,"brick"], spruce_log:[28,"brick"], birch_planks:[15,"brick"], birch_log:[19,"brick"], jungle_planks:[92,"brick"], jungle_log:[86,"brick"], acacia_planks:[25,"brick"], acacia_log:[28,"brick"], dark_oak_planks:[28,"brick"], dark_oak_log:[26,"brick"], mangrove_planks:[4,"brick"], cherry_planks:[29,"brick"], bamboo_planks:[14,"brick"], crimson_planks:[4,"brick"], warped_planks:[3,"brick"], white_wool:[15,"brick"], orange_wool:[36,"brick"], magenta_wool:[124,"brick"], light_blue_wool:[9,"brick"], yellow_wool:[14,"brick"], lime_wool:[37,"brick"], pink_wool:[77,"brick"], gray_wool:[72,"brick"], light_gray_wool:[7,"brick"], cyan_wool:[3,"brick"], purple_wool:[85,"brick"], blue_wool:[1,"brick"], brown_wool:[6,"brick"], green_wool:[2,"brick"], red_wool:[4,"brick"], black_wool:[26,"brick"], white_concrete:[15,"brick"], orange_concrete:[36,"brick"], magenta_concrete:[69,"brick"], light_blue_concrete:[9,"brick"], yellow_concrete:[14,"brick"], lime_concrete:[37,"brick"], pink_concrete:[77,"brick"], gray_concrete:[72,"brick"], light_gray_concrete:[7,"brick"], cyan_concrete:[3,"brick"], purple_concrete:[85,"brick"], blue_concrete:[1,"brick"], brown_concrete:[6,"brick"], green_concrete:[2,"brick"], red_concrete:[4,"brick"], black_concrete:[26,"brick"], terracotta:[86,"brick"], white_terracotta:[15,"brick"], orange_terracotta:[25,"brick"], magenta_terracotta:[124,"brick"], light_blue_terracotta:[73,"brick"], yellow_terracotta:[226,"brick"], lime_terracotta:[115,"brick"], pink_terracotta:[100,"brick"], gray_terracotta:[8,"brick"], light_gray_terracotta:[7,"brick"], cyan_terracotta:[378,"brick"], purple_terracotta:[373,"brick"], blue_terracotta:[379,"brick"], brown_terracotta:[335,"brick"], green_terracotta:[141,"brick"], red_terracotta:[335,"brick"], black_terracotta:[26,"brick"], glass:[40,"brick"], glass_pane:[40,"plate"], white_stained_glass:[40,"brick"], orange_stained_glass:[46,"brick"], light_blue_stained_glass:[43,"brick"], yellow_stained_glass:[44,"brick"], lime_stained_glass:[47,"brick"], cyan_stained_glass:[43,"brick"], blue_stained_glass:[45,"brick"], red_stained_glass:[41,"brick"], coal_ore:[26,"brick"], iron_ore:[86,"brick"], copper_ore:[25,"brick"], gold_ore:[14,"brick"], redstone_ore:[4,"brick"], emerald_ore:[2,"brick"], lapis_ore:[1,"brick"], diamond_ore:[9,"brick"], iron_block:[7,"brick"], gold_block:[14,"brick"], diamond_block:[9,"brick"], emerald_block:[2,"brick"], lapis_block:[1,"brick"], redstone_block:[4,"brick"], copper_block:[25,"brick"], netherite_block:[26,"brick"], netherrack:[4,"brick"], nether_bricks:[26,"brick"], red_nether_bricks:[4,"brick"], soul_sand:[28,"brick"], basalt:[72,"brick"], blackstone:[26,"brick"], quartz_block:[15,"brick"], smooth_quartz:[15,"brick"], glowstone:[14,"brick"], shroomlight:[14,"brick"], magma_block:[4,"brick"], end_stone:[226,"brick"], end_stone_bricks:[226,"brick"], purpur_block:[112,"brick"], obsidian:[26,"brick"], crying_obsidian:[85,"brick"], bricks:[4,"brick"], bookshelf:[19,"brick"], prismarine:[3,"brick"], prismarine_bricks:[9,"brick"], dark_prismarine:[27,"brick"], sea_lantern:[40,"brick"], hay_block:[14,"brick"], honeycomb_block:[36,"brick"], amethyst_block:[85,"brick"], snow_block:[15,"brick"], ice:[9,"brick"], packed_ice:[9,"brick"], blue_ice:[1,"brick"], oak_stairs:[19,"slope"], spruce_stairs:[28,"slope"], birch_stairs:[15,"slope"], jungle_stairs:[92,"slope"], acacia_stairs:[25,"slope"], dark_oak_stairs:[28,"slope"], stone_stairs:[72,"slope"], cobblestone_stairs:[8,"slope"], stone_brick_stairs:[71,"slope"], sandstone_stairs:[19,"slope"], quartz_stairs:[15,"slope"], brick_stairs:[4,"slope"], nether_brick_stairs:[26,"slope"], purpur_stairs:[112,"slope"], oak_slab:[19,"plate"], spruce_slab:[28,"plate"], birch_slab:[15,"plate"], stone_slab:[72,"plate"], cobblestone_slab:[8,"plate"], stone_brick_slab:[71,"plate"], sandstone_slab:[19,"plate"], quartz_slab:[15,"plate"], brick_slab:[4,"plate"], jungle_slab:[92,"plate"], acacia_slab:[25,"plate"], dark_oak_slab:[28,"plate"], mangrove_slab:[4,"plate"], cherry_slab:[29,"plate"], bamboo_slab:[14,"plate"], crimson_slab:[4,"plate"], warped_slab:[3,"plate"], smooth_stone_slab:[7,"plate"], smooth_sandstone_slab:[138,"plate"], red_sandstone_slab:[25,"plate"], nether_brick_slab:[26,"plate"], purpur_slab:[112,"plate"], prismarine_slab:[3,"plate"], prismarine_brick_slab:[9,"plate"], dark_prismarine_slab:[27,"plate"], deepslate_brick_slab:[8,"plate"], cobbled_deepslate_slab:[8,"plate"], polished_deepslate_slab:[72,"plate"], blackstone_slab:[26,"plate"], polished_blackstone_slab:[26,"plate"], polished_blackstone_brick_slab:[26,"plate"], end_stone_brick_slab:[226,"plate"], mossy_stone_brick_slab:[151,"plate"], mossy_cobblestone_slab:[151,"plate"], andesite_slab:[72,"plate"], granite_slab:[25,"plate"], diorite_slab:[7,"plate"], polished_andesite_slab:[8,"plate"], polished_granite_slab:[86,"plate"], polished_diorite_slab:[15,"plate"], red_nether_brick_slab:[4,"plate"], jungle_stairs:[92,"slope"], acacia_stairs:[25,"slope"], dark_oak_stairs:[28,"slope"], mangrove_stairs:[4,"slope"], cherry_stairs:[29,"slope"], bamboo_stairs:[14,"slope"], crimson_stairs:[4,"slope"], warped_stairs:[3,"slope"], smooth_sandstone_stairs:[138,"slope"], red_sandstone_stairs:[25,"slope"], prismarine_stairs:[3,"slope"], prismarine_brick_stairs:[9,"slope"], dark_prismarine_stairs:[27,"slope"], deepslate_brick_stairs:[8,"slope"], cobbled_deepslate_stairs:[8,"slope"], polished_deepslate_stairs:[72,"slope"], blackstone_stairs:[26,"slope"], polished_blackstone_stairs:[26,"slope"], polished_blackstone_brick_stairs:[26,"slope"], end_stone_brick_stairs:[226,"slope"], mossy_stone_brick_stairs:[151,"slope"], mossy_cobblestone_stairs:[151,"slope"], andesite_stairs:[72,"slope"], granite_stairs:[25,"slope"], diorite_stairs:[7,"slope"], polished_andesite_stairs:[8,"slope"], polished_granite_stairs:[86,"slope"], polished_diorite_stairs:[15,"slope"], red_nether_brick_stairs:[4,"slope"], oak_leaves:[37,"plate"], spruce_leaves:[2,"plate"], birch_leaves:[10,"plate"], jungle_leaves:[2,"plate"], acacia_leaves:[37,"plate"], dark_oak_leaves:[2,"plate"], mangrove_leaves:[2,"plate"], cherry_leaves:[29,"plate"],
 };
@@ -24,9 +32,6 @@ const MERGE_SIZES_BY_TYPE = {
   plate: [[2,10],[2,8],[2,6],[2,4],[2,3],[2,2],[1,8],[1,6],[1,4],[1,3],[1,2],[1,1]],
   slope: [[2,4],[2,3],[2,2],[1,2],[1,1]],
 };
-// Brick-bond stagger: on offset layers, cap the x-length of the first brick in
-// each horizontal run so vertical seams don't stack across layers (running bond).
-const STAGGER_CAP = 3;
 const LDR_PARTS = {"brick:1x1":"3005.dat","brick:1x2":"3004.dat","brick:1x3":"3622.dat","brick:1x4":"3010.dat","brick:1x6":"3009.dat","brick:1x8":"3008.dat","brick:2x2":"3003.dat","brick:2x3":"3002.dat","brick:2x4":"3001.dat","brick:2x6":"2456.dat","brick:2x8":"3007.dat","brick:2x10":"3006.dat","plate:1x1":"3024.dat","plate:1x2":"3023.dat","plate:1x3":"3623.dat","plate:1x4":"3710.dat","plate:1x6":"3666.dat","plate:1x8":"3460.dat","plate:2x2":"3022.dat","plate:2x3":"3021.dat","plate:2x4":"3020.dat","plate:2x6":"3795.dat","plate:2x8":"3034.dat","plate:2x10":"3832.dat","slope:1x1":"54200.dat","slope:1x2":"3040.dat","slope:2x2":"3039.dat","slope:2x3":"3038.dat","slope:2x4":"3037.dat"};
 
 const uploadZone = document.getElementById("uploadZone");
@@ -117,10 +122,16 @@ async function convertAndOptimize(file) {
 
   const allBricks = [];
   const sortedLayers = [...layers.entries()].sort((a, b) => a[0] - b[0]);
+  let previousLayerBricks = [];
+  let previousY = null;
   for (const [y, layer] of sortedLayers) {
-    for (const brick of optimizeLayer(layer, width, length, y % 2)) {
-      allBricks.push([brick[0], y, brick[1], brick[2], brick[3], brick[4], brick[5]]);
+    if (previousY !== null && y !== previousY + 1) previousLayerBricks = [];
+    const layerBricks = optimizeLayer(layer, width, length, previousLayerBricks, y % 2);
+    for (const brick of layerBricks) {
+      allBricks.push([brick[0], y, brick[1], brick[2], brick[3], brick[4], brick[5], brick[6]]);
     }
+    previousLayerBricks = layerBricks;
+    previousY = y;
   }
   return buildOutputFromBricks(allBricks, { width, height, length }, blocks.size);
 }
@@ -231,6 +242,7 @@ function trimTrailingNbtPadding(buffer, error) {
 
 function parseFile(filename, nbtData) {
   const ext = filename.toLowerCase().split(".").pop() || "";
+  if (ext === "nbt") return normalizeParsedStructure(parseStructureNbt(nbtData));
   if (ext === "litematic") return normalizeParsedStructure(parseLitematic(nbtData));
   if (ext === "schematic") return normalizeParsedStructure(parseSchematic(nbtData));
   try { return normalizeParsedStructure(parseSchem(nbtData)); } catch { try { return normalizeParsedStructure(parseSchematic(nbtData)); } catch { return normalizeParsedStructure(parseLitematic(nbtData)); } }
@@ -318,11 +330,45 @@ function parseSchematic(nbtData) {
         if (COLORED_BLOCK_IDS[bid]) name = COLORED_BLOCK_IDS[bid].replace("{}", COLOR_NAMES[bdata & 0x0f]);
         else if (MC_LEGACY_IDS[bid]) name = MC_LEGACY_IDS[bid];
         else name = `unknown_${bid}`;
+        if (name.endsWith("_stairs")) {
+          const facing = LEGACY_STAIR_FACING[bdata & 0x03];
+          const half = (bdata & 0x04) ? "top" : "bottom";
+          name = `${name}[facing=${facing},half=${half},shape=straight]`;
+        }
         blocks.set(key3(x, y, z), name);
       }
     }
   }
   return { width, height, length, blocks };
+}
+
+function blockStateName(entry) {
+  if (typeof entry === "string") return entry;
+  if (!entry || typeof entry !== "object") return "air";
+  const name = String(entry.Name || "air");
+  const props = entry.Properties;
+  if (!props || typeof props !== "object") return name;
+  const values = Object.entries(props).map(([key, value]) => `${key}=${value}`).join(",");
+  return values ? `${name}[${values}]` : name;
+}
+
+function parseStructureNbt(nbtData) {
+  const size = nbtData.size || [];
+  const palette = nbtData.palette || [];
+  const entries = nbtData.blocks || [];
+  if (size.length !== 3 || !palette.length) throw new Error("Invalid Java structure NBT.");
+  const names = palette.map(blockStateName);
+  const blocks = new Map();
+  for (const entry of entries) {
+    const pos = entry?.pos || [];
+    const state = asNumber(entry?.state ?? -1);
+    if (pos.length !== 3 || state < 0 || state >= names.length) continue;
+    const name = names[state];
+    if (!AIR_BLOCKS.has(normalizeBlockName(name))) {
+      blocks.set(key3(asNumber(pos[0]), asNumber(pos[1]), asNumber(pos[2])), name);
+    }
+  }
+  return { width: asNumber(size[0]), height: asNumber(size[1]), length: asNumber(size[2]), blocks };
 }
 
 function parseLitematic(nbtData) {
@@ -358,9 +404,8 @@ function parseLitematic(nbtData) {
           if (longIdx >= longs.length) break;
           const pidx = Number((longs[longIdx] >> bitOff) & mask);
           if (pidx >= palette.length) continue;
-          const entry = palette[pidx];
-          const bname = typeof entry === "string" ? entry : String((entry && entry.Name) || "air");
-          if (bname.includes("air")) continue;
+          const bname = blockStateName(palette[pidx]);
+          if (AIR_BLOCKS.has(normalizeBlockName(bname))) continue;
           const wx = ox + x, wy = oy + y, wz = oz + z;
           allBlocks.set(key3(wx, wy, wz), bname);
           minC[0] = Math.min(minC[0], wx); minC[1] = Math.min(minC[1], wy); minC[2] = Math.min(minC[2], wz);
@@ -419,69 +464,185 @@ function findClosestLegoColor(r, g, b) {
 function mapBlockToLego(blockName) {
   const name = normalizeBlockName(blockName);
   if (AIR_BLOCKS.has(name)) return null;
-  if (MC_BLOCK_MAP[name]) return MC_BLOCK_MAP[name];
-  if (MC_BLOCK_RGB[name]) return [findClosestLegoColor(...MC_BLOCK_RGB[name]), "brick"];
-  for (const [suffix, brickType] of [["_stairs", "slope"], ["_slab", "plate"], ["_wall", "brick"], ["_fence", "brick"], ["_door", "plate"], ["_trapdoor", "plate"]]) {
-    if (name.endsWith(suffix)) {
-      const base = name.slice(0, -suffix.length);
-      for (const variant of [base, `${base}_planks`, `${base}_block`]) {
-        if (MC_BLOCK_MAP[variant]) return [MC_BLOCK_MAP[variant][0], brickType];
+  let mapped = MC_BLOCK_MAP[name] || null;
+  if (!mapped && MC_BLOCK_RGB[name]) mapped = [findClosestLegoColor(...MC_BLOCK_RGB[name]), "brick"];
+  if (!mapped) {
+    for (const [suffix, brickType] of [["_stairs", "slope"], ["_slab", "plate"], ["_wall", "brick"], ["_fence", "brick"], ["_door", "plate"], ["_trapdoor", "plate"]]) {
+      if (name.endsWith(suffix)) {
+        const base = name.slice(0, -suffix.length);
+        for (const variant of [base, `${base}_planks`, `${base}_block`, `${base}s`]) {
+          if (MC_BLOCK_MAP[variant]) {
+            mapped = [MC_BLOCK_MAP[variant][0], brickType];
+            break;
+          }
+        }
+        if (mapped) break;
       }
     }
   }
-  return [71, "brick"];
+  if (!mapped) mapped = [71, "brick"];
+  if (name.endsWith("_stairs") && mapped[1] === "slope") {
+    const props = parseBlockState(blockName);
+    if ((props.half || "bottom") === "top" || (props.shape || "straight") !== "straight") {
+      return [mapped[0], "brick", 0];
+    }
+    return [mapped[0], "slope", STAIR_FACING_ROT[props.facing || "north"] || 0];
+  }
+  return [mapped[0], mapped[1], 0];
 }
 
-function optimizeLayer(layerCells, width, length, phase = 0) {
+function greedyLayerPlan(layerCells, width, length, sizeOrder, reverseX = false, reverseZ = false) {
   const used = new Set();
   const bricks = [];
-  const sortedKeys = [...layerCells.keys()].sort((a, b) => { const [ax, az] = parseKey2(a); const [bx, bz] = parseKey2(b); return ax - bx || az - bz; });
+  const sortedKeys = [...layerCells.keys()].sort((a, b) => {
+    const [ax, az] = parseKey2(a), [bx, bz] = parseKey2(b);
+    return (reverseX ? bx - ax : ax - bx) || (reverseZ ? bz - az : az - bz);
+  });
+  const xStep = reverseX ? -1 : 1;
+  const zStep = reverseZ ? -1 : 1;
   for (const key of sortedKeys) {
     if (used.has(key)) continue;
     const [x, z] = parseKey2(key);
-    const [cid, brickType] = layerCells.get(key);
+    const [cid, brickType, rotation] = layerCells.get(key);
+    if (brickType === "slope") {
+      used.add(key);
+      bricks.push([x, z, 1, 1, cid, brickType, rotation]);
+      continue;
+    }
     let placed = false;
-    const leftVal = layerCells.get(key2(x - 1, z));
-    const upVal = layerCells.get(key2(x, z - 1));
-    const runStartX = !leftVal || leftVal[0] !== cid || leftVal[1] !== brickType;
-    const runStartZ = !upVal || upVal[0] !== cid || upVal[1] !== brickType;
-    const capW = (phase && runStartX) ? STAGGER_CAP : null;
-    const capL = (phase && runStartZ) ? STAGGER_CAP : null;
-    const mergeSizes = MERGE_SIZES_BY_TYPE[brickType] || MERGE_SIZES_BY_TYPE.brick;
+    const mergeSizes = sizeOrder[brickType] || sizeOrder.brick;
     for (const [mw, ml] of mergeSizes) {
       if (mw === 1 && ml === 1) break;
       const orientations = mw === ml ? [[mw, ml]] : [[mw, ml], [ml, mw]];
       for (const [w, l] of orientations) {
-        if (capW !== null && w > capW) continue;
-        if (capL !== null && l > capL) continue;
-        if (x + w > width || z + l > length) continue;
+        const cells = [];
         let ok = true;
-        for (let dx = 0; dx < w && ok; dx++) {
-          for (let dz = 0; dz < l; dz++) {
-            const pos = key2(x + dx, z + dz);
-            if (used.has(pos) || !layerCells.has(pos)) { ok = false; break; }
+        for (let dx = 0; dx < w && ok; dx++) for (let dz = 0; dz < l; dz++) {
+            const px = x + dx * xStep, pz = z + dz * zStep;
+            const pos = key2(px, pz);
+            cells.push(pos);
+            if (px < 0 || px >= width || pz < 0 || pz >= length || used.has(pos) || !layerCells.has(pos)) { ok = false; break; }
             const candidate = layerCells.get(pos);
             if (candidate[0] !== cid || candidate[1] !== brickType) { ok = false; break; }
-          }
         }
         if (!ok) continue;
-        for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < l; dz++) used.add(key2(x + dx, z + dz));
-        bricks.push([x, z, w, l, cid, brickType]);
+        for (const pos of cells) used.add(pos);
+        bricks.push([Math.min(...cells.map(pos => parseKey2(pos)[0])), Math.min(...cells.map(pos => parseKey2(pos)[1])), w, l, cid, brickType, rotation]);
         placed = true;
         break;
       }
       if (placed) break;
     }
-    if (!placed) { used.add(key); bricks.push([x, z, 1, 1, cid, brickType]); }
+    if (!placed) { used.add(key); bricks.push([x, z, 1, 1, cid, brickType, rotation]); }
   }
   return bricks;
 }
 
+function brickSeams(bricks) {
+  const occupancy = new Map();
+  bricks.forEach(([x, z, w, l], index) => {
+    for (let dx = 0; dx < w; dx++) for (let dz = 0; dz < l; dz++) occupancy.set(key2(x + dx, z + dz), index);
+  });
+  const seams = new Set();
+  for (const [key, index] of occupancy.entries()) {
+    const [x, z] = parseKey2(key);
+    const right = occupancy.get(key2(x + 1, z));
+    const forward = occupancy.get(key2(x, z + 1));
+    if (right !== undefined && right !== index) seams.add(`x:${x + 1}:${z}`);
+    if (forward !== undefined && forward !== index) seams.add(`z:${x}:${z + 1}`);
+  }
+  return seams;
+}
+
+function staggeredLayerPlan(layerCells, width, length, phase) {
+  const used = new Set();
+  const bricks = [];
+  const sortedKeys = [...layerCells.keys()].sort((a, b) => {
+    const [ax, az] = parseKey2(a), [bx, bz] = parseKey2(b);
+    return ax - bx || az - bz;
+  });
+  for (const key of sortedKeys) {
+    if (used.has(key)) continue;
+    const [x, z] = parseKey2(key);
+    const [cid, brickType, rotation] = layerCells.get(key);
+    if (brickType === "slope") {
+      used.add(key);
+      bricks.push([x, z, 1, 1, cid, brickType, rotation]);
+      continue;
+    }
+    const left = layerCells.get(key2(x - 1, z));
+    const behind = layerCells.get(key2(x, z - 1));
+    const capW = phase && (!left || left[0] !== cid || left[1] !== brickType) ? 3 : null;
+    const capL = phase && (!behind || behind[0] !== cid || behind[1] !== brickType) ? 3 : null;
+    let placed = false;
+    for (const [mw, ml] of MERGE_SIZES_BY_TYPE[brickType] || MERGE_SIZES_BY_TYPE.brick) {
+      if (mw === 1 && ml === 1) break;
+      const orientations = mw === ml ? [[mw, ml]] : [[mw, ml], [ml, mw]];
+      for (const [w, l] of orientations) {
+        if ((capW !== null && w > capW) || (capL !== null && l > capL) || x + w > width || z + l > length) continue;
+        const cells = [];
+        let ok = true;
+        for (let dx = 0; dx < w && ok; dx++) for (let dz = 0; dz < l; dz++) {
+          const pos = key2(x + dx, z + dz);
+          const candidate = layerCells.get(pos);
+          cells.push(pos);
+          if (used.has(pos) || !candidate || candidate[0] !== cid || candidate[1] !== brickType) {
+            ok = false;
+            break;
+          }
+        }
+        if (!ok) continue;
+        cells.forEach(pos => used.add(pos));
+        bricks.push([x, z, w, l, cid, brickType, rotation]);
+        placed = true;
+        break;
+      }
+      if (placed) break;
+    }
+    if (!placed) {
+      used.add(key);
+      bricks.push([x, z, 1, 1, cid, brickType, rotation]);
+    }
+  }
+  return bricks;
+}
+
+function optimizeLayer(layerCells, width, length, previousBricks = [], phase = 0) {
+  const previousSeams = brickSeams(previousBricks);
+  const reordered = [true, false].map(preferShort => Object.fromEntries(
+    Object.entries(MERGE_SIZES_BY_TYPE).map(([type, sizes]) => {
+      const candidates = sizes.filter(([w, l]) => w !== 1 || l !== 1);
+      candidates.sort((a, b) => {
+        const delta = a[0] * a[1] - b[0] * b[1] || a[0] - b[0];
+        return preferShort ? delta : -delta;
+      });
+      return [type, [...candidates, [1, 1]]];
+    })
+  ));
+  const plans = [];
+  for (const order of [MERGE_SIZES_BY_TYPE, ...reordered]) {
+    for (const [reverseX, reverseZ] of [[false, false], [true, false], [false, true], [true, true]]) {
+      plans.push(greedyLayerPlan(layerCells, width, length, order, reverseX, reverseZ));
+    }
+  }
+  plans.push(staggeredLayerPlan(layerCells, width, length, phase));
+  const score = plan => {
+    const structuralOneByOne = plan.filter(([, , w, l, , type]) => w === 1 && l === 1 && type !== "slope").length;
+    const alignedSeams = [...brickSeams(plan)].filter(seam => previousSeams.has(seam)).length;
+    return plan.length + structuralOneByOne * 10 + alignedSeams * 2;
+  };
+  return plans.reduce((best, plan) => score(plan) < score(best) ? plan : best);
+}
+
 function generateLdr(bricks) {
   const lines = ["0 FILE brickcraft_model.ldr", "0 BrickCraft Converted Model", "0 Name: brickcraft_model.ldr", "0 Author: BrickCraft"];
-  for (const [x, y, z, w, l, cid, brickType] of bricks) {
+  for (const [x, y, z, w, l, cid, brickType, rotation] of bricks) {
     const part = LDR_PARTS[`${brickType}:${Math.min(w, l)}x${Math.max(w, l)}`] || "3005.dat";
-    lines.push(`1 ${cid} ${x * 20} ${-(y * 24)} ${z * 20} 1 0 0 0 1 0 0 0 1 ${part}`);
+    const rot = brickType === "slope" ? rotation : (w > l ? 1 : 0);
+    const matrix = ROTATION_MATRICES[rot].join(" ");
+    const lx = (x + (w - 1) / 2) * 20;
+    const lz = (z + (l - 1) / 2) * 20;
+    lines.push(`1 ${cid} ${lx} ${-(y * 24)} ${lz} ${matrix} ${part}`);
   }
   lines.push("0");
   return lines.join("\n");

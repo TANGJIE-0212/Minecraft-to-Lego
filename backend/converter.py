@@ -42,6 +42,15 @@ LEGO_COLORS = [
 
 AIR_BLOCKS = {"air","cave_air","void_air","water","lava"}
 
+ROTATION_MATRICES = [
+    (1,0,0, 0,1,0, 0,0,1),
+    (0,0,1, 0,1,0, -1,0,0),
+    (-1,0,0, 0,1,0, 0,0,-1),
+    (0,0,-1, 0,1,0, 1,0,0),
+]
+STAIR_FACING_ROT = {"north": 0, "west": 1, "south": 2, "east": 3}
+LEGACY_STAIR_FACING = ["east", "west", "south", "north"]
+
 MC_BLOCK_MAP = {
     "stone":(72,"brick"),"cobblestone":(8,"brick"),"stone_bricks":(71,"brick"),
     "cracked_stone_bricks":(8,"brick"),"mossy_stone_bricks":(151,"brick"),
@@ -255,7 +264,7 @@ import struct
 import uuid
 import math
 
-def load_nbt(data: bytes):
+def load_nbt(data: bytes, byteorder: str = "big"):
     """Parse NBT data from raw bytes."""
     if not NBT_AVAILABLE:
         raise ImportError("nbtlib is required. Install with: pip install nbtlib")
@@ -263,7 +272,7 @@ def load_nbt(data: bytes):
         buf = gzip.decompress(data)
     except Exception:
         buf = data
-    return nbtlib.File.parse(io.BytesIO(buf))
+    return nbtlib.File.parse(io.BytesIO(buf), byteorder=byteorder)
 
 
 def _read_varint(data, offset):
@@ -348,8 +357,91 @@ def parse_schematic(nbt_data):
                     name = MC_LEGACY_IDS[bid]
                 else:
                     name = f"unknown_{bid}"
+                if name.endswith('_stairs'):
+                    facing = LEGACY_STAIR_FACING[bdata & 0x3]
+                    half = 'top' if (bdata & 0x4) else 'bottom'
+                    name = f'{name}[facing={facing},half={half},shape=straight]'
                 blocks[(x, y, z)] = name
     return width, height, length, blocks
+
+
+def _block_state_name(entry, bedrock=False):
+    if not hasattr(entry, 'keys'):
+        return str(entry)
+    name = str(entry.get('name' if bedrock else 'Name', 'air'))
+    props = entry.get('states' if bedrock else 'Properties', {})
+    if not hasattr(props, 'items') or not props:
+        return name
+    if bedrock and name.endswith('_stairs'):
+        direction = int(props.get('weirdo_direction', 3))
+        facing = LEGACY_STAIR_FACING[direction & 0x3]
+        half = 'top' if int(props.get('upside_down_bit', 0)) else 'bottom'
+        return f'{name}[facing={facing},half={half},shape=straight]'
+    values = ','.join(f'{key}={value}' for key, value in props.items())
+    return f'{name}[{values}]' if values else name
+
+
+def _normalize_sparse_blocks(blocks):
+    if not blocks:
+        return 0, 0, 0, {}
+    min_x = min(pos[0] for pos in blocks)
+    min_y = min(pos[1] for pos in blocks)
+    min_z = min(pos[2] for pos in blocks)
+    max_x = max(pos[0] for pos in blocks)
+    max_y = max(pos[1] for pos in blocks)
+    max_z = max(pos[2] for pos in blocks)
+    normalized = {
+        (x - min_x, y - min_y, z - min_z): name
+        for (x, y, z), name in blocks.items()
+    }
+    return max_x - min_x + 1, max_y - min_y + 1, max_z - min_z + 1, normalized
+
+
+def parse_structure_nbt(nbt_data):
+    """Parse a Java Structure Block .nbt file."""
+    size = nbt_data.get('size', [])
+    palette = nbt_data.get('palette', [])
+    entries = nbt_data.get('blocks', [])
+    if len(size) != 3 or not palette:
+        raise ValueError("Invalid Java structure NBT")
+    palette_names = [_block_state_name(entry) for entry in palette]
+    blocks = {}
+    for entry in entries:
+        pos = entry.get('pos', []) if hasattr(entry, 'get') else []
+        state = int(entry.get('state', -1)) if hasattr(entry, 'get') else -1
+        if len(pos) != 3 or state < 0 or state >= len(palette_names):
+            continue
+        name = palette_names[state]
+        if normalize_block_name(name) not in AIR_BLOCKS:
+            blocks[tuple(map(int, pos))] = name
+    return _normalize_sparse_blocks(blocks)
+
+
+def parse_mcstructure(nbt_data):
+    """Parse a Bedrock Structure Block .mcstructure file."""
+    size = nbt_data.get('size', [])
+    structure = nbt_data.get('structure', {})
+    palette = structure.get('palette', {}).get('default', {}).get('block_palette', [])
+    index_layers = structure.get('block_indices', [])
+    if len(size) != 3 or not palette or not index_layers:
+        raise ValueError("Invalid Bedrock mcstructure")
+    width, height, length = map(int, size)
+    indices = list(map(int, index_layers[0]))
+    palette_names = [_block_state_name(entry, bedrock=True) for entry in palette]
+    blocks = {}
+    for x in range(width):
+        for y in range(height):
+            for z in range(length):
+                offset = (x * height + y) * length + z
+                if offset >= len(indices):
+                    continue
+                state = indices[offset]
+                if state < 0 or state >= len(palette_names):
+                    continue
+                name = palette_names[state]
+                if normalize_block_name(name) not in AIR_BLOCKS:
+                    blocks[(x, y, z)] = name
+    return _normalize_sparse_blocks(blocks)
 
 
 def parse_litematic(nbt_data):
@@ -374,7 +466,7 @@ def parse_litematic(nbt_data):
 
         palette      = region.get('BlockStatePalette', [])
         block_states = region.get('BlockStates', [])
-        if not palette or not block_states:
+        if len(palette) == 0 or len(block_states) == 0:
             continue
 
         total = ax * ay * az
@@ -399,9 +491,8 @@ def parse_litematic(nbt_data):
                     if pidx >= len(palette):
                         continue
 
-                    entry = palette[pidx]
-                    bname = str(entry.get('Name', 'air')) if hasattr(entry, 'keys') else str(entry)
-                    if 'air' in bname:
+                    bname = _block_state_name(palette[pidx])
+                    if normalize_block_name(bname) in AIR_BLOCKS:
                         continue
 
                     wx, wy, wz = ox + x, oy + y, oz + z
@@ -419,8 +510,12 @@ def parse_litematic(nbt_data):
 
 def parse_file(filename: str, data: bytes):
     """Auto-detect format and parse the schematic."""
-    nbt_data = load_nbt(data)
     ext = filename.lower().rsplit('.', 1)[-1] if '.' in filename else ''
+    nbt_data = load_nbt(data, byteorder='little' if ext == 'mcstructure' else 'big')
+    if ext == 'mcstructure':
+        return parse_mcstructure(nbt_data)
+    if ext == 'nbt':
+        return parse_structure_nbt(nbt_data)
     if ext == 'litematic':
         return parse_litematic(nbt_data)
     if ext == 'schematic':
@@ -481,24 +576,35 @@ def find_closest_lego_color(r, g, b):
 
 
 def map_block_to_lego(block_name: str):
-    """Map MC block → (ldraw_color_id, brick_type) or None."""
+    """Map MC block → (ldraw_color_id, brick_type, rotation) or None."""
     name = normalize_block_name(block_name)
     if name in AIR_BLOCKS:
         return None
+    mapped = None
     if name in MC_BLOCK_MAP:
-        return MC_BLOCK_MAP[name]
-    # Fallback: match by known MC block color
-    if name in MC_BLOCK_RGB:
-        return (find_closest_lego_color(*MC_BLOCK_RGB[name]), "brick")
-    # Try to derive from suffix
-    for sfx, btype in [("_stairs", "slope"), ("_slab", "plate"), ("_wall", "brick"),
-                        ("_fence", "brick"), ("_door", "plate"), ("_trapdoor", "plate")]:
-        if name.endswith(sfx):
-            base = name[:-len(sfx)]
-            for v in (base, base + "_planks", base + "_block"):
-                if v in MC_BLOCK_MAP:
-                    return (MC_BLOCK_MAP[v][0], btype)
-    return (71, "brick")   # fallback: light bluish gray brick
+        mapped = MC_BLOCK_MAP[name]
+    elif name in MC_BLOCK_RGB:
+        mapped = (find_closest_lego_color(*MC_BLOCK_RGB[name]), "brick")
+    else:
+        for sfx, btype in [("_stairs", "slope"), ("_slab", "plate"), ("_wall", "brick"),
+                            ("_fence", "brick"), ("_door", "plate"), ("_trapdoor", "plate")]:
+            if name.endswith(sfx):
+                base = name[:-len(sfx)]
+                for variant in (base, base + "_planks", base + "_block", base + "s"):
+                    if variant in MC_BLOCK_MAP:
+                        mapped = (MC_BLOCK_MAP[variant][0], btype)
+                        break
+                if mapped:
+                    break
+        if not mapped:
+            mapped = (71, "brick")
+
+    if name.endswith('_stairs') and mapped[1] == "slope":
+        props = parse_block_state(block_name)
+        if props.get('half', 'bottom') == 'top' or props.get('shape', 'straight') != 'straight':
+            return (mapped[0], "brick", 0)
+        return (mapped[0], "slope", STAIR_FACING_ROT.get(props.get('facing', 'north'), 0))
+    return (mapped[0], mapped[1], 0)
 
 
 # ═══════════════════════════════════════════════════════
@@ -514,70 +620,151 @@ MERGE_SIZES_BY_TYPE = {
     "slope": [(2,4),(2,3),(2,2),(1,2),(1,1)],
 }
 
-# Brick-bond stagger: on offset layers, cap the x-length of the first brick in
-# each horizontal run so vertical seams don't stack across layers (running bond).
-STAGGER_CAP = 3
-
-def _optimize_layer(layer_cells, width, length, phase=0):
-    """Merge same-color adjacent cells into larger bricks on one Y layer.
-    layer_cells: {(x,z): (color_id, brick_type)}
-    phase: 0 or 1; on phase 1 the first brick of each horizontal run is shortened
-           to offset vertical seams from the adjacent layers (brick bond).
-    Returns [(x, z, w, l, color_id, brick_type), ...]
-    """
-    used   = set()
+def _greedy_layer_plan(layer_cells, width, length, size_order, reverse_x=False, reverse_z=False):
+    used = set()
     bricks = []
+    positions = sorted(
+        layer_cells,
+        key=lambda pos: (-pos[0] if reverse_x else pos[0], -pos[1] if reverse_z else pos[1]),
+    )
+    x_step = -1 if reverse_x else 1
+    z_step = -1 if reverse_z else 1
 
-    for (x, z) in sorted(layer_cells):
+    for x, z in positions:
         if (x, z) in used:
             continue
-        cid, btype = layer_cells[(x, z)]
+        cid, btype, rot = layer_cells[(x, z)]
+        if btype == "slope":
+            used.add((x, z))
+            bricks.append((x, z, 1, 1, cid, btype, rot))
+            continue
+
         placed = False
-
-        # Start of a run = no same-group cell directly before it on that axis.
-        # On offset layers, cap the first brick on whichever axis starts a run so
-        # vertical seams along that wall are offset from the adjacent layers.
-        run_start_x = layer_cells.get((x - 1, z)) != (cid, btype)
-        run_start_z = layer_cells.get((x, z - 1)) != (cid, btype)
-        cap_w = STAGGER_CAP if (phase and run_start_x) else None
-        cap_l = STAGGER_CAP if (phase and run_start_z) else None
-
-        for mw, ml in MERGE_SIZES_BY_TYPE.get(btype, MERGE_SIZES_BY_TYPE["brick"]):
+        for mw, ml in size_order.get(btype, size_order["brick"]):
             if mw == 1 and ml == 1:
                 break
             orientations = [(mw, ml)] if mw == ml else [(mw, ml), (ml, mw)]
             for w, l in orientations:
-                if cap_w is not None and w > cap_w:
+                cells = [
+                    (x + dx * x_step, z + dz * z_step)
+                    for dx in range(w)
+                    for dz in range(l)
+                ]
+                if any(px < 0 or px >= width or pz < 0 or pz >= length for px, pz in cells):
                     continue
-                if cap_l is not None and l > cap_l:
+                if any(
+                    pos in used
+                    or pos not in layer_cells
+                    or layer_cells[pos][:2] != (cid, btype)
+                    for pos in cells
+                ):
                     continue
-                if x + w > width or z + l > length:
-                    continue
-                ok = True
-                for dx in range(w):
-                    for dz in range(l):
-                        p = (x + dx, z + dz)
-                        if p in used or p not in layer_cells:
-                            ok = False; break
-                        if layer_cells[p] != (cid, btype):
-                            ok = False; break
-                    if not ok:
-                        break
-                if ok:
-                    for dx in range(w):
-                        for dz in range(l):
-                            used.add((x + dx, z + dz))
-                    bricks.append((x, z, w, l, cid, btype))
-                    placed = True
-                    break
+                used.update(cells)
+                bricks.append((
+                    min(px for px, _ in cells), min(pz for _, pz in cells),
+                    w, l, cid, btype, rot,
+                ))
+                placed = True
+                break
             if placed:
                 break
 
         if not placed:
             used.add((x, z))
-            bricks.append((x, z, 1, 1, cid, btype))
-
+            bricks.append((x, z, 1, 1, cid, btype, rot))
     return bricks
+
+
+def _staggered_layer_plan(layer_cells, width, length, phase):
+    """Preserve the deployed running-bond plan as an optimization candidate."""
+    used = set()
+    bricks = []
+    for x, z in sorted(layer_cells):
+        if (x, z) in used:
+            continue
+        cid, btype, rot = layer_cells[(x, z)]
+        if btype == "slope":
+            used.add((x, z))
+            bricks.append((x, z, 1, 1, cid, btype, rot))
+            continue
+        left = layer_cells.get((x - 1, z))
+        behind = layer_cells.get((x, z - 1))
+        cap_w = 3 if phase and (not left or left[:2] != (cid, btype)) else None
+        cap_l = 3 if phase and (not behind or behind[:2] != (cid, btype)) else None
+        placed = False
+        for mw, ml in MERGE_SIZES_BY_TYPE.get(btype, MERGE_SIZES_BY_TYPE["brick"]):
+            if mw == 1 and ml == 1:
+                break
+            orientations = [(mw, ml)] if mw == ml else [(mw, ml), (ml, mw)]
+            for w, l in orientations:
+                if (cap_w is not None and w > cap_w) or (cap_l is not None and l > cap_l):
+                    continue
+                cells = [(x + dx, z + dz) for dx in range(w) for dz in range(l)]
+                if (
+                    x + w > width
+                    or z + l > length
+                    or any(
+                        pos in used
+                        or pos not in layer_cells
+                        or layer_cells[pos][:2] != (cid, btype)
+                        for pos in cells
+                    )
+                ):
+                    continue
+                used.update(cells)
+                bricks.append((x, z, w, l, cid, btype, rot))
+                placed = True
+                break
+            if placed:
+                break
+        if not placed:
+            used.add((x, z))
+            bricks.append((x, z, 1, 1, cid, btype, rot))
+    return bricks
+
+
+def _brick_seams(bricks):
+    occupancy = {}
+    for index, (x, z, w, l, *_rest) in enumerate(bricks):
+        for dx in range(w):
+            for dz in range(l):
+                occupancy[(x + dx, z + dz)] = index
+    seams = set()
+    for (x, z), index in occupancy.items():
+        if (right := occupancy.get((x + 1, z))) is not None and right != index:
+            seams.add(("x", x + 1, z))
+        if (forward := occupancy.get((x, z + 1))) is not None and forward != index:
+            seams.add(("z", x, z + 1))
+    return seams
+
+
+def _plan_score(bricks, previous_seams):
+    one_by_one = sum(
+        w == 1 and l == 1 and btype != "slope"
+        for _x, _z, w, l, _cid, btype, _rot in bricks
+    )
+    aligned_seams = len(_brick_seams(bricks) & previous_seams)
+    return len(bricks) + one_by_one * 10 + aligned_seams * 2
+
+
+def _optimize_layer(layer_cells, width, length, previous_bricks=None, phase=0):
+    """Choose a low-part plan while avoiding structural 1x1s and aligned seams."""
+    previous_seams = _brick_seams(previous_bricks or [])
+    size_orders = [MERGE_SIZES_BY_TYPE]
+    for prefer_short in (True, False):
+        order = {}
+        for btype, sizes in MERGE_SIZES_BY_TYPE.items():
+            non_unit = [size for size in sizes if size != (1, 1)]
+            non_unit.sort(key=lambda size: (size[0] * size[1], size[0]), reverse=not prefer_short)
+            order[btype] = non_unit + [(1, 1)]
+        size_orders.append(order)
+    plans = [
+        _greedy_layer_plan(layer_cells, width, length, order, reverse_x, reverse_z)
+        for order in size_orders
+        for reverse_x, reverse_z in ((False, False), (True, False), (False, True), (True, True))
+    ]
+    plans.append(_staggered_layer_plan(layer_cells, width, length, phase))
+    return min(plans, key=lambda plan: _plan_score(plan, previous_seams))
 
 
 # ═══════════════════════════════════════════════════════
@@ -605,10 +792,15 @@ def generate_ldr(bricks):
         "0 Name: brickcraft_model.ldr",
         "0 Author: BrickCraft",
     ]
-    for x, y, z, w, l, cid, btype in bricks:
-        lx, ly, lz = x * 20, -(y * 24), z * 20
+    for x, y, z, w, l, cid, btype, rot in bricks:
+        lx = (x + (w - 1) / 2) * 20
+        ly = -(y * 24)
+        lz = (z + (l - 1) / 2) * 20
         part = _LDR_PARTS.get((btype, min(w, l), max(w, l)), "3005.dat")
-        lines.append(f"1 {cid} {lx} {ly} {lz} 1 0 0 0 1 0 0 0 1 {part}")
+        output_rot = rot if btype == "slope" else (1 if w > l else 0)
+        matrix = ROTATION_MATRICES[output_rot]
+        matrix_text = " ".join(map(str, matrix))
+        lines.append(f"1 {cid} {lx} {ly} {lz} {matrix_text} {part}")
     lines.append("0")
     return "\n".join(lines)
 
@@ -653,19 +845,24 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
             lego_blocks[pos] = m
 
     # 3. Build brick list
-    all_bricks = []   # (x, y, z, w, l, color_id, brick_type)
+    all_bricks = []   # (x, y, z, w, l, color_id, brick_type, rotation)
 
-    # Optimize layer by layer with brick-bond staggering
+    # Optimize layer by layer and compare seams with the layer below.
+    previous_layer_bricks = []
     for y in range(height):
         layer = {(bx, bz): val for (bx, by, bz), val in lego_blocks.items() if by == y}
         if layer:
-            for (bx, bz, w, l, cid, bt) in _optimize_layer(layer, width, length, phase=y % 2):
-                all_bricks.append((bx, y, bz, w, l, cid, bt))
+            layer_bricks = _optimize_layer(layer, width, length, previous_layer_bricks, phase=y % 2)
+            for (bx, bz, w, l, cid, bt, rot) in layer_bricks:
+                all_bricks.append((bx, y, bz, w, l, cid, bt, rot))
+            previous_layer_bricks = layer_bricks
+        else:
+            previous_layer_bricks = []
 
     # 4. Statistics
     parts_counter = Counter()
     color_counter = Counter()
-    for (x, y, z, w, l, cid, bt) in all_bricks:
+    for (x, y, z, w, l, cid, bt, _rot) in all_bricks:
         pid, pname = _get_part_info(bt, w, l)
         parts_counter[(pid, cid, pname, bt)] += 1
         color_counter[cid] += 1
@@ -687,7 +884,7 @@ def convert_and_optimize(filename: str, data: bytes) -> dict:
     palette_map = {}
     palette = []
     voxels = []
-    for (x, y, z, w, l, cid, bt) in all_bricks:
+    for (x, y, z, w, l, cid, bt, _rot) in all_bricks:
         rgb = LEGO_COLOR_RGB.get(cid, (128, 128, 128))
         key = tuple(rgb)
         if key not in palette_map:

@@ -20,7 +20,7 @@ app.add_middleware(
 _store: dict[str, dict] = {}
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
-ALLOWED_EXT = {".schem", ".schematic", ".litematic"}
+ALLOWED_EXT = {".schem", ".schematic", ".litematic", ".nbt", ".mcstructure"}
 
 
 @app.post("/api/convert")
